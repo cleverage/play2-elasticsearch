@@ -4,3 +4,8 @@
 *.jar
 *.war
 *.ear
+
+.DS_Store
+*.iml
+*.ipr
+*.iws
