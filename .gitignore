@@ -1,0 +1,5 @@
+project-code
+samples
+*.ipr
+*.iws
+.DS_Store
