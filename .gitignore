@@ -3,3 +3,4 @@ samples
 *.ipr
 *.iws
 .DS_Store
+copyreleases.sh
