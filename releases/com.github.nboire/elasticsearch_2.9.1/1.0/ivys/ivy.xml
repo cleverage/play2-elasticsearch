@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivy-module version="2.0" xmlns:e="http://ant.apache.org/ivy/extra">
-	<info organisation="com.github.nboire" module="elasticsearch_2.9.1" revision="1.0" status="release" publication="20120512093819">
+	<info organisation="com.github.nboire" module="elasticsearch_2.9.1" revision="1.0" status="release" publication="20120515073631">
 		<description>
 		elasticsearch
 		</description>
