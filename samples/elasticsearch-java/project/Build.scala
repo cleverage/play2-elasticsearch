@@ -15,8 +15,7 @@ object ApplicationBuild extends Build {
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
       // Add your own project settings here      
       resolvers += "Local Play Repository" at "file://Users/nboire/dev/java/play/play-2.0/repository/local"
-      //resolvers += "Local Play Repository" at "file://path/to/play-2.0/repository/local"
-       
+      //resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://nboire.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
     )
 
 }
