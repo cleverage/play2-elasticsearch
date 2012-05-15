@@ -11,8 +11,9 @@ public class Application extends Controller {
   
   public static Result index() {
 
+      // test indexing a product
       IndexProduct indexProduct = new IndexProduct();
-      indexProduct.id = 1L;
+      indexProduct.id = "1";
       indexProduct.name = "name";
       indexProduct.dateCreate = new Date();
       indexProduct.price = 12;
