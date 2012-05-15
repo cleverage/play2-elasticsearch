@@ -1,4 +1,4 @@
-play2-elasticsearch
+h1. play2-elasticsearch
 ===================
 
 This module provides Elasticsearch in a play2 application 
