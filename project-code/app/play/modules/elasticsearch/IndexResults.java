@@ -1,4 +1,4 @@
-package elasticsearch;
+package play.modules.elasticsearch;
 
 import org.elasticsearch.search.facet.Facets;
 
@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @param <T> the generic type
  */
-public class IndexResults<T extends Indexable> {
+public class IndexResults<T extends Index> {
 
     /** The total count. */
     public long totalCount;

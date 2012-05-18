@@ -1,4 +1,4 @@
-package elasticsearch;
+package play.modules.elasticsearch;
 
 /**
  * User: nboire
@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An elastic search query
+ * An ElasticSearch query
  *
  * @param <T>
  *            the generic model to search for
  */
-public class IndexQuery<T extends Indexable> {
+public class IndexQuery<T extends Index> {
 
     /**
      * Objet retourné dans les résultats
@@ -44,6 +44,7 @@ public class IndexQuery<T extends Indexable> {
 
     private int from = -1;
     private int size = -1;
+    private boolean explain = false;
 
     public IndexQuery(Class<T> clazz, QueryBuilder builder) {
         Validate.notNull(clazz, "clazz cannot be null");
@@ -80,6 +81,12 @@ public class IndexQuery<T extends Indexable> {
      */
     public IndexQuery<T> size(int size) {
         this.size = size;
+
+        return this;
+    }
+
+    public IndexQuery<T> setExplain(boolean explain) {
+        this.explain = explain;
 
         return this;
     }
@@ -134,11 +141,11 @@ public class IndexQuery<T extends Indexable> {
      *
      * @return the search results
      */
-    public IndexResults<T> fetch(IndexPath indexPath) {
+    public IndexResults<T> fetch(IndexQueryPath indexQueryPath) {
         // Build request
         SearchRequestBuilder request = IndexClient.client()
-                .prepareSearch(indexPath.index)
-                .setTypes(indexPath.type)
+                .prepareSearch(indexQueryPath.index)
+                .setTypes(indexQueryPath.type)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setQuery(builder);
 
@@ -160,34 +167,29 @@ public class IndexQuery<T extends Indexable> {
             request.setSize(size);
         }
 
-        // Only load id field for hydrate
-        /*
-        if (hydrate) {
-            request.addField("_id");
-        }
-        */
-
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("ES Query: "+ builder.toString());
-        }
-
-        if (Logger.isDebugEnabled()) {
+        // Explain
+        if (explain) {
             request.setExplain(true);
         }
 
-        SearchResponse searchResponse = request.execute().actionGet();
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("ES Response : "+ searchResponse.toString());
+        // Todo load select fields
+        if (IndexConfig.showRequest) {
+            Logger.debug("ElasticSearch : Query -> "+ builder.toString());
         }
 
-        searchResponse.hits();
+        // Execute query
+        SearchResponse searchResponse = request.execute().actionGet();
+
+        if (IndexConfig.showRequest) {
+            Logger.debug("ElasticSearch : Response -> "+ searchResponse.toString());
+        }
 
         IndexResults<T> searchResults = toSearchResults(searchResponse);
 
         return searchResults;
     }
 
-    public IndexResults<T> toSearchResults(SearchResponse searchResponse) {
+    private IndexResults<T> toSearchResults(SearchResponse searchResponse) {
         // Get Total Records Found
         long count = searchResponse.hits().totalHits();
 
@@ -204,19 +206,15 @@ public class IndexQuery<T extends Indexable> {
             Map<String, Object> map = h.sourceAsMap();
 
             // Create a new Indexable Object for the return
-            try {
-                T objectIndexable = clazz.newInstance();
-                results.add((T) objectIndexable.fromIndex(map));
+            T objectIndexable = IndexUtils.getInstanceIndex(clazz);
+            T t = (T) objectIndexable.fromIndex(map);
+            t.id = h.getId();
 
-            } catch (InstantiationException e) {
-                Logger.error("...", e);
-            } catch (IllegalAccessException e) {
-                Logger.error("...",e);
-            }
+            results.add(t);
         }
 
         if(Logger.isDebugEnabled()) {
-            Logger.debug("Results : "+ results.toString());
+            Logger.debug("ElasticSearch : Results -> "+ results.toString());
         }
 
         // Return Results

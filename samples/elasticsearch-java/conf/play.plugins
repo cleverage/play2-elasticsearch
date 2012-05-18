@@ -1,1 +1,1 @@
-10000:elasticsearch.IndexPlugin
+9000:play.modules.elasticsearch.plugin.IndexPlugin
