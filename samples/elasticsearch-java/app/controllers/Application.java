@@ -1,5 +1,6 @@
 package controllers;
 
+import indexing.IndexTest;
 import indexing.Team;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
@@ -14,6 +15,15 @@ public class Application extends Controller {
   
   public static Result index() {
 
+      // ElasticSearch HelloWorld
+      IndexTest indexTest = new IndexTest();
+      // "id" is mandatory if you want to update your document or to get by id else "id" is not mandatory
+      indexTest.id = "1";
+      indexTest.name = "hello World";
+      indexTest.index();
+
+
+      // Team indexing
       // search All
       IndexResults<Team> all = Team.find.findAll();
 
