@@ -47,5 +47,31 @@ Play2-elasticsearch requires its plugin to be declared in the conf/play.plugins 
 just create it in the conf directory first, and then add
 
 ```
-10000:elasticsearch.IndexPlugin
+9000:elasticsearch.IndexPlugin
+```
+
+## Configuration
+Add settings in conf/application.conf
+
+```
+## ElasticSearch Configuration
+##############################
+## define local mode or not
+elasticsearch.local=false
+
+## list clients
+elasticsearch.client="192.168.0.46:9300"
+# ex : elasticsearch.client="192.168.0.46:9300,192.168.0.47:9300"
+
+## Name of the index
+elasticsearch.index.name=play2-elasticsearch
+
+## define package or class separate by commas for loading @IndexType and @IndexMapping information
+elasticsearch.index.clazzs="indexing.*"
+
+## show request & result json of search request in log
+elasticsearch.index.show_request=true
+
+%test.elasticsearch.local=true
+%test.elasticsearch.index.name=play2-elasticsearchtest
 ```
