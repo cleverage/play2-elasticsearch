@@ -1,9 +1,8 @@
 package play.modules.elasticsearch;
 
-import play.modules.elasticsearch.annotations.IndexType;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.index.query.QueryBuilders;
 import play.Logger;
+import play.modules.elasticsearch.annotations.IndexType;
 
 /**
  * User: nboire
@@ -54,7 +53,14 @@ public abstract class Index implements Indexable {
             this.type = type;
             T t = IndexUtils.getInstanceIndex(type);
             this.queryPath = t.getIndexPath();
-            t = null;
+        }
+
+        /**
+         * Return a query for request this Index
+         * @return
+         */
+        public IndexQuery<T> query() {
+            return new IndexQuery<T>(type);
         }
 
         /**
@@ -70,11 +76,7 @@ public abstract class Index implements Indexable {
          * Retrieves all entities of the given type.
          */
         public IndexResults<T> findAll() {
-
-            // query match All
-            IndexQuery<T> query = new IndexQuery<T>(type, QueryBuilders.matchAllQuery());
-
-            return find(query);
+            return find(query());
         }
 
         /**

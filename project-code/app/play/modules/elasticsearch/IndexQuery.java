@@ -10,6 +10,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.AbstractFacetBuilder;
 import org.elasticsearch.search.facet.Facets;
@@ -38,25 +39,27 @@ public class IndexQuery<T extends Index> {
     /**
      * Query searchRequestBuilder
      */
-    private final QueryBuilder builder;
-    private final List<AbstractFacetBuilder> facets;
-    private final List<SortBuilder> sorts;
+    private QueryBuilder builder = QueryBuilders.matchAllQuery();;
+    private List<AbstractFacetBuilder> facets = new ArrayList<AbstractFacetBuilder>();
+    private List<SortBuilder> sorts = new ArrayList<SortBuilder>();
 
     private int from = -1;
     private int size = -1;
     private boolean explain = false;
 
-    public IndexQuery(Class<T> clazz, QueryBuilder builder) {
+    public IndexQuery(Class<T> clazz) {
         Validate.notNull(clazz, "clazz cannot be null");
-        Validate.notNull(builder, "searchRequestBuilder cannot be null");
         this.clazz = clazz;
-        this.builder = builder;
-        this.facets = new ArrayList<AbstractFacetBuilder>();
-        this.sorts = new ArrayList<SortBuilder>();
     }
 
     public QueryBuilder getQueryBuilder() {
         return builder;
+    }
+
+    public IndexQuery<T> setBuilder(QueryBuilder builder) {
+        this.builder = builder;
+
+        return this;
     }
 
     /**
@@ -142,6 +145,7 @@ public class IndexQuery<T extends Index> {
      * @return the search results
      */
     public IndexResults<T> fetch(IndexQueryPath indexQueryPath) {
+
         // Build request
         SearchRequestBuilder request = IndexClient.client()
                 .prepareSearch(indexQueryPath.index)

@@ -1,13 +1,8 @@
 package test;
 
-import org.junit.*;
+import org.junit.Test;
 
-import play.mvc.*;
-import play.test.*;
-import play.libs.F.*;
-
-import static play.test.Helpers.*;
-import static org.fest.assertions.Assertions.*;
+import static org.fest.assertions.Assertions.assertThat;
 
 public class SimpleTest {
 

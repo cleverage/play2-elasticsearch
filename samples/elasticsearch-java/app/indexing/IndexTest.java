@@ -25,10 +25,6 @@ public class IndexTest extends Index {
 
     @Override
     public Indexable fromIndex(Map map) {
-
-        if(map == null) {
-            return null;
-        }
         this.name = (String)map.get("name");
         return this;
     }
