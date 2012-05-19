@@ -75,3 +75,19 @@ elasticsearch.index.show_request=true
 %test.elasticsearch.local=true
 %test.elasticsearch.index.name=play2-elasticsearchtest
 ```
+
+## Usage
+
+### HelloWorld
+Create an Class extends play.modules.elasticsearch.Index
+Example : [IndexTest.java](https://github.com/nboire/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/IndexTest.java)
+
+```
+IndexTest indexTest = new IndexTest();
+indexTest.name = "hello World";
+indexTest.index();
+```
+
+### More Complex
+Example : https://github.com/nboire/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/Team.java
+

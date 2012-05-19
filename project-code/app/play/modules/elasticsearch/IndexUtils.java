@@ -17,9 +17,9 @@ import java.util.Map;
 public abstract class IndexUtils {
 
     public static <T extends Indexable> List<T> getIndexables(Map map, String key, Class<T> t) {
-        List<Map<String, Object>> mapList = (List<Map<String, Object>>)map.get(key);
+        List<Map<String, Object>> mapList = (List<Map<String, Object>>) map.get(key);
         List<T> list = new ArrayList<T>();
-        if(mapList != null) {
+        if (mapList != null) {
             for (Map<String, Object> map1 : mapList) {
                 list.add(getIndexable(map1, t));
             }
@@ -34,11 +34,12 @@ public abstract class IndexUtils {
 
     public static <T extends Indexable> T getIndexable(Map map, Class<T> t) {
         T instance = IndexUtils.getInstanceIndexable(t);
-        return (T)instance.fromIndex((Map)map);
+        return (T) instance.fromIndex((Map) map);
     }
 
     /**
      * Converts a List of Object T to an List of Map<String, Object> for serialize in the index
+     *
      * @param listT
      * @param <T>
      * @return
@@ -57,9 +58,9 @@ public abstract class IndexUtils {
         try {
             object = clazz.newInstance();
         } catch (InstantiationException e) {
-            Logger.error("...",e);
+            Logger.error("...", e);
         } catch (IllegalAccessException e) {
-            Logger.error("...",e);
+            Logger.error("...", e);
         }
         return object;
     }
@@ -69,64 +70,70 @@ public abstract class IndexUtils {
         try {
             object = clazz.newInstance();
         } catch (InstantiationException e) {
-            Logger.error("...",e);
+            Logger.error("...", e);
         } catch (IllegalAccessException e) {
-            Logger.error("...",e);
+            Logger.error("...", e);
         }
         return object;
     }
 
     /**
      * Convert String to Object
+     *
      * @param value
      * @param targetType
      * @return
      */
     public static Object convertValue(final Object value, final Class<?> targetType) {
-        if(value == null) {
+        if (value == null) {
             return null;
         }
         if (targetType.equals(value.getClass())) {
-            // Types match
             return value;
         }
 
-        // Types do not match, perform conversion where needed
         if (targetType.equals(String.class)) {
             return value.toString();
-        } else if (targetType.equals(BigDecimal.class)) {
+        }
+        else if (targetType.equals(BigDecimal.class)) {
             return new BigDecimal(value.toString());
-        } else if (targetType.equals(Date.class)) {
+        }
+        else if (targetType.equals(Date.class)) {
             return convertToDate(value);
-
-            // Use Number intermediary where possible
-        } else if (targetType.equals(Integer.class)) {
+        }
+        else if (targetType.equals(Integer.class)) {
             if (value instanceof Number) {
                 return Integer.valueOf(((Number) value).intValue());
-            } else {
+            }
+            else {
                 return Integer.valueOf(value.toString());
             }
-        } else if (targetType.equals(Long.class)) {
+        }
+        else if (targetType.equals(Long.class)) {
             if (value instanceof Number) {
                 return Long.valueOf(((Number) value).longValue());
-            } else {
+            }
+            else {
                 return Long.valueOf(value.toString());
             }
-        } else if (targetType.equals(Double.class)) {
+        }
+        else if (targetType.equals(Double.class)) {
             if (value instanceof Number) {
                 return Double.valueOf(((Number) value).doubleValue());
-            } else {
+            }
+            else {
                 return Double.valueOf(value.toString());
             }
-        } else if (targetType.equals(Float.class)) {
+        }
+        else if (targetType.equals(Float.class)) {
             if (value instanceof Number) {
                 return Float.valueOf(((Number) value).floatValue());
-            } else {
+            }
+            else {
                 return Float.valueOf(value.toString());
             }
-
-            // Fallback to simply returning the value
-        } else {
+        }
+        else {
             return value;
         }
     }
@@ -134,8 +141,7 @@ public abstract class IndexUtils {
     /**
      * Convert to date.
      *
-     * @param value
-     *            the value
+     * @param value the value
      * @return the date
      */
     private static Date convertToDate(Object value) {
@@ -159,19 +165,11 @@ public abstract class IndexUtils {
         return date;
     }
 
-    /**
-     * Gets the date.
-     *
-     * @param val
-     *            the val
-     * @return the date
-     */
     private static Date getDate(String val) {
         try {
-            // Use ES internal converter
             return XContentBuilder.defaultDatePrinter.parseDateTime(val).toDate();
         } catch (Throwable t) {
-            Logger.error(val,t);
+            Logger.error(val, t);
         }
         return null;
     }
