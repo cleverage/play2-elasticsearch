@@ -79,7 +79,8 @@ elasticsearch.index.show_request=true
 ## Usage
 
 ### HelloWorld
-Create an Class extends 9000:com.github.nboire.elasticsearch.Index
+Create an Class extends "com.github.nboire.elasticsearch.Index"
+
 Example : [IndexTest.java](https://github.com/nboire/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/IndexTest.java)
 
 ```
