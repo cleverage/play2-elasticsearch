@@ -64,7 +64,7 @@ elasticsearch.client="192.168.0.46:9300"
 # ex : elasticsearch.client="192.168.0.46:9300,192.168.0.47:9300"
 
 ## Name of the index
-elasticsearch.index.name=play2-elasticsearch
+elasticsearch.index.name="play2-elasticsearch"
 
 ## define package or class separate by commas for loading @IndexType and @IndexMapping information
 elasticsearch.index.clazzs="indexing.*"
@@ -73,7 +73,7 @@ elasticsearch.index.clazzs="indexing.*"
 elasticsearch.index.show_request=true
 
 %test.elasticsearch.local=true
-%test.elasticsearch.index.name=play2-elasticsearchtest
+%test.elasticsearch.index.name="play2-elasticsearchtest"
 ```
 
 ## Usage
