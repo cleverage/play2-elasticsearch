@@ -1,9 +1,9 @@
-package play.modules.elasticsearch;
+package com.github.nboire.elasticsearch;
 
 import play.Logger;
 import play.Play;
-import play.modules.elasticsearch.annotations.IndexMapping;
-import play.modules.elasticsearch.annotations.IndexType;
+import com.github.nboire.elasticsearch.annotations.IndexMapping;
+import com.github.nboire.elasticsearch.annotations.IndexType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,11 +14,11 @@ import java.util.Set;
  * User: nboire
  *
  * example :
- elasticsearch.local=false
- elasticsearch.client="192.168.0.46:9300"
- elasticsearch.index.name=play2-elasticsearch
- elasticsearch.index.clazzs="indexing.*"
- elasticsearch.index.show_request=true
+ * elasticsearch.local=false
+ * elasticsearch.client="192.168.0.46:9300"
+ * elasticsearch.index.name=play2-elasticsearch
+ * elasticsearch.index.clazzs="indexing.*"
+ * elasticsearch.index.show_request=true
  */
 public class IndexConfig {
 

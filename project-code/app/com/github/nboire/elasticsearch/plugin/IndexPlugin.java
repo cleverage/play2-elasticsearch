@@ -1,8 +1,8 @@
-package play.modules.elasticsearch.plugin;
+package com.github.nboire.elasticsearch.plugin;
 
-import play.modules.elasticsearch.IndexClient;
-import play.modules.elasticsearch.IndexConfig;
-import play.modules.elasticsearch.IndexManager;
+import com.github.nboire.elasticsearch.IndexClient;
+import com.github.nboire.elasticsearch.IndexConfig;
+import com.github.nboire.elasticsearch.IndexService;
 import play.Application;
 import play.Logger;
 import play.Plugin;
@@ -36,13 +36,13 @@ public class IndexPlugin extends Plugin
         }
 
         // Create Index If not Exists
-        if (!IndexManager.existsIndex()) {
-            Logger.debug(" ElasticSearch : creating index " + IndexManager.INDEX_DEFAULT);
-            IndexManager.createIndex();
+        if (!IndexService.existsIndex()) {
+            Logger.debug(" ElasticSearch : creating index " + IndexService.INDEX_DEFAULT);
+            IndexService.createIndex();
         }
 
         // Prepare Index ( define mapping if present )
-        IndexManager.prepareIndex();
+        IndexService.prepareIndex();
 
         Logger.info("ElasticSearch : Plugin has started");
     }

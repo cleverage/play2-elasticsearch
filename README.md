@@ -47,7 +47,7 @@ Play2-elasticsearch requires its plugin to be declared in the conf/play.plugins 
 just create it in the conf directory first, and then add
 
 ```
-9000:elasticsearch.IndexPlugin
+9000:com.github.nboire.elasticsearch.plugin.IndexPlugin
 ```
 
 ## Configuration
@@ -79,15 +79,25 @@ elasticsearch.index.show_request=true
 ## Usage
 
 ### HelloWorld
-Create an Class extends play.modules.elasticsearch.Index
+Create an Class extends 9000:com.github.nboire.elasticsearch.Index
 Example : [IndexTest.java](https://github.com/nboire/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/IndexTest.java)
 
 ```
 IndexTest indexTest = new IndexTest();
 indexTest.name = "hello World";
 indexTest.index();
+
+IndexTest byId = IndexTest.find.findById("1");
+
+IndexResults<IndexTest> all = IndexTest.find.findAll();
+
+IndexQuery<IndexTest> indexQuery = IndexTest.find.query();
+indexQuery.setBuilder(QueryBuilders.queryString("hello"));
+IndexResults<IndexTest> results = IndexTest.find.find(indexQuery);
+
 ```
 
 ### More Complex
 Example : https://github.com/nboire/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/Team.java
 
+See samples/elasticsearch-java application for more sample

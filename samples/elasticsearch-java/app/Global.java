@@ -1,10 +1,10 @@
+import com.github.nboire.elasticsearch.IndexService;
 import indexing.Country;
 import indexing.Player;
 import indexing.Team;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
-import play.modules.elasticsearch.IndexManager;
 
 import java.util.Date;
 
@@ -16,7 +16,7 @@ public class Global extends GlobalSettings {
         Logger.info("Application has started");
 
         // Clean the index
-        IndexManager.cleanIndex(app);
+        IndexService.cleanIndex(app);
 
         initTeams();
     }
@@ -50,7 +50,6 @@ public class Global extends GlobalSettings {
         madrid.index();
 
 
-
         Team ol = new Team();
         ol.name = "Olympique Lyonnais";
         ol.country = france;
@@ -61,23 +60,23 @@ public class Global extends GlobalSettings {
 
     private void loadPlayersMadrid(Team madrid) {
         Player casillas = new Player();
-        casillas.name ="casillas";
-        casillas.weight=79;
+        casillas.name = "casillas";
+        casillas.weight = 79;
         casillas.position.add(Player.Position.GOALKEEPER.toString());
 
         Player marcelo = new Player();
-        marcelo.name ="marcelo";
-        marcelo.weight=73;
+        marcelo.name = "marcelo";
+        marcelo.weight = 73;
         marcelo.position.add(Player.Position.DEFENDER.toString());
 
         Player benzema = new Player();
-        benzema.name ="benzema";
-        benzema.weight=73;
+        benzema.name = "benzema";
+        benzema.weight = 73;
         benzema.position.add(Player.Position.FORWARD.toString());
 
         Player ronaldo = new Player();
-        ronaldo.name ="ronaldo";
-        ronaldo.weight=73;
+        ronaldo.name = "ronaldo";
+        ronaldo.weight = 73;
         ronaldo.position.add(Player.Position.FORWARD.toString());
 
         madrid.players.add(casillas);
@@ -88,53 +87,53 @@ public class Global extends GlobalSettings {
 
     private void loadPlayersBarcelone(Team barcelone) {
         Player valdes = new Player();
-        valdes.name ="valdes";
-        valdes.weight=78;
+        valdes.name = "valdes";
+        valdes.weight = 78;
         valdes.position.add(Player.Position.GOALKEEPER.toString());
 
         Player abidal = new Player();
-        abidal.name ="abidal";
-        abidal.weight=75;
+        abidal.name = "abidal";
+        abidal.weight = 75;
         abidal.position.add(Player.Position.DEFENDER.toString());
 
         Player alves = new Player();
-        alves.name ="alves";
-        alves.weight=64;
+        alves.name = "alves";
+        alves.weight = 64;
         alves.position.add(Player.Position.DEFENDER.toString());
 
         Player puyol = new Player();
-        puyol.name ="puyol";
-        puyol.weight=80;
+        puyol.name = "puyol";
+        puyol.weight = 80;
         puyol.position.add(Player.Position.DEFENDER.toString());
 
         Player pique = new Player();
-        pique.name ="pique";
-        pique.weight=75;
+        pique.name = "pique";
+        pique.weight = 75;
         pique.position.add(Player.Position.DEFENDER.toString());
 
         Player xavi = new Player();
-        xavi.name ="xavi";
-        xavi.weight=68;
+        xavi.name = "xavi";
+        xavi.weight = 68;
         xavi.position.add(Player.Position.MIDFIELDER.toString());
 
         Player inesta = new Player();
-        inesta.name ="inesta";
-        inesta.weight=64;
+        inesta.name = "inesta";
+        inesta.weight = 64;
         inesta.position.add(Player.Position.MIDFIELDER.toString());
 
         Player fabregas = new Player();
-        fabregas.name ="fabregas";
-        fabregas.weight=69;
+        fabregas.name = "fabregas";
+        fabregas.weight = 69;
 
         Player messi = new Player();
-        messi.name ="messi";
-        messi.weight=67;
+        messi.name = "messi";
+        messi.weight = 67;
         messi.position.add(Player.Position.FORWARD.toString());
         messi.position.add(Player.Position.MIDFIELDER.toString());
 
         Player vila = new Player();
-        vila.name ="vila";
-        vila.weight=69;
+        vila.name = "vila";
+        vila.weight = 69;
         vila.position.add(Player.Position.FORWARD.toString());
 
         barcelone.players.add(valdes);

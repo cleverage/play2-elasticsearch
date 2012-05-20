@@ -1,4 +1,4 @@
-package play.modules.elasticsearch;
+package com.github.nboire.elasticsearch;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
@@ -9,10 +9,6 @@ import play.Logger;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
-/**
- * User: nboire
- * Date: 19/04/12
- */
 public class IndexClient {
 
     /**

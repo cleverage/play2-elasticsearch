@@ -1,6 +1,6 @@
 package indexing;
 
-import play.modules.elasticsearch.Indexable;
+import com.github.nboire.elasticsearch.Indexable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +32,9 @@ public class Player implements Indexable {
 
     @Override
     public Indexable fromIndex(Map map) {
-        if(map == null) return this;
+        if (map == null) {
+            return this;
+        }
 
         this.name = (String) map.get("name");
         this.weight = (Integer) map.get("weight");

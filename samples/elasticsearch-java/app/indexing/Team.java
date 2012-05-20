@@ -1,10 +1,10 @@
 package indexing;
 
-import play.modules.elasticsearch.Index;
-import play.modules.elasticsearch.IndexUtils;
-import play.modules.elasticsearch.Indexable;
-import play.modules.elasticsearch.annotations.IndexMapping;
-import play.modules.elasticsearch.annotations.IndexType;
+import com.github.nboire.elasticsearch.Index;
+import com.github.nboire.elasticsearch.IndexUtils;
+import com.github.nboire.elasticsearch.Indexable;
+import com.github.nboire.elasticsearch.annotations.IndexMapping;
+import com.github.nboire.elasticsearch.annotations.IndexType;
 
 import java.util.*;
 
@@ -12,7 +12,7 @@ import java.util.*;
  * User: nboire
  * Date: 20/04/12
  */
-@IndexType(name="team")
+@IndexType(name = "team")
 @IndexMapping(value = "{ players : { properties : { players : { type : \"nested\" } } } }")
 public class Team extends Index {
 
@@ -45,7 +45,9 @@ public class Team extends Index {
     @Override
     public Indexable fromIndex(Map map) {
 
-        if(map == null) return this;
+        if (map == null) {
+            return this;
+        }
 
         this.name = (String) map.get("name");
         this.level = (String) map.get("level");

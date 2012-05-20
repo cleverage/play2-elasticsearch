@@ -1,11 +1,12 @@
 package controllers;
 
+import com.github.nboire.elasticsearch.IndexQuery;
+import com.github.nboire.elasticsearch.IndexResults;
 import indexing.IndexTest;
 import indexing.Team;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacet;
-import play.modules.elasticsearch.IndexQuery;
-import play.modules.elasticsearch.IndexResults;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
@@ -21,10 +22,19 @@ public class Application extends Controller {
       indexTest.name = "hello World";
       indexTest.index();
 
+      IndexTest byId = IndexTest.find.findById("1");
+
+      IndexResults<IndexTest> all = IndexTest.find.findAll();
+
+      IndexQuery<IndexTest> indexQuery = IndexTest.find.query();
+      indexQuery.setBuilder(QueryBuilders.queryString("hello"));
+
+      IndexResults<IndexTest> indexResults = IndexTest.find.find(indexQuery);
+
 
       // Team indexing
       // search All
-      IndexResults<Team> all = Team.find.findAll();
+      IndexResults<Team> allTeam = Team.find.findAll();
 
       // search All + facet country
 

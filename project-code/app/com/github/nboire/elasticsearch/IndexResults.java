@@ -1,4 +1,4 @@
-package play.modules.elasticsearch;
+package com.github.nboire.elasticsearch;
 
 import org.elasticsearch.search.facet.Facets;
 
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * The Class IndexResult.
  *
- * @param <T> the generic type
+ * @param <T> extends Index
  */
 public class IndexResults<T extends Index> {
 

@@ -1,11 +1,7 @@
-package play.modules.elasticsearch;
+package com.github.nboire.elasticsearch;
 
 import java.util.Map;
 
-/**
- * User: nboire
- * Date: 17/05/12
- */
 public interface Indexable {
 
     public Map toIndex();

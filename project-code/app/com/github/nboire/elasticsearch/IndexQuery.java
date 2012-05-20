@@ -1,9 +1,4 @@
-package play.modules.elasticsearch;
-
-/**
- * User: nboire
- * Date: 23/04/12
- */
+package com.github.nboire.elasticsearch;
 
 import org.apache.commons.lang.Validate;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -26,8 +21,7 @@ import java.util.Map;
 /**
  * An ElasticSearch query
  *
- * @param <T>
- *            the generic model to search for
+ * @param <T> extends Index
  */
 public class IndexQuery<T extends Index> {
 
@@ -50,10 +44,6 @@ public class IndexQuery<T extends Index> {
     public IndexQuery(Class<T> clazz) {
         Validate.notNull(clazz, "clazz cannot be null");
         this.clazz = clazz;
-    }
-
-    public QueryBuilder getQueryBuilder() {
-        return builder;
     }
 
     public IndexQuery<T> setBuilder(QueryBuilder builder) {

@@ -1,13 +1,9 @@
-package play.modules.elasticsearch;
+package com.github.nboire.elasticsearch;
 
 import org.elasticsearch.action.index.IndexResponse;
 import play.Logger;
-import play.modules.elasticsearch.annotations.IndexType;
+import com.github.nboire.elasticsearch.annotations.IndexType;
 
-/**
- * User: nboire
- * Date: 19/04/12
- */
 public abstract class Index implements Indexable {
 
     public String id;
@@ -24,7 +20,7 @@ public abstract class Index implements Indexable {
         }
         String indexType = indexTypeAnnotation.name();
 
-        return new IndexQueryPath(IndexManager.INDEX_DEFAULT, indexType);
+        return new IndexQueryPath(IndexService.INDEX_DEFAULT, indexType);
     }
 
     /**
@@ -34,7 +30,7 @@ public abstract class Index implements Indexable {
      */
     public IndexResponse index() {
 
-        return IndexManager.index(getIndexPath(), id, this);
+        return IndexService.index(getIndexPath(), id, this);
     }
 
     /**
@@ -69,7 +65,7 @@ public abstract class Index implements Indexable {
          * @return
          */
         public T findById(String id) {
-            return IndexManager.get(queryPath, type, id);
+            return IndexService.get(queryPath, type, id);
         }
 
         /**
@@ -87,7 +83,7 @@ public abstract class Index implements Indexable {
          */
         public IndexResults<T> find(IndexQuery<T> query) {
 
-            return IndexManager.search(queryPath, query);
+            return IndexService.search(queryPath, query);
         }
     }
 

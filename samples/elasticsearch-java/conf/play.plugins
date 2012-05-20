@@ -1,1 +1,1 @@
-9000:play.modules.elasticsearch.plugin.IndexPlugin
+9000:com.github.nboire.elasticsearch.plugin.IndexPlugin

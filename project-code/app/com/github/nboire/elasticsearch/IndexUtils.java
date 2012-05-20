@@ -1,4 +1,4 @@
-package play.modules.elasticsearch;
+package com.github.nboire.elasticsearch;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import play.Logger;
@@ -9,11 +9,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Classe permettant de convertir les données récupéré de l'index ( toutes des strings ) en Object
- * User: nboire
- * Date: 25/04/12
- */
 public abstract class IndexUtils {
 
     public static <T extends Indexable> List<T> getIndexables(Map map, String key, Class<T> t) {

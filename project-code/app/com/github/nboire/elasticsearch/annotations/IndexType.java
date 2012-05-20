@@ -1,7 +1,6 @@
-package play.modules.elasticsearch.annotations;
+package com.github.nboire.elasticsearch.annotations;
 
 import java.lang.annotation.*;
-
 /**
  * User: nboire
  * Date: 17/05/12
@@ -10,7 +9,7 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface IndexMapping {
+public @interface IndexType {
 
-    String value();
+    String name();
 }

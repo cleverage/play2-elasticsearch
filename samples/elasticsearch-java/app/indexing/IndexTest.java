@@ -1,8 +1,8 @@
 package indexing;
 
-import play.modules.elasticsearch.Index;
-import play.modules.elasticsearch.Indexable;
-import play.modules.elasticsearch.annotations.IndexType;
+import com.github.nboire.elasticsearch.Index;
+import com.github.nboire.elasticsearch.Indexable;
+import com.github.nboire.elasticsearch.annotations.IndexType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,16 +16,19 @@ public class IndexTest extends Index {
 
     public String name;
 
+    // Find method static for request
+    public static Finder<IndexTest> find = new Finder<IndexTest>(IndexTest.class);
+
     @Override
     public Map toIndex() {
-        Map<String, Object> map = new HashMap<String,Object>();
-        map.put("name",name);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("name", name);
         return map;
     }
 
     @Override
     public Indexable fromIndex(Map map) {
-        this.name = (String)map.get("name");
+        this.name = (String) map.get("name");
         return this;
     }
 }

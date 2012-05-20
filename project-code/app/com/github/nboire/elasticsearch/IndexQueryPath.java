@@ -1,15 +1,13 @@
-package play.modules.elasticsearch;
+package com.github.nboire.elasticsearch;
 
 /**
- * Classe permettant d'identifier le path a requeter dans ElasticSearch
+ * ElasticSearch Path to request
  * curl -XGET 'http://localhost:9200/twitter/tweet/1'
  *
- * _index : "twitter",
- " _type" : "tweet",
- " _id" : "1",
+ *  _index : "twitter",
+ "  _type" : "tweet",
+ "  _id" : "1",
  *
- * User: nboire
- * Date: 25/04/12
  */
 public class IndexQueryPath {
 
@@ -17,7 +15,7 @@ public class IndexQueryPath {
     String type;
 
     public IndexQueryPath(String type) {
-        this.index = IndexManager.INDEX_DEFAULT;
+        this.index = IndexService.INDEX_DEFAULT;
         this.type = type;
     }
 

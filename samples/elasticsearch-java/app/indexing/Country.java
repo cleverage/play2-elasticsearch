@@ -1,6 +1,6 @@
 package indexing;
 
-import play.modules.elasticsearch.Indexable;
+import com.github.nboire.elasticsearch.Indexable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,9 @@ public class Country implements Indexable {
 
     @Override
     public Indexable fromIndex(Map map) {
-        if(map == null) return this;
+        if (map == null) {
+            return this;
+        }
 
         this.name = (String) map.get("name");
         this.continent = (String) map.get("continent");

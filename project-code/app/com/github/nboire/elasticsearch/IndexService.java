@@ -1,4 +1,4 @@
-package play.modules.elasticsearch;
+package com.github.nboire.elasticsearch;
 
 import org.elasticsearch.action.admin.indices.exists.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
@@ -14,11 +14,7 @@ import play.Logger;
 import java.util.Map;
 
 
-/**
- * User: nboire
- * Date: 19/04/12
- */
-public abstract class IndexManager {
+public abstract class IndexService {
 
     public static final String INDEX_DEFAULT = IndexConfig.indexName;
 
@@ -150,7 +146,7 @@ public abstract class IndexManager {
      */
     public static void createMapping(String indexType, String indexMapping) {
         Logger.debug("ElasticSearch : Creating Mapping " + indexType + " :  " + indexMapping);
-        PutMappingResponse response = IndexClient.client().admin().indices().preparePutMapping(IndexManager.INDEX_DEFAULT).setType(indexType).setSource(indexMapping).execute().actionGet();
+        PutMappingResponse response = IndexClient.client().admin().indices().preparePutMapping(IndexService.INDEX_DEFAULT).setType(indexType).setSource(indexMapping).execute().actionGet();
     }
 
 
