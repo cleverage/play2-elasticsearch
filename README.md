@@ -1,14 +1,14 @@
 # play2-elasticsearch
 ===================
 
-This module provides Elasticsearch in a play2 application 
+This module provides [Elasticsearch](http://www.elasticsearch.org/) in a play2 application
 
 ## Installing
 
 The dependency declaration is
 
 ```
-"elasticsearch" % "elasticsearch_2.9.1" % "0.1"
+"com.github.nboire" % "elasticsearch_2.9.1" % "0.1"
 ```
 The resolver repository is 
 
@@ -29,7 +29,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "elasticsearch" % "elasticsearch_2.9.1" % "0.1"
+      "com.github.nboire" % "elasticsearch_2.9.1" % "0.1"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
@@ -101,3 +101,6 @@ IndexResults<IndexTest> results = IndexTest.find.find(indexQuery);
 Example : https://github.com/nboire/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/Team.java
 
 See samples/elasticsearch-java application for more sample
+
+## Javadoc
+http://nboire.github.com/play2-elasticsearch/javadoc/
