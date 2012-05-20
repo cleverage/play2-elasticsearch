@@ -10,3 +10,5 @@
 *.ipr
 *.iws
 copyreleases.sh
+javadoc
+
