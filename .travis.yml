@@ -6,7 +6,7 @@ before_script:
   - unzip -q play-${PLAY_VERSION}.zip
 script:
   - cd samples/elasticsearch-java
-  - play-${PLAY_VERSION}/play test
+  - ../../play-${PLAY_VERSION}/play test
 notifications:
   # Email notifications are disabled to not annoy anybody.
   # See http://about.travis-ci.org/docs/user/build-configuration/ to learn more
