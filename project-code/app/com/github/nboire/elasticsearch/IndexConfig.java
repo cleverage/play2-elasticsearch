@@ -1,9 +1,9 @@
 package com.github.nboire.elasticsearch;
 
-import play.Logger;
-import play.Play;
 import com.github.nboire.elasticsearch.annotations.IndexMapping;
 import com.github.nboire.elasticsearch.annotations.IndexType;
+import play.Application;
+import play.Logger;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,15 +53,20 @@ public class IndexConfig {
      */
     public static Map<String, String> mappings = new HashMap<String, String>();
 
-    public IndexConfig() {
+    /**
+     * Play application
+     */
+    public static Application application;
 
-        this.client = Play.application().configuration().getString("elasticsearch.client");
-        this.local = Play.application().configuration().getBoolean("elasticsearch.local");
+    public IndexConfig(Application app) {
+        this.application = app;
+        this.client = app.configuration().getString("elasticsearch.client");
+        this.local = app.configuration().getBoolean("elasticsearch.local");
 
-        this.indexName = Play.application().configuration().getString("elasticsearch.index.name");
-        this.indexClazzs = Play.application().configuration().getString("elasticsearch.index.clazzs");
+        this.indexName = app.configuration().getString("elasticsearch.index.name");
+        this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
 
-        this.showRequest = Play.application().configuration().getBoolean("elasticsearch.index.show_request");
+        this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request");
 
         loadMapping();
     }
@@ -80,7 +85,7 @@ public class IndexConfig {
                 // Loading class and annotation for set mapping if is present
                 Logger.debug(" ElasticSearch : Loading -> " + aClass);
 
-                klass = Class.forName(aClass, true, Play.application().classloader());
+                klass = Class.forName(aClass, true, application.classloader());
                 Object o = klass.newInstance();
 
                 String indexType = getIndexType(o);
@@ -120,7 +125,7 @@ public class IndexConfig {
             for (String load : toLoad) {
                 load = load.trim();
                 if (load.endsWith(".*")) {
-                    classes.addAll(Play.application().getTypesAnnotatedWith(load.substring(0, load.length() - 2), IndexType.class));
+                    classes.addAll(application.getTypesAnnotatedWith(load.substring(0, load.length() - 2), IndexType.class));
                 } else {
                     classes.add(load);
                 }

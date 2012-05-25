@@ -1,5 +1,6 @@
 package com.github.nboire.elasticsearch;
 
+import org.elasticsearch.action.admin.indices.exists.IndicesExistsRequestBuilder;
 import org.elasticsearch.action.admin.indices.exists.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
@@ -7,6 +8,9 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.AdminClient;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.indices.IndexMissingException;
 import play.Application;
 import play.Logger;
@@ -26,7 +30,7 @@ public abstract class IndexService {
      */
     public static IndexResponse index(IndexQueryPath indexPath, String id, Index indexable) {
 
-        IndexResponse indexResponse = IndexClient.client().prepareIndex(INDEX_DEFAULT, indexPath.type, id)
+        IndexResponse indexResponse = IndexClient.client.prepareIndex(INDEX_DEFAULT, indexPath.type, id)
                     .setSource(indexable.toIndex())
                     .execute()
                     .actionGet();
@@ -43,7 +47,7 @@ public abstract class IndexService {
      */
     public static DeleteResponse delete(IndexQueryPath indexPath, String id) {
 
-        DeleteResponse deleteResponse = IndexClient.client().prepareDelete(indexPath.index, indexPath.type, id)
+        DeleteResponse deleteResponse = IndexClient.client.prepareDelete(indexPath.index, indexPath.type, id)
                 .execute()
                 .actionGet();
 
@@ -65,7 +69,7 @@ public abstract class IndexService {
 
         T t = IndexUtils.getInstanceIndex(clazz);
 
-        GetResponse getResponse = IndexClient.client().prepareGet(indexPath.index, indexPath.type, id)
+        GetResponse getResponse = IndexClient.client.prepareGet(indexPath.index, indexPath.type, id)
                 .execute()
                 .actionGet();
 
@@ -102,7 +106,13 @@ public abstract class IndexService {
      * @return true if exists
      */
     public static boolean existsIndex() {
-        IndicesExistsResponse response = IndexClient.client().admin().indices().prepareExists(INDEX_DEFAULT).execute().actionGet();
+
+        Client client = IndexClient.client;
+        AdminClient admin = client.admin();
+        IndicesAdminClient indices = admin.indices();
+        IndicesExistsRequestBuilder indicesExistsRequestBuilder = indices.prepareExists(INDEX_DEFAULT);
+        IndicesExistsResponse response = indicesExistsRequestBuilder.execute().actionGet();
+
         return response.exists();
     }
 
@@ -111,7 +121,7 @@ public abstract class IndexService {
      */
     public static void createIndex() {
         try {
-            IndexClient.client().admin().indices().prepareCreate(INDEX_DEFAULT).execute().actionGet();
+            IndexClient.client.admin().indices().prepareCreate(INDEX_DEFAULT).execute().actionGet();
         } catch (Exception e) {
             Logger.error("ElasticSearch : Index create error : " + e.toString());
         }
@@ -122,7 +132,7 @@ public abstract class IndexService {
      */
     public static void deleteIndex() {
         try {
-            IndexClient.client().admin().indices().prepareDelete(INDEX_DEFAULT).execute().actionGet();
+            IndexClient.client.admin().indices().prepareDelete(INDEX_DEFAULT).execute().actionGet();
         } catch (IndexMissingException indexMissing) {
             Logger.debug("ElasticSearch : Index " + INDEX_DEFAULT + " no exists");
         } catch (Exception e) {
@@ -146,7 +156,7 @@ public abstract class IndexService {
      */
     public static void createMapping(String indexType, String indexMapping) {
         Logger.debug("ElasticSearch : Creating Mapping " + indexType + " :  " + indexMapping);
-        PutMappingResponse response = IndexClient.client().admin().indices().preparePutMapping(IndexService.INDEX_DEFAULT).setType(indexType).setSource(indexMapping).execute().actionGet();
+        PutMappingResponse response = IndexClient.client.admin().indices().preparePutMapping(IndexService.INDEX_DEFAULT).setType(indexType).setSource(indexMapping).execute().actionGet();
     }
 
 
@@ -187,14 +197,14 @@ public abstract class IndexService {
      * Refresh full index
      */
     public static void refresh() {
-        IndexClient.client().admin().indices().refresh(new RefreshRequest(INDEX_DEFAULT));
+        IndexClient.client.admin().indices().refresh(new RefreshRequest(INDEX_DEFAULT));
     }
 
     /**
      * Flush full index
      */
     public static void flush() {
-        IndexClient.client().admin().indices().flush(new FlushRequest(INDEX_DEFAULT));
+        IndexClient.client.admin().indices().flush(new FlushRequest(INDEX_DEFAULT));
     }
 
 }

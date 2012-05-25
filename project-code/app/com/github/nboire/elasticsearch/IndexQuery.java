@@ -137,7 +137,7 @@ public class IndexQuery<T extends Index> {
     public IndexResults<T> fetch(IndexQueryPath indexQueryPath) {
 
         // Build request
-        SearchRequestBuilder request = IndexClient.client()
+        SearchRequestBuilder request = IndexClient.client
                 .prepareSearch(indexQueryPath.index)
                 .setTypes(indexQueryPath.type)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)

@@ -3,7 +3,6 @@ package com.github.nboire.elasticsearch;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import play.Logger;
 
@@ -11,19 +10,9 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 public class IndexClient {
 
-    /**
-     * The client.
-     */
-    private static org.elasticsearch.client.Client client = null;
+    public static org.elasticsearch.node.Node node = null;
 
-    /**
-     * Client.
-     *
-     * @return the client
-     */
-    public static org.elasticsearch.client.Client client() {
-        return client;
-    }
+    public static org.elasticsearch.client.Client client = null;
 
     /**
      * Checks if is local mode.
@@ -48,20 +37,36 @@ public class IndexClient {
 
     public void start() throws Exception {
         // Start Node Builder
+
         ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder();
-        settings.put("client.transport.sniff", true);
-        settings.build();
 
         // Check Model
         if (this.isLocalMode()) {
             Logger.info("ElasticSearch : Starting in Local Mode");
+
+            String pathData = "data";
+            if(IndexConfig.application.isDev()) {
+                pathData += "-dev";
+            }
+            if(IndexConfig.application.isProd()) {
+                pathData += "-prod";
+            }
+            if(IndexConfig.application.isTest()) {
+                pathData += "-test";
+            }
+            settings.put("path.data", pathData);
+            settings.build();
+
             NodeBuilder nb = nodeBuilder().settings(settings).local(true).client(false).data(true);
-            Node node = nb.node();
+            node = nb.node();
             client = node.client();
             Logger.info("ElasticSearch : Started in Local Mode");
         }
         else
         {
+            settings.put("client.transport.sniff", true);
+            settings.build();
+
             Logger.info("ElasticSearch : Starting in Client Mode");
             TransportClient c = new TransportClient(settings);
             if (IndexConfig.client == null) {
@@ -90,5 +95,13 @@ public class IndexClient {
         if (client == null) {
             throw new Exception("ElasticSearch Client cannot be null - please check the configuration provided and the health of your ElasticSearch instances.");
         }
+    }
+
+    public void stop() throws Exception {
+         client.close();
+
+         if(node != null) {
+             node.close();
+         }
     }
 }

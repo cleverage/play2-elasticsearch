@@ -15,6 +15,7 @@ import play.Plugin;
 public class IndexPlugin extends Plugin
 {
     private final Application application;
+    private IndexClient client = null;
 
     public IndexPlugin(Application application)
     {
@@ -25,13 +26,14 @@ public class IndexPlugin extends Plugin
     public void onStart()
     {
         // ElasticSearch config load from application.conf
-        IndexConfig config = new IndexConfig();
+        IndexConfig config = new IndexConfig(application);
 
         // ElasticSearch client start on local or network
-        IndexClient client = new IndexClient();
+        client = new IndexClient();
         try {
             client.start();
         } catch (Exception e) {
+            e.printStackTrace();
             Logger.error(" ElasticSearch : Error when start elasticSearch Client ",e);
         }
 
@@ -50,8 +52,11 @@ public class IndexPlugin extends Plugin
     @Override
     public void onStop()
     {
-        IndexClient.client().close();
-
+        try {
+            client.stop();
+        } catch (Exception e) {
+            Logger.error("ElasticSearch : error when stop plugin ", e);
+        }
         Logger.info("ElasticSearch : Plugin has stopped");
     }
 }
