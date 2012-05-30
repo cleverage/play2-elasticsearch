@@ -194,18 +194,26 @@ public abstract class IndexService {
         }
     }
 
+    public static void cleanIndex() {
+
+        if (IndexService.existsIndex()) {
+            IndexService.deleteIndex();
+        }
+        IndexService.createIndex();
+        IndexService.prepareIndex();
+    }
     /**
      * Refresh full index
      */
     public static void refresh() {
-        IndexClient.client.admin().indices().refresh(new RefreshRequest(INDEX_DEFAULT));
+        IndexClient.client.admin().indices().refresh(new RefreshRequest(INDEX_DEFAULT)).actionGet();
     }
 
     /**
      * Flush full index
      */
     public static void flush() {
-        IndexClient.client.admin().indices().flush(new FlushRequest(INDEX_DEFAULT));
+        IndexClient.client.admin().indices().flush(new FlushRequest(INDEX_DEFAULT)).actionGet();
     }
 
 }
