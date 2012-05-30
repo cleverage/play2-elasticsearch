@@ -1,7 +1,8 @@
 # play2-elasticsearch
 ===================
 
-This module provides [Elasticsearch](http://www.elasticsearch.org/) in a play2 application
+This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.19.4) in a play2 application
+
 
 ## Installing
 
