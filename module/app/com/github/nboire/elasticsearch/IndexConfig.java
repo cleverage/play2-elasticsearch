@@ -51,7 +51,7 @@ public class IndexConfig {
     /**
      * List of IndexType and IndexMapping associate
      */
-    public static Map<String, String> mappings = new HashMap<String, String>();
+    public static Map<String, String> indexTypes = new HashMap<String, String>();
 
     /**
      * Play application
@@ -91,8 +91,8 @@ public class IndexConfig {
                 String indexType = getIndexType(o);
                 String indexMapping = getIndexMapping(o);
 
-                if (indexType != null && indexMapping != null) {
-                    mappings.put(indexType, indexMapping);
+                if (indexType != null) {
+                    indexTypes.put(indexType, indexMapping);
                 }
             } catch (Throwable e) {
                 Logger.error(e.getMessage());

@@ -1,5 +1,6 @@
 package com.github.nboire.elasticsearch;
 
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import play.Logger;
 import com.github.nboire.elasticsearch.annotations.IndexType;
@@ -32,6 +33,17 @@ public abstract class Index implements Indexable {
 
         return IndexService.index(getIndexPath(), id, this);
     }
+
+    /**
+     * Delete this Document
+     * @return
+     * @throws Exception
+     */
+    public DeleteResponse delete() {
+
+        return IndexService.delete(getIndexPath(), id);
+    }
+
 
     /**
      * Helper for index queries.

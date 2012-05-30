@@ -184,12 +184,13 @@ public abstract class IndexService {
      */
     public static void prepareIndex() {
 
-        Map<String, String> mappings = IndexConfig.mappings;
-        for (String indexName : mappings.keySet()) {
+        Map<String, String> indexTypes = IndexConfig.indexTypes;
+        for (String indexType : indexTypes.keySet()) {
 
-            String indexMapping = mappings.get(indexName);
-
-            createMapping(indexName, indexMapping);
+            String indexMapping = indexTypes.get(indexType);
+            if(indexMapping != null) {
+                createMapping(indexType, indexMapping);
+            }
         }
     }
 
