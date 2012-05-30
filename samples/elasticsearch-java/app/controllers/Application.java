@@ -1,7 +1,7 @@
 package controllers;
 
-import com.github.nboire.elasticsearch.IndexQuery;
-import com.github.nboire.elasticsearch.IndexResults;
+import com.github.cleverage.elasticsearch.IndexQuery;
+import com.github.cleverage.elasticsearch.IndexResults;
 import indexing.IndexTest;
 import indexing.Team;
 import org.elasticsearch.index.query.QueryBuilders;

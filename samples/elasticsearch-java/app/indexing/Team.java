@@ -1,10 +1,10 @@
 package indexing;
 
-import com.github.nboire.elasticsearch.Index;
-import com.github.nboire.elasticsearch.IndexUtils;
-import com.github.nboire.elasticsearch.Indexable;
-import com.github.nboire.elasticsearch.annotations.IndexMapping;
-import com.github.nboire.elasticsearch.annotations.IndexType;
+import com.github.cleverage.elasticsearch.Index;
+import com.github.cleverage.elasticsearch.IndexUtils;
+import com.github.cleverage.elasticsearch.Indexable;
+import com.github.cleverage.elasticsearch.annotations.IndexMapping;
+import com.github.cleverage.elasticsearch.annotations.IndexType;
 
 import java.util.*;
 

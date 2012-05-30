@@ -1,4 +1,4 @@
-import com.github.nboire.elasticsearch.IndexService;
+import com.github.cleverage.elasticsearch.IndexService;
 import indexing.Country;
 import indexing.Player;
 import indexing.Team;
@@ -16,7 +16,7 @@ public class Global extends GlobalSettings {
         Logger.info("Application has started");
 
         // Clean the index
-        IndexService.cleanIndex(app);
+        IndexService.cleanIndex();
 
         initTeams();
     }

@@ -8,12 +8,12 @@ This module provides [Elasticsearch](http://www.elasticsearch.org/) in a play2 a
 The dependency declaration is
 
 ```
-"com.github.nboire" % "elasticsearch_2.9.1" % "0.1"
+"com.github.cleverage" % "elasticsearch_2.9.1" % "0.1"
 ```
 The resolver repository is 
 
 ```
- resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://nboire.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
+ resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
 ```
 
 So the Build.scala looks like 
@@ -29,12 +29,12 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "com.github.nboire" % "elasticsearch_2.9.1" % "0.1"
+      "com.github.cleverage" % "elasticsearch_2.9.1" % "0.1"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
       // Add your own project settings here      
-      resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://nboire.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
+      resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
     )
 
 }
@@ -47,7 +47,7 @@ Play2-elasticsearch requires its plugin to be declared in the conf/play.plugins 
 just create it in the conf directory first, and then add
 
 ```
-9000:com.github.nboire.elasticsearch.plugin.IndexPlugin
+9000:com.github.cleverage.elasticsearch.plugin.IndexPlugin
 ```
 
 ## Configuration
@@ -71,17 +71,14 @@ elasticsearch.index.clazzs="indexing.*"
 
 ## show request & result json of search request in log
 elasticsearch.index.show_request=true
-
-%test.elasticsearch.local=true
-%test.elasticsearch.index.name="play2-elasticsearchtest"
 ```
 
 ## Usage
 
 ### HelloWorld
-Create an Class extends "com.github.nboire.elasticsearch.Index"
+Create an Class extends "com.github.cleverage.elasticsearch.Index"
 
-Example : [IndexTest.java](https://github.com/nboire/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/IndexTest.java)
+Example : [IndexTest.java](https://github.com/cleverage/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/IndexTest.java)
 
 ```
 IndexTest indexTest = new IndexTest();
@@ -99,9 +96,9 @@ IndexResults<IndexTest> results = IndexTest.find.find(indexQuery);
 ```
 
 ### More Complex
-Example : https://github.com/nboire/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/Team.java
+Example : https://github.com/cleverage/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/Team.java
 
 See samples/elasticsearch-java application for more sample
 
 ## Javadoc
-http://nboire.github.com/play2-elasticsearch/javadoc/
+http://cleverage.github.com/play2-elasticsearch/javadoc/

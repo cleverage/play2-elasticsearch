@@ -1,4 +1,4 @@
-package com.github.nboire.elasticsearch;
+package com.github.cleverage.elasticsearch;
 
 import org.apache.commons.lang.Validate;
 import org.elasticsearch.action.search.SearchRequestBuilder;

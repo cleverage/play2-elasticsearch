@@ -1,7 +1,7 @@
-package com.github.nboire.elasticsearch;
+package com.github.cleverage.elasticsearch;
 
-import com.github.nboire.elasticsearch.annotations.IndexMapping;
-import com.github.nboire.elasticsearch.annotations.IndexType;
+import com.github.cleverage.elasticsearch.annotations.IndexMapping;
+import com.github.cleverage.elasticsearch.annotations.IndexType;
 import play.Application;
 import play.Logger;
 

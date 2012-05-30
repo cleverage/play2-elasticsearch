@@ -1,9 +1,9 @@
-package com.github.nboire.elasticsearch;
+package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import play.Logger;
-import com.github.nboire.elasticsearch.annotations.IndexType;
+import com.github.cleverage.elasticsearch.annotations.IndexType;
 
 public abstract class Index implements Indexable {
 

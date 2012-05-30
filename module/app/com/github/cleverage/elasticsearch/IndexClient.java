@@ -1,4 +1,4 @@
-package com.github.nboire.elasticsearch;
+package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;

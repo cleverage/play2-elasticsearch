@@ -1,4 +1,4 @@
-package com.github.nboire.elasticsearch;
+package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import play.Logger;

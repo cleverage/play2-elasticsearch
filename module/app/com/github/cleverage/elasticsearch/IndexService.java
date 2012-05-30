@@ -1,4 +1,4 @@
-package com.github.nboire.elasticsearch;
+package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.action.admin.indices.exists.IndicesExistsRequestBuilder;
 import org.elasticsearch.action.admin.indices.exists.IndicesExistsResponse;
@@ -12,7 +12,6 @@ import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.indices.IndexMissingException;
-import play.Application;
 import play.Logger;
 
 import java.util.Map;
@@ -157,26 +156,6 @@ public abstract class IndexService {
     public static void createMapping(String indexType, String indexMapping) {
         Logger.debug("ElasticSearch : Creating Mapping " + indexType + " :  " + indexMapping);
         PutMappingResponse response = IndexClient.client.admin().indices().preparePutMapping(IndexService.INDEX_DEFAULT).setType(indexType).setSource(indexMapping).execute().actionGet();
-    }
-
-
-    /**
-     * Delete if exist, create index and prepareIndex
-     * @param application
-     */
-    public static void cleanIndex(Application application) {
-
-        Logger.debug("ElasticSearch : Clean Index starting ... ");
-
-        if (existsIndex()) {
-            deleteIndex();
-        }
-
-        createIndex();
-
-        prepareIndex();
-
-        Logger.debug("ElasticSearch : Clean Index ok ");
     }
 
     /**

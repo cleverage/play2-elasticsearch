@@ -1,8 +1,8 @@
-package com.github.nboire.elasticsearch.plugin;
+package com.github.cleverage.elasticsearch.plugin;
 
-import com.github.nboire.elasticsearch.IndexClient;
-import com.github.nboire.elasticsearch.IndexConfig;
-import com.github.nboire.elasticsearch.IndexService;
+import com.github.cleverage.elasticsearch.IndexClient;
+import com.github.cleverage.elasticsearch.IndexConfig;
+import com.github.cleverage.elasticsearch.IndexService;
 import play.Application;
 import play.Logger;
 import play.Plugin;

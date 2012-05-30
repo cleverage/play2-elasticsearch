@@ -1,6 +1,6 @@
 package indexing;
 
-import com.github.nboire.elasticsearch.Indexable;
+import com.github.cleverage.elasticsearch.Indexable;
 
 import java.util.ArrayList;
 import java.util.HashMap;

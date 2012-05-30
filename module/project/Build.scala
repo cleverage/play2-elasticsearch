@@ -9,7 +9,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here
-      "org.elasticsearch" % "elasticsearch" % "0.19.3"
+      "org.elasticsearch" % "elasticsearch" % "0.19.4"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
