@@ -13,7 +13,7 @@ object ApplicationBuild extends Build {
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
-      organization := "com.github.nboire"
+      organization := "com.github.cleverage"
     )
 
 }
