@@ -3,11 +3,16 @@
 
 This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.19.4) in a play2 application
 
+## Versions
+ 0.1 -> first version
+
+## Roadmap
+ 0.2 -> Percolator support
+ 0.3 -> Add binding for Ebean Model via an IndexModel.class
 
 ## Installing
 
 The dependency declaration is
-
 ```
 "com.github.cleverage" % "elasticsearch_2.9.1" % "0.1"
 ```
