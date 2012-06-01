@@ -83,7 +83,7 @@ public class IndexConfig {
             Class<?> klass = null;
             try {
                 // Loading class and annotation for set mapping if is present
-                Logger.debug(" ElasticSearch : Loading -> " + aClass);
+                Logger.debug("ElasticSearch : Registering class " + aClass);
 
                 klass = Class.forName(aClass, true, application.classloader());
                 Object o = klass.newInstance();

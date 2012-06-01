@@ -34,12 +34,12 @@ public class IndexPlugin extends Plugin
             client.start();
         } catch (Exception e) {
             e.printStackTrace();
-            Logger.error(" ElasticSearch : Error when start elasticSearch Client ",e);
+            Logger.error("ElasticSearch : Error when start elasticSearch Client ",e);
         }
 
         // Create Index If not Exists
         if (!IndexService.existsIndex()) {
-            Logger.debug(" ElasticSearch : creating index " + IndexService.INDEX_DEFAULT);
+            Logger.debug("ElasticSearch : creating index " + IndexService.INDEX_DEFAULT);
             IndexService.createIndex();
         }
 
@@ -55,7 +55,7 @@ public class IndexPlugin extends Plugin
         try {
             client.stop();
         } catch (Exception e) {
-            Logger.error("ElasticSearch : error when stop plugin ", e);
+            Logger.error("ElasticSearch : error when stop plugin ",e);
         }
         Logger.info("ElasticSearch : Plugin has stopped");
     }
