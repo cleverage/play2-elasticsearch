@@ -4,17 +4,17 @@
 This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.19.4) in a play2 application
 
 ## Versions
- 0.1 -> first version
+ 0.1 -> init version
+ 0.2 -> Percolators support
 
 ## Roadmap
- 0.2 -> Percolator support
  0.3 -> Add binding for Ebean Model via an IndexModel.class
 
 ## Installing
 
 The dependency declaration is
 ```
-"com.github.cleverage" % "elasticsearch_2.9.1" % "0.1"
+"com.github.cleverage" % "elasticsearch_2.9.1" % "0.2"
 ```
 The resolver repository is 
 
@@ -35,7 +35,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "com.github.cleverage" % "elasticsearch_2.9.1" % "0.1"
+      "com.github.cleverage" % "elasticsearch_2.9.1" % "0.2"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
@@ -91,13 +91,13 @@ IndexTest indexTest = new IndexTest();
 indexTest.name = "hello World";
 indexTest.index();
 
-IndexTest byId = IndexTest.find.findById("1");
+IndexTest byId = IndexTest.find.byId("1");
 
-IndexResults<IndexTest> all = IndexTest.find.findAll();
+IndexResults<IndexTest> all = IndexTest.find.all();
 
 IndexQuery<IndexTest> indexQuery = IndexTest.find.query();
 indexQuery.setBuilder(QueryBuilders.queryString("hello"));
-IndexResults<IndexTest> results = IndexTest.find.find(indexQuery);
+IndexResults<IndexTest> results = IndexTest.find.search(indexQuery);
 
 ```
 
