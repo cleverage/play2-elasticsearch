@@ -22,31 +22,31 @@ public class Application extends Controller {
       indexTest.name = "hello World";
       indexTest.index();
 
-      IndexTest byId = IndexTest.find.findById("1");
+      IndexTest byId = IndexTest.find.byId("1");
 
-      IndexResults<IndexTest> all = IndexTest.find.findAll();
+      IndexResults<IndexTest> all = IndexTest.find.all();
 
       IndexQuery<IndexTest> indexQuery = IndexTest.find.query();
       indexQuery.setBuilder(QueryBuilders.queryString("hello"));
 
-      IndexResults<IndexTest> indexResults = IndexTest.find.find(indexQuery);
+      IndexResults<IndexTest> indexResults = IndexTest.find.search(indexQuery);
 
 
       // Team indexing
       // search All
-      IndexResults<Team> allTeam = Team.find.findAll();
+      IndexResults<Team> allTeam = Team.find.all();
 
       // search All + facet country
 
       IndexQuery<Team> queryCountry = Team.find.query();
       queryCountry.addFacet(FacetBuilders.termsFacet("countryF").field("country.name"));
-      IndexResults<Team> allAndFacetCountry = Team.find.find(queryCountry);
+      IndexResults<Team> allAndFacetCountry = Team.find.search(queryCountry);
       TermsFacet countryF = allAndFacetCountry.facets.facet("countryF");
 
       // search All + facet players.position
       IndexQuery<Team> queryPlayers = Team.find.query();
       queryPlayers.addFacet(FacetBuilders.termsFacet("playersF").field("players.position").nested("players"));
-      IndexResults<Team> allAndFacetAge = Team.find.find(queryPlayers);
+      IndexResults<Team> allAndFacetAge = Team.find.search(queryPlayers);
 
 
       return ok(index.render("Your new application is ready."));
