@@ -37,14 +37,14 @@ public class IndexPlugin extends Plugin
             Logger.error("ElasticSearch : Error when start elasticSearch Client ",e);
         }
 
-        // Create Index If not Exists
+        // Create Index and Mapping if not Exists
         if (!IndexService.existsIndex()) {
             Logger.debug("ElasticSearch : creating index " + IndexService.INDEX_DEFAULT);
             IndexService.createIndex();
-        }
 
-        // Prepare Index ( define mapping if present )
-        IndexService.prepareIndex();
+            // Prepare Index ( define mapping if present )
+            IndexService.prepareIndex();
+        }
 
         Logger.info("ElasticSearch : Plugin has started");
     }
