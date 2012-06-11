@@ -1,5 +1,6 @@
 package com.github.cleverage.elasticsearch;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -33,13 +34,15 @@ public class IndexQuery<T extends Index> {
     /**
      * Query searchRequestBuilder
      */
-    private QueryBuilder builder = QueryBuilders.matchAllQuery();;
+    private QueryBuilder builder = QueryBuilders.matchAllQuery();
+    private String query = null;
     private List<AbstractFacetBuilder> facets = new ArrayList<AbstractFacetBuilder>();
     private List<SortBuilder> sorts = new ArrayList<SortBuilder>();
 
     private int from = -1;
     private int size = -1;
     private boolean explain = false;
+    private boolean noField = false;
 
     public IndexQuery(Class<T> clazz) {
         Validate.notNull(clazz, "clazz cannot be null");
@@ -50,6 +53,14 @@ public class IndexQuery<T extends Index> {
         this.builder = builder;
 
         return this;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
+    }
+
+    public void setNoField(boolean noField) {
+        this.noField = noField;
     }
 
     /**
@@ -140,8 +151,21 @@ public class IndexQuery<T extends Index> {
         SearchRequestBuilder request = IndexClient.client
                 .prepareSearch(indexQueryPath.index)
                 .setTypes(indexQueryPath.type)
-                .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setQuery(builder);
+                .setSearchType(SearchType.QUERY_THEN_FETCH);
+
+        // set Query
+        if (StringUtils.isNotBlank(query)) {
+            request.setQuery(query);
+        }
+        else
+        {
+            request.setQuery(builder);
+        }
+
+        // set no Fields -> only return id and type
+        if(noField) {
+            request.setNoFields();
+        }
 
         // Facets
         for (AbstractFacetBuilder facet : facets) {
@@ -166,9 +190,14 @@ public class IndexQuery<T extends Index> {
             request.setExplain(true);
         }
 
-        // Todo load select fields
         if (IndexConfig.showRequest) {
-            Logger.debug("ElasticSearch : Query -> "+ builder.toString());
+            if (StringUtils.isNotBlank(query)) {
+                Logger.debug("ElasticSearch : Query -> "+ query);
+            }
+            else
+            {
+                Logger.debug("ElasticSearch : Query -> "+ builder.toString());
+            }
         }
 
         // Execute query
