@@ -11,8 +11,8 @@ package com.github.cleverage.elasticsearch;
  */
 public class IndexQueryPath {
 
-    String index;
-    String type;
+    public String index;
+    public String type;
 
     public IndexQueryPath(String type) {
         this.index = IndexService.INDEX_DEFAULT;
