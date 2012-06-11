@@ -76,15 +76,15 @@ public abstract class Index implements Indexable {
          * @param id
          * @return
          */
-        public T findById(String id) {
+        public T byId(String id) {
             return IndexService.get(queryPath, type, id);
         }
 
         /**
          * Retrieves all entities of the given type.
          */
-        public IndexResults<T> findAll() {
-            return find(query());
+        public IndexResults<T> all() {
+            return search(query());
         }
 
         /**
@@ -93,7 +93,7 @@ public abstract class Index implements Indexable {
          * @return
          * @throws Exception
          */
-        public IndexResults<T> find(IndexQuery<T> query) {
+        public IndexResults<T> search(IndexQuery<T> query) {
 
             return IndexService.search(queryPath, query);
         }
