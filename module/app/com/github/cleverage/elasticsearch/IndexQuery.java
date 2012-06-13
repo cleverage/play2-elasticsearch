@@ -15,6 +15,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import play.Logger;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -240,8 +241,21 @@ public class IndexQuery<T extends Index> {
             Logger.debug("ElasticSearch : Results -> "+ results.toString());
         }
 
+        // pagination
+        long pageSize = 10;
+        if (size > -1) {
+            pageSize = size;
+        }
+
+        long pageCurrent = 1;
+        if(from > 0) {
+            pageCurrent = ((int) (from / pageSize))+1;
+        }
+
+        long pageNb = (long)Math.ceil(new BigDecimal(count).divide(new BigDecimal(pageSize)).doubleValue());
+
         // Return Results
-        return new IndexResults<T>(count, results, facetsResponse);
+        return new IndexResults<T>(count, pageSize, pageCurrent, pageNb, results, facetsResponse);
     }
 }
 

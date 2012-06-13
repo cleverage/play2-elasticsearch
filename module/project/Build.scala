@@ -5,7 +5,7 @@ import PlayProject._
 object ApplicationBuild extends Build {
 
     val appName         = "elasticsearch"
-    val appVersion      = "0.2"
+    val appVersion      = "0.3"
 
     val appDependencies = Seq(
       // Add your project dependencies here

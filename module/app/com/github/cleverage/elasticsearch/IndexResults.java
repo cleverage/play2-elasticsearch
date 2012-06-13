@@ -14,6 +14,21 @@ public class IndexResults<T extends Index> {
     /** The total count. */
     public long totalCount;
 
+    /**
+     * Nb result by page
+     */
+    public long pageSize;
+
+    /**
+     * Number of current page
+     */
+    public long pageCurrent;
+
+    /**
+     * Number of total pages
+     */
+    public long pageNb;
+
     /** The results. */
     public List<T> results;
 
@@ -21,14 +36,19 @@ public class IndexResults<T extends Index> {
     public Facets facets;
 
     /**
-     * Instantiates a new search results.
-     *
-     * @param totalCount the total count
-     * @param results the results
-     * @param facets the facets
+     * Create new Index Result
+     * @param totalCount
+     * @param pageSize
+     * @param pageCurrent
+     * @param pageNb
+     * @param results
+     * @param facets
      */
-    public IndexResults(long totalCount, List<T> results, Facets facets) {
+    public IndexResults(long totalCount,long pageSize, long pageCurrent, long pageNb, List<T> results, Facets facets) {
         this.totalCount = totalCount;
+        this.pageSize = pageSize;
+        this.pageCurrent = pageCurrent;
+        this.pageNb = pageNb;
         this.results = results;
         this.facets = facets;
     }

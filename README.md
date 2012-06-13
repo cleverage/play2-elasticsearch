@@ -6,15 +6,16 @@ This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.19.4) in 
 ## Versions
  0.1 -> init version
  0.2 -> Percolators support
+ 0.3 -> IndexResult : add pagination data
 
 ## Roadmap
- 0.3 -> Add binding for Ebean Model via an IndexModel.class
+ 0.4 -> Add binding for Ebean Model via an IndexModel.class
 
 ## Installing
 
 The dependency declaration is
 ```
-"com.github.cleverage" % "elasticsearch_2.9.1" % "0.2"
+"com.github.cleverage" % "elasticsearch_2.9.1" % "0.3"
 ```
 The resolver repository is 
 
@@ -35,7 +36,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "com.github.cleverage" % "elasticsearch_2.9.1" % "0.2"
+      "com.github.cleverage" % "elasticsearch_2.9.1" % "0.3"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
