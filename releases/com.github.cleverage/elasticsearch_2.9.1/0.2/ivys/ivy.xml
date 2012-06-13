@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ivy-module version="2.0" xmlns:e="http://ant.apache.org/ivy/extra">
-	<info organisation="com.github.cleverage" module="elasticsearch_2.9.1" revision="0.2" status="release" publication="20120611154430">
+	<info organisation="com.github.cleverage" module="elasticsearch_2.9.1" revision="0.2" status="release" publication="20120613112459">
 		<description>
 		elasticsearch
 		</description>
