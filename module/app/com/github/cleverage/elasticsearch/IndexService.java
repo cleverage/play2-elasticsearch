@@ -281,7 +281,6 @@ public abstract class IndexService {
         return percolatorRequest.execute().actionGet();
     }
 
-
     /**
      * Create Percolator
      *
@@ -299,6 +298,20 @@ public abstract class IndexService {
                         .setSource("{\"query\": " + query + "}");
 
         return percolatorRequest.execute().actionGet();
+    }
+
+    /**
+     * Check if a percolator exists
+     * @param namePercolator
+     * @return
+     */
+    public static boolean precolatorExists(String namePercolator) {
+        try {
+            GetResponse responseExist = IndexService.getPercolator(namePercolator);
+            return (responseExist.exists());
+        } catch (IndexMissingException e) {
+            return false;
+        }
     }
 
     /**
