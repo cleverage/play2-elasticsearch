@@ -65,6 +65,9 @@ public class IndexClient {
         else
         {
             settings.put("client.transport.sniff", true);
+            if (IndexConfig.clusterName != null) {
+                settings.put("cluster.name", IndexConfig.clusterName);
+            }
             settings.build();
 
             Logger.info("ElasticSearch : Starting in Client Mode");
