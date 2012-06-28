@@ -16,6 +16,7 @@ import java.util.Set;
  * example :
  * elasticsearch.local=false
  * elasticsearch.client="192.168.0.46:9300"
+ * elasticsearch.cluster.name=myCluster
  * elasticsearch.index.name=play2-elasticsearch
  * elasticsearch.index.clazzs="indexing.*"
  * elasticsearch.index.show_request=true
@@ -32,6 +33,11 @@ public class IndexConfig {
      *  elasticsearch.client = list of client separate by commas ex : 192.168.0.1:9300,192.168.0.2:9300
      */
     public static String client = null;
+
+    /**
+     * elasticsearch.cluster.name = name of the elasticsearch cluster
+     */
+    public static String clusterName = null;
 
     /**
      * Debug mode for log search request and response
@@ -62,6 +68,7 @@ public class IndexConfig {
         this.application = app;
         this.client = app.configuration().getString("elasticsearch.client");
         this.local = app.configuration().getBoolean("elasticsearch.local");
+        this.clusterName = app.configuration().getString("elasticsearch.cluster.name");
 
         this.indexName = app.configuration().getString("elasticsearch.index.name");
         this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
