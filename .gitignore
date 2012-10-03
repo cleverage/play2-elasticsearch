@@ -6,6 +6,8 @@
 *.ear
 
 .DS_Store
+.idea
+.settings
 *.iml
 *.ipr
 *.iws
