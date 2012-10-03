@@ -1,1 +1,3 @@
 com.github.cleverage.elasticsearch
+com.github.cleverage.elasticsearch.annotations
+com.github.cleverage.elasticsearch.plugin
