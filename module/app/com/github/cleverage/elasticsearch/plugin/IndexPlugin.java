@@ -52,10 +52,12 @@ public class IndexPlugin extends Plugin
     @Override
     public void onStop()
     {
-        try {
-            client.stop();
-        } catch (Exception e) {
-            Logger.error("ElasticSearch : error when stop plugin ",e);
+        if(client!= null) {
+            try {
+                client.stop();
+            } catch (Exception e) {
+                Logger.error("ElasticSearch : error when stop plugin ",e);
+            }
         }
         Logger.info("ElasticSearch : Plugin has stopped");
     }
