@@ -5,11 +5,11 @@ import PlayProject._
 object ApplicationBuild extends Build {
 
     val appName         = "elasticsearch"
-    val appVersion      = "0.3.2"
+    val appVersion      = "0.4"
 
     val appDependencies = Seq(
       // Add your project dependencies here
-      "org.elasticsearch" % "elasticsearch" % "0.19.9"
+      "org.elasticsearch" % "elasticsearch" % "0.19.10"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
