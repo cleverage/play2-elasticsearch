@@ -148,6 +148,26 @@ public class IndexQuery<T extends Index> {
      */
     public IndexResults<T> fetch(IndexQueryPath indexQueryPath) {
 
+        SearchRequestBuilder request = getSearchRequestBuilder(indexQueryPath);
+
+        return executeSearchRequest(request);
+    }
+
+    public IndexResults<T> executeSearchRequest(SearchRequestBuilder request) {
+
+        SearchResponse searchResponse = request.execute().actionGet();
+
+        if (IndexConfig.showRequest) {
+            Logger.debug("ElasticSearch : Response -> " + searchResponse.toString());
+        }
+
+        IndexResults<T> searchResults = toSearchResults(searchResponse);
+
+        return searchResults;
+    }
+
+    public SearchRequestBuilder getSearchRequestBuilder(IndexQueryPath indexQueryPath) {
+
         // Build request
         SearchRequestBuilder request = IndexClient.client
                 .prepareSearch(indexQueryPath.index)
@@ -193,24 +213,14 @@ public class IndexQuery<T extends Index> {
 
         if (IndexConfig.showRequest) {
             if (StringUtils.isNotBlank(query)) {
-                Logger.debug("ElasticSearch : Query -> "+ query);
+                Logger.debug("ElasticSearch : Query -> " + query);
             }
             else
             {
                 Logger.debug("ElasticSearch : Query -> "+ builder.toString());
             }
         }
-
-        // Execute query
-        SearchResponse searchResponse = request.execute().actionGet();
-
-        if (IndexConfig.showRequest) {
-            Logger.debug("ElasticSearch : Response -> "+ searchResponse.toString());
-        }
-
-        IndexResults<T> searchResults = toSearchResults(searchResponse);
-
-        return searchResults;
+        return request;
     }
 
     private IndexResults<T> toSearchResults(SearchResponse searchResponse) {
@@ -233,6 +243,7 @@ public class IndexQuery<T extends Index> {
             T objectIndexable = IndexUtils.getInstanceIndex(clazz);
             T t = (T) objectIndexable.fromIndex(map);
             t.id = h.getId();
+            t.searchHit = h;
 
             results.add(t);
         }

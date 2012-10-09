@@ -2,12 +2,20 @@ package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.search.SearchHit;
 import play.Logger;
 import com.github.cleverage.elasticsearch.annotations.IndexType;
 
 public abstract class Index implements Indexable {
 
     public String id;
+
+    /**
+     * SearchHit is use when do a search
+     * It's contains information like "_index", "_type", "_id", "_score", "hightlight", ...
+     */
+    public SearchHit searchHit;
+
 
     /**
      * Return indexName and indexType
