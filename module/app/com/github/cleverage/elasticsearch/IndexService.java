@@ -1,5 +1,6 @@
 package com.github.cleverage.elasticsearch;
 
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.IndicesExistsRequestBuilder;
 import org.elasticsearch.action.admin.indices.exists.IndicesExistsResponse;
@@ -174,7 +175,11 @@ public abstract class IndexService {
      */
     public static void createIndex() {
         try {
-            IndexClient.client.admin().indices().prepareCreate(INDEX_DEFAULT).execute().actionGet();
+            CreateIndexRequestBuilder creator = IndexClient.client.admin().indices().prepareCreate(INDEX_DEFAULT);
+            if (IndexConfig.indexSettings != null) {
+            	creator.setSettings(IndexConfig.indexSettings);
+            }
+            creator.execute().actionGet();
         } catch (Exception e) {
             Logger.error("ElasticSearch : Index create error : " + e.toString());
         }

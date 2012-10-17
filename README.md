@@ -75,6 +75,9 @@ elasticsearch.client="192.168.0.46:9300"
 ## Name of the index
 elasticsearch.index.name="play2-elasticsearch"
 
+## Custom settings to apply when creating the index (optional)
+elasticsearch.index.settings="{ analysis: { analyzer: { my_analyzer: { type: \"custom\", tokenizer: \"standard\" } } } }"
+
 ## define package or class separate by commas for loading @IndexType and @IndexMapping information
 elasticsearch.index.clazzs="indexing.*"
 
