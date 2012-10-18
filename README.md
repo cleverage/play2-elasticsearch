@@ -9,6 +9,7 @@ This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.19.10) in
  * 0.3 -> IndexResult : add pagination data
  * 0.4 -> upgrade ES to 0.19.10
  * 0.4.1 -> allow advanced query ( with hightlight, .... ) 
+ * 0.4.2 -> upgrade play2.0.4 + allow index settings in conf 
 
 ## Roadmap
  0.5 -> Add binding for Ebean Model via an IndexModel.class
@@ -17,7 +18,7 @@ This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.19.10) in
 
 The dependency declaration is
 ```
-"com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.1"
+"com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.2"
 ```
 The resolver repository is 
 
@@ -38,7 +39,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.1"
+      "com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.2"
     )
 
     val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
