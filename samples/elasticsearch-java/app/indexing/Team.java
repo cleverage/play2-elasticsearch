@@ -13,7 +13,7 @@ import java.util.*;
  * Date: 20/04/12
  */
 @IndexType(name = "team")
-@IndexMapping(value = "{ players : { properties : { players : { type : \"nested\" } } } }")
+@IndexMapping(value = "{ players : { properties : { players : { type : \"nested\" }, name : { type : \"string\", analyzer : \"team_name_analyzer\" } } } }")
 public class Team extends Index {
 
     public String name;
