@@ -18,6 +18,7 @@ import java.util.Set;
  * elasticsearch.client="192.168.0.46:9300"
  * elasticsearch.cluster.name=myCluster
  * elasticsearch.index.name=play2-elasticsearch
+ * elasticsearch.index.settings="{ analysis: { analyzer: { my_analyzer: { type: \"custom\", tokenizer: \"standard\" } } } }"
  * elasticsearch.index.clazzs="indexing.*"
  * elasticsearch.index.show_request=true
  */
@@ -50,6 +51,11 @@ public class IndexConfig {
     public static String indexName = null;
 
     /**
+     * Custom settings to apply when creating the index. ex: "{ analysis: { analyzer: { my_analyzer: { type : "custom", tokenizer: "standard" } } } }" 
+     */
+    public static String indexSettings = null;
+
+    /**
      * list of class extends "Index" ex: myPackage.myClass,myPackage2.*
      */
     public static String indexClazzs = null;
@@ -71,6 +77,7 @@ public class IndexConfig {
         this.clusterName = app.configuration().getString("elasticsearch.cluster.name");
 
         this.indexName = app.configuration().getString("elasticsearch.index.name");
+        this.indexSettings = app.configuration().getString("elasticsearch.index.settings");
         this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
 
         this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request");
