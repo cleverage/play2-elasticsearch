@@ -10,6 +10,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import play.libs.ReflectionsCache;
+import org.reflections.Reflections;
+
+
+
 /**
  * User: nboire
  *
@@ -139,7 +144,10 @@ public class IndexConfig {
             for (String load : toLoad) {
                 load = load.trim();
                 if (load.endsWith(".*")) {
-                    classes.addAll(application.getTypesAnnotatedWith(load.substring(0, load.length() - 2), IndexType.class));
+                        Reflections reflections = ReflectionsCache.getReflections(application.classloader(), load.substring(0, load.length() - 2));
+                        for(Class c :reflections.getTypesAnnotatedWith(IndexType.class)){
+                        classes.add(c.getName());
+                    }
                 } else {
                     classes.add(load);
                 }
