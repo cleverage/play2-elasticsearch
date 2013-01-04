@@ -11,8 +11,7 @@ This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.19.10) in
  * 0.4.1 -> allow advanced query ( with hightlight, .... ) 
  * 0.4.2 -> upgrade play2.0.4 + allow index settings in conf 
 
-## Roadmap
- 0.5 -> Add binding for Ebean Model via an IndexModel.class
+ * 0.5.0 -> compatibility with play 2.1-RC1
 
 ## Installing
 
@@ -20,6 +19,11 @@ The dependency declaration is
 ```
 "com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.2"
 ```
+or 
+```
+"com.github.cleverage" %% "elasticsearch" % "0.5.0"
+```
+
 The resolver repository is 
 
 ```
@@ -50,6 +54,29 @@ object ApplicationBuild extends Build {
 }
 ```
 
+or for play 2.1-RC1 : 
+```
+import sbt._
+import Keys._
+import play.Project._
+
+object ApplicationBuild extends Build {
+
+    val appName         = "elasticsearch-sample"
+    val appVersion      = "1.0-SNAPSHOT"
+
+    val appDependencies = Seq(
+      // Add your project dependencies here,
+      "com.github.cleverage" %% "elasticsearch" % "0.5.0"
+    )
+
+    val main = play.Project(appName, appVersion, appDependencies).settings(
+      // Add your own project settings here      
+      resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
+    )
+
+}
+```
 
 ## Activate the plugin
 
