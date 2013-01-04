@@ -1,0 +1,7 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+# Fake route used to make "publish-local" work correctly 
+# see : https://play.lighthouseapp.com/projects/82401-play-20/tickets/898
+# Can be removed when this issue will be fixed
+GET     /fake                       com.github.cleverage.elasticsearch.controllers.FakeController.index
