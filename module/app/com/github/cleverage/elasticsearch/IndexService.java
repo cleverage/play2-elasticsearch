@@ -82,6 +82,22 @@ public abstract class IndexService {
     }
 
     /**
+     * Add a json document to the index
+     * @param indexPath
+     * @param id
+     * @param json
+     * @return
+     */
+    public static IndexResponse index(IndexQueryPath indexPath, String id, String json) {
+        IndexResponse indexResponse = IndexClient.client.prepareIndex(INDEX_DEFAULT, indexPath.type, id)
+                .setSource(json)
+                .execute()
+                .actionGet();
+        return indexResponse;
+    }
+
+
+    /**
      * Delete element in index
      * @param indexPath
      * @return
@@ -97,6 +113,19 @@ public abstract class IndexService {
         }
 
         return deleteResponse;
+    }
+
+    /**
+     * Get the json representation of a document from an id
+     * @param indexPath
+     * @param id
+     * @return
+     */
+    public static String getAsString(IndexQueryPath indexPath, String id) {
+        return IndexClient.client.prepareGet(indexPath.index, indexPath.type, id)
+                .execute()
+                .actionGet()
+                .getSourceAsString();
     }
 
     /**
@@ -142,6 +171,7 @@ public abstract class IndexService {
         GetResponse getResponse = getRequestBuilder.execute().actionGet();
         return getResponse;
     }
+
 
     /**
      * Search information on Index from a query

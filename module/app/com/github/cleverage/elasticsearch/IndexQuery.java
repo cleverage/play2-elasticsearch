@@ -77,6 +77,10 @@ public class IndexQuery<T extends Index> {
         return this;
     }
 
+    public int getFrom() {
+        return this.from;
+    }
+
     /**
      * Sets fetch size
      *
@@ -88,6 +92,10 @@ public class IndexQuery<T extends Index> {
         this.size = size;
 
         return this;
+    }
+
+    public int getSize() {
+        return this.size;
     }
 
     public IndexQuery<T> setExplain(boolean explain) {
@@ -139,6 +147,10 @@ public class IndexQuery<T extends Index> {
         sorts.add(sort);
 
         return this;
+    }
+
+    public SearchResponse execute(IndexQueryPath indexQueryPath) {
+        return getSearchRequestBuilder(indexQueryPath).execute().actionGet();
     }
 
     /**
@@ -224,12 +236,54 @@ public class IndexQuery<T extends Index> {
     }
 
     private IndexResults<T> toSearchResults(SearchResponse searchResponse) {
-        // Get Total Records Found
-        long count = searchResponse.hits().totalHits();
+        long count = getCount(searchResponse);
+        Facets facetsResponse = getFacets(searchResponse);
 
+        List<T> results = buildResults(searchResponse);
+        if(Logger.isDebugEnabled()) {
+            Logger.debug("ElasticSearch : Results -> "+ results.toString());
+        }
+
+        long pageSize = getPageSize(size);
+        long pageCurrent = getPageCurrent(from, pageSize);
+        long pageNb = getPageNb(count, pageSize);
+
+        // Return Results
+        return new IndexResults<T>(count, pageSize, pageCurrent, pageNb, results, facetsResponse);
+    }
+
+    public static long getPageNb(long count, long pageSize) {
+        return (long)Math.ceil(new BigDecimal(count).divide(new BigDecimal(pageSize)).doubleValue());
+    }
+
+    public static long getPageCurrent(long from, long pageSize) {
+        long pageCurrent = 1;
+        if(from > 0) {
+            pageCurrent = ((int) (from / pageSize))+1;
+        }
+        return pageCurrent;
+    }
+
+    public static long getPageSize(long size) {
+        // pagination
+        long pageSize = 10;
+        if (size > -1) {
+            pageSize = size;
+        }
+        return pageSize;
+    }
+
+    public static Facets getFacets(SearchResponse searchResponse) {
         // Get Facets
-        Facets facetsResponse = searchResponse.facets();
+        return searchResponse.facets();
+    }
 
+    public static long getCount(SearchResponse searchResponse) {
+        // Get Total Records Found
+        return searchResponse.hits().totalHits();
+    }
+
+    private List<T> buildResults(SearchResponse searchResponse) {
         // Get List results
         List<T> results = new ArrayList<T>();
 
@@ -247,26 +301,7 @@ public class IndexQuery<T extends Index> {
 
             results.add(t);
         }
-
-        if(Logger.isDebugEnabled()) {
-            Logger.debug("ElasticSearch : Results -> "+ results.toString());
-        }
-
-        // pagination
-        long pageSize = 10;
-        if (size > -1) {
-            pageSize = size;
-        }
-
-        long pageCurrent = 1;
-        if(from > 0) {
-            pageCurrent = ((int) (from / pageSize))+1;
-        }
-
-        long pageNb = (long)Math.ceil(new BigDecimal(count).divide(new BigDecimal(pageSize)).doubleValue());
-
-        // Return Results
-        return new IndexResults<T>(count, pageSize, pageCurrent, pageNb, results, facetsResponse);
+        return results;
     }
 }
 
