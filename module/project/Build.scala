@@ -15,7 +15,8 @@ object ApplicationBuild extends Build {
 
     val main =  play.Project(appName, appVersion, appDependencies).settings(
       organization := "com.github.cleverage",
-      resolvers += "oss sonytape (release)" at "http://oss.sonatype.org/content/repositories/releases/"
+      resolvers += "oss sonytape (release)" at "http://oss.sonatype.org/content/repositories/releases/",
+      publishArtifact in(Compile, packageDoc) := false
     )
 
 }
