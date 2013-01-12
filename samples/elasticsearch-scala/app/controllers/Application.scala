@@ -10,7 +10,7 @@ import com.github.cleverage.elasticsearch.Elasticsearch.IndexQuery
 object Application extends Controller {
   
   def index = Action {
-    val indexTest = IndexTest("1", "The name")
+    val indexTest = IndexTest("1", "The name", "The category")
     IndexTestHelper.index(indexTest)
     Logger.info("IndexTestHelper.index() : " + indexTest)
 
@@ -23,10 +23,10 @@ object Application extends Controller {
     val gettingIndexTestMore = IndexTestHelper.get("1")
     Logger.info("IndexTestHelper.get() => " + gettingIndexTestMore)
 
-    IndexTestHelper.index(IndexTest("1", "Here is the first name"))
-    IndexTestHelper.index(IndexTest("2", "Then comes the second name"))
-    IndexTestHelper.index(IndexTest("3", "Here is the third name"))
-    IndexTestHelper.index(IndexTest("4", "Finnaly is the fourth name"))
+    IndexTestHelper.index(IndexTest("1", "Here is the first name", "First category"))
+    IndexTestHelper.index(IndexTest("2", "Then comes the second name", "First category"))
+    IndexTestHelper.index(IndexTest("3", "Here is the third name", "Second category"))
+    IndexTestHelper.index(IndexTest("4", "Finnaly is the fourth name", "Second category"))
 
     val indexQuery = IndexQuery[IndexTest]()
       .builder(QueryBuilders.matchQuery("name", "Here"))

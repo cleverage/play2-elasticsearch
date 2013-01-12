@@ -3,6 +3,7 @@ package com.github.cleverage.elasticsearch;
 import com.github.cleverage.elasticsearch.annotations.IndexMapping;
 import com.github.cleverage.elasticsearch.annotations.IndexType;
 import play.Application;
+import play.Configuration;
 import play.Logger;
 
 import java.util.HashMap;
@@ -93,16 +94,20 @@ public class IndexConfig {
 
         this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request");
 
-        this.dropOnShutdown = app.configuration().getBoolean("elasticsearch.index.dropOnShutdown");
+        Boolean dropOnShutdown = app.configuration().getBoolean("elasticsearch.index.dropOnShutdown");
+        if (dropOnShutdown != null) {
+            this.dropOnShutdown = dropOnShutdown;
+        }
 
-        loadMapping();
+        loadMappingFromAnnotations();
+        loadMappingFromConfig();
     }
 
 
     /**
      * Load classes with @IndexType and initialize mapping if present on the @IndexMapping
      */
-    private void loadMapping() {
+    private void loadMappingFromAnnotations() {
 
         Set<String> classes = getClazzs();
 
@@ -123,6 +128,23 @@ public class IndexConfig {
                 }
             } catch (Throwable e) {
                 Logger.error(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Load additional mappings from config entry "elasticsearch.index.mapping"
+     */
+    private void loadMappingFromConfig() {
+        Configuration mappingConfig = application.configuration().getConfig("elasticsearch.index.mappings");
+        if (mappingConfig != null) {
+            Map<String, Object> mappings = mappingConfig.asMap();
+            for (String indexType : mappings.keySet()) {
+                if (mappings.get(indexType) instanceof String) {
+                    indexTypes.put(indexType, (String)mappings.get(indexType));
+                } else {
+                    Logger.warn("Incorrect value in elasticsearch.index.mappings");
+                }
             }
         }
     }

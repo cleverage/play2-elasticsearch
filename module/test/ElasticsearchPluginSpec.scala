@@ -31,6 +31,11 @@ class ElasticsearchPluginSpec extends Specification with ElasticsearchTestHelper
         IndexService.existsIndex must beFalse
       }
     }
+    "create configured mapping" in {
+      running(esFakeApp) {
+        IndexService.getMapping("testType") must beEqualTo(testMapping.get("testType"))
+      }
+    }
   }
 
 }

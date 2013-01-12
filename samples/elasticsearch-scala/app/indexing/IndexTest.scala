@@ -5,7 +5,7 @@ import com.github.cleverage.elasticsearch.Elasticsearch
 import com.github.cleverage.elasticsearch.Elasticsearch.IndexableHelper
 
 
-case class IndexTest(id: String, name: String) extends Elasticsearch.Indexable
+case class IndexTest(id: String, name: String, category: String) extends Elasticsearch.Indexable
 
 object IndexTestHelper extends IndexableHelper[IndexTest] {
   import play.api.libs.json._

@@ -17,6 +17,8 @@ import org.elasticsearch.action.percolate.PercolateResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.cluster.ClusterState;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
@@ -247,6 +249,24 @@ public abstract class IndexService {
         Logger.debug("ElasticSearch : Creating Mapping " + indexType + " :  " + indexMapping);
         PutMappingResponse response = IndexClient.client.admin().indices().preparePutMapping(IndexService.INDEX_DEFAULT).setType(indexType).setSource(indexMapping).execute().actionGet();
         return response;
+    }
+
+    /**
+     * Read the Mapping for a type
+     * @param indexType
+     * @return
+     */
+    public static String getMapping(String indexType) {
+        ClusterState state = IndexClient.client.admin().cluster()
+                .prepareState()
+                .setFilterIndices(IndexService.INDEX_DEFAULT)
+                .execute().actionGet().getState();
+        MappingMetaData mappingMetaData = state.getMetaData().index(IndexService.INDEX_DEFAULT).mapping(indexType);
+        if (mappingMetaData != null) {
+            return mappingMetaData.source().toString();
+        } else {
+            return null;
+        }
     }
 
     /**
