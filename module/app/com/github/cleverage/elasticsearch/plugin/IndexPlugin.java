@@ -52,6 +52,10 @@ public class IndexPlugin extends Plugin
     @Override
     public void onStop()
     {
+        if (IndexConfig.dropOnShutdown && IndexService.existsIndex()) {
+            IndexService.deleteIndex();
+        }
+
         if(client!= null) {
             try {
                 client.stop();

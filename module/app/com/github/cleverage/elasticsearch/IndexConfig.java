@@ -71,6 +71,12 @@ public class IndexConfig {
     public static Map<String, String> indexTypes = new HashMap<String, String>();
 
     /**
+     * Drop the index on application shutdown
+     * Should probably be used only in tests
+     */
+    public static boolean dropOnShutdown = false;
+
+    /**
      * Play application
      */
     public static Application application;
@@ -86,6 +92,8 @@ public class IndexConfig {
         this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
 
         this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request");
+
+        this.dropOnShutdown = app.configuration().getBoolean("elasticsearch.index.dropOnShutdown");
 
         loadMapping();
     }
