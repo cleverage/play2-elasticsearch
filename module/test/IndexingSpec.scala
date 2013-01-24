@@ -1,4 +1,5 @@
 import com.github.cleverage.elasticsearch.Elasticsearch._
+import org.elasticsearch.index.query.QueryBuilders
 import org.specs2.mutable.Specification
 import play.api.libs.json.{Json, Writes, Reads}
 import play.api.test.Helpers._
@@ -14,9 +15,9 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   case class SampleIndexable (id: String, title: String, count: Long) extends Indexable
 
   /**
-   * Sample IndexableHelper for managing SampleIndexable objects
+   * Sample IndexableManager for managing SampleIndexable objects
    */
-  object SampleIndexableHelper extends IndexableHelper[SampleIndexable]{
+  object SampleIndexableManager extends IndexableManager[SampleIndexable]{
     val indexType = "sampleIndexable"
     val reads = Json.reads[SampleIndexable]
     val writes = Json.writes[SampleIndexable]
@@ -24,10 +25,10 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
 
   sequential
 
-  "IndexableHelper" should {
+  "IndexableManager" should {
     "not retrieve anything if nothing is indexed" in {
       running(esFakeApp) {
-        SampleIndexableHelper.get("1") must beNone
+        SampleIndexableManager.get("1") must beNone
       }
     }
   }
@@ -36,9 +37,34 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
     "be indexable and retrievable" in {
       running(esFakeApp) {
         val expected = SampleIndexable("1", "the title", 5)
-        SampleIndexableHelper.index(expected)
-        val result = SampleIndexableHelper.get(expected.id)
+        SampleIndexableManager.index(expected)
+        val result = SampleIndexableManager.get(expected.id)
         result must beSome.which(_.equals(expected))
+      }
+    }
+  }
+
+  "Indexable objects" should {
+    "be returned by a query" in {
+      running(esFakeApp) {
+        val first = SampleIndexable("1", "blabla is first title", 5)
+        val second = SampleIndexable("2", "blabla is second title", 10)
+        val third = SampleIndexable("3", "here is third title", 5)
+        SampleIndexableManager.index(List(first, second, third))
+        SampleIndexableManager.refresh()
+        val titleQuery = IndexQuery[SampleIndexable]()
+          .builder(QueryBuilders.wildcardQuery("title", "blabla"))
+          .size(10)
+        val titleResults = SampleIndexableManager.search(titleQuery)
+        titleResults.totalCount must beEqualTo(2)
+        titleResults.results must containAllOf(List(first, second))
+
+        val countQuery = IndexQuery[SampleIndexable]()
+          .builder(QueryBuilders.termQuery("count", 5))
+          .size(10)
+        val countResults = SampleIndexableManager.search(countQuery)
+        countResults.totalCount must beEqualTo(2)
+        countResults.results must containAllOf(List(first, third))
       }
     }
   }

@@ -9,6 +9,7 @@ trait ElasticsearchTestHelper {
   testMapping.put("testType", "{\"testType\":{\"properties\":{\"name\":{\"type\":\"string\",\"analyzer\":\"keyword\"}}}}")
 
   val elasticsearchAdditionalConf = Map(
+    "elasticsearch.local" -> true,
     "elasticsearch.cluster.name" -> "test-cluster",
     "elasticsearch.index.name" -> "test-index",
     "elasticsearch.index.dropOnShutdown" -> true,

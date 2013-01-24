@@ -19,7 +19,7 @@ object Elasticsearch {
     def id: String
   }
 
-  trait IndexableHelper[T <: Indexable] {
+  trait IndexableManager[T <: Indexable] {
     val indexType: String
     lazy val indexPath = new IndexQueryPath(indexType)
 
@@ -33,8 +33,10 @@ object Elasticsearch {
       }
     }
     def index(t: T): IndexResponse = IndexService.index(indexPath, t.id, Json.toJson(t)(writes).toString())
+    def index(tSeq: Seq[T]): Seq[IndexResponse] = tSeq.map(t => IndexService.index(indexPath, t.id, Json.toJson(t)(writes).toString()))
     def delete(id: String): DeleteResponse = IndexService.delete(indexPath, id)
     def search(indexQuery: IndexQuery[T]): IndexResults[T] = indexQuery.fetch(indexPath, reads)
+    def refresh() = IndexService.refresh()
 
   }
 
