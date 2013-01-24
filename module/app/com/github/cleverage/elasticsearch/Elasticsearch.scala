@@ -65,9 +65,7 @@ object Elasticsearch {
       sortBuilders.foreach { request.addSort(_) }
       from.foreach { request.setFrom(_) }
       size.foreach { request.setSize(_) }
-      Logger.info("debug : " + request.toString)
       val response = request.execute().actionGet()
-      Logger.info("response : " + response.toString)
       IndexResults(this, response, reads)
     }
   }
