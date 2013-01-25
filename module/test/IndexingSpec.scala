@@ -1,5 +1,5 @@
 import com.github.cleverage.elasticsearch.Elasticsearch._
-import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
 import org.specs2.mutable.Specification
 import play.api.libs.json.{Json, Writes, Reads}
 import play.api.test.Helpers._
@@ -12,7 +12,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   /**
    * Sample case class representing an Indexable class
    */
-  case class SampleIndexable (id: String, title: String, count: Long) extends Indexable
+  case class SampleIndexable (id: String, title: String, count: Long, category: String) extends Indexable
 
   /**
    * Sample IndexableManager for managing SampleIndexable objects
@@ -23,7 +23,13 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
     val writes = Json.writes[SampleIndexable]
   }
 
+  val first = SampleIndexable("1", "blabla is first title", 5, "foo category")
+  val second = SampleIndexable("2", "blabla is second title", 10, "bar category")
+  val third = SampleIndexable("3", "here is third title", 5, "bar category")
+
   sequential
+
+  def search(qb: QueryBuilder) = SampleIndexableManager.search(SampleIndexableManager.query.builder(qb).size(10))
 
   "IndexableManager" should {
     "not retrieve anything if nothing is indexed" in {
@@ -36,7 +42,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   "Indexable objects" should {
     "be indexable and retrievable" in {
       running(esFakeApp) {
-        val expected = SampleIndexable("1", "the title", 5)
+        val expected = SampleIndexable("1", "the title", 5, "foo category")
         SampleIndexableManager.index(expected)
         val result = SampleIndexableManager.get(expected.id)
         result must beSome.which(_.equals(expected))
@@ -47,25 +53,47 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   "Indexable objects" should {
     "be returned by a query" in {
       running(esFakeApp) {
-        val first = SampleIndexable("1", "blabla is first title", 5)
-        val second = SampleIndexable("2", "blabla is second title", 10)
-        val third = SampleIndexable("3", "here is third title", 5)
         SampleIndexableManager.index(List(first, second, third))
         SampleIndexableManager.refresh()
-        val titleQuery = IndexQuery[SampleIndexable]()
-          .builder(QueryBuilders.wildcardQuery("title", "blabla"))
-          .size(10)
-        val titleResults = SampleIndexableManager.search(titleQuery)
+        val titleResults = search(QueryBuilders.wildcardQuery("title", "blabla"))
         titleResults.totalCount must beEqualTo(2)
         titleResults.results must containAllOf(List(first, second))
 
-        val countQuery = IndexQuery[SampleIndexable]()
-          .builder(QueryBuilders.termQuery("count", 5))
-          .size(10)
-        val countResults = SampleIndexableManager.search(countQuery)
+        val countResults = search(QueryBuilders.termQuery("count", 5))
         countResults.totalCount must beEqualTo(2)
         countResults.results must containAllOf(List(first, third))
       }
     }
   }
+
+  "String field without keyword mapping" should {
+    "be tokenized" in {
+      running(esFakeApp) {
+        SampleIndexableManager.index(List(first, second, third))
+        SampleIndexableManager.refresh()
+        val categoryResults = search(QueryBuilders.termQuery("category", "bar category"))
+        categoryResults.totalCount must beEqualTo(0)
+
+        val tokenCategoryResults = search(QueryBuilders.termQuery("category", "bar"))
+        tokenCategoryResults.totalCount must beEqualTo(2)
+        tokenCategoryResults.results must containAllOf(List(second, third))
+      }
+    }
+  }
+
+  "String field with keyword mapping" should {
+    "not be tokenized" in {
+      running(esFakeAppWithMapping) {
+        SampleIndexableManager.index(List(first, second, third))
+        SampleIndexableManager.refresh()
+        val categoryResults = search(QueryBuilders.termQuery("category", "bar category"))
+        categoryResults.totalCount must beEqualTo(2)
+        categoryResults.results must containAllOf(List(second, third))
+
+        val tokenCategoryResults = search(QueryBuilders.termQuery("category", "bar"))
+        tokenCategoryResults.totalCount must beEqualTo(0)
+      }
+    }
+  }
+
 }

@@ -1,3 +1,4 @@
+import scala.collection.JavaConverters._
 import java.util
 import play.api.test.FakeApplication
 
@@ -16,12 +17,32 @@ trait ElasticsearchTestHelper {
     "elasticsearch.index.mappings" -> testMapping
   )
 
+  val mappingConf = Map("elasticsearch.index.mappings" ->
+    Map("sampleIndexable" -> """
+          {
+            "sampleIndexable": {
+              "properties": {
+                "category": {
+                  "type":"string",
+                  "analyzer":"keyword"
+                }
+              }
+            }
+          }
+    """).asJava
+  )
+
   val additionalPlugins = Seq(
     "com.github.cleverage.elasticsearch.plugin.IndexPlugin"
   )
 
   def esFakeApp = FakeApplication(
     additionalConfiguration = elasticsearchAdditionalConf,
-    additionalPlugins = additionalPlugins)
+    additionalPlugins = additionalPlugins
+  )
 
+  def esFakeAppWithMapping = FakeApplication(
+    additionalConfiguration = elasticsearchAdditionalConf ++ mappingConf,
+    additionalPlugins = additionalPlugins
+  )
 }

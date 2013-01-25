@@ -37,6 +37,7 @@ object Elasticsearch {
     def delete(id: String): DeleteResponse = IndexService.delete(indexPath, id)
     def search(indexQuery: IndexQuery[T]): IndexResults[T] = indexQuery.fetch(indexPath, reads)
     def refresh() = IndexService.refresh()
+    def query: IndexQuery[T] = IndexQuery[T]()
 
   }
 
