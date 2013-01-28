@@ -47,16 +47,16 @@ object Elasticsearch {
     val sortBuilders: List[SortBuilder] = Nil,
     val from: Option[Int] = None,
     val size: Option[Int] = None,
-    val explain: Boolean = false,
+    val explain: Option[Boolean] = None,
     val noField: Boolean = false
   ) {
-    def builder(builder: QueryBuilder): IndexQuery[T] = copy(builder = builder)
+    def withBuilder(builder: QueryBuilder): IndexQuery[T] = copy(builder = builder)
     def addFacet(facet: AbstractFacetBuilder): IndexQuery[T] = copy(facetBuilders = facet :: facetBuilders)
     def addSort(sort: SortBuilder): IndexQuery[T] = copy(sortBuilders = sort :: sortBuilders)
-    def from(from: Int): IndexQuery[T] = copy(from = Some(from))
-    def size(size: Int): IndexQuery[T] = copy(size = Some(size))
-    def explain(explain: Boolean): IndexQuery[T] = copy(explain = explain)
-    def noField(noField: Boolean): IndexQuery[T] = copy(noField = noField)
+    def withFrom(from: Int): IndexQuery[T] = copy(from = Some(from))
+    def withSize(size: Int): IndexQuery[T] = copy(size = Some(size))
+    def withExplain(explain: Boolean): IndexQuery[T] = copy(explain = Some(explain))
+    def withNoField(noField: Boolean): IndexQuery[T] = copy(noField = noField)
     def fetch(indexPath: IndexQueryPath, reads: Reads[T]): IndexResults[T] = {
       val request = IndexClient.client.prepareSearch(indexPath.index)
         .setTypes(indexPath.`type`)
@@ -66,6 +66,8 @@ object Elasticsearch {
       sortBuilders.foreach { request.addSort(_) }
       from.foreach { request.setFrom(_) }
       size.foreach { request.setSize(_) }
+      explain.foreach { request.setExplain(_) }
+      if (noField) { request.setNoFields() }
       val response = request.execute().actionGet()
       IndexResults(this, response, reads)
     }

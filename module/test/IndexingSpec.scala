@@ -1,3 +1,4 @@
+import collection.JavaConverters._
 import com.github.cleverage.elasticsearch.Elasticsearch._
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
 import org.specs2.mutable.Specification
@@ -27,9 +28,25 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   val second = SampleIndexable("2", "blabla is second title", 10, "bar category")
   val third = SampleIndexable("3", "here is third title", 5, "bar category")
 
+  val sampleIndexableMappingConf = Map("elasticsearch.index.mappings" ->
+    Map("sampleIndexable" ->
+      """
+        |{
+        |  "sampleIndexable": {
+        |    "properties": {
+        |      "category": {
+        |        "type":"string",
+        |        "analyzer":"keyword"
+        |      }
+        |    }
+        |  }
+        |}
+      """.stripMargin).asJava
+  )
+
   sequential
 
-  def search(qb: QueryBuilder) = SampleIndexableManager.search(SampleIndexableManager.query.builder(qb).size(10))
+  def search(qb: QueryBuilder) = SampleIndexableManager.search(SampleIndexableManager.query.withBuilder(qb).withSize(10))
 
   "IndexableManager" should {
     "not retrieve anything if nothing is indexed" in {
@@ -83,7 +100,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
 
   "String field with keyword mapping" should {
     "not be tokenized" in {
-      running(esFakeAppWithMapping) {
+      running(esFakeApp(sampleIndexableMappingConf)) {
         SampleIndexableManager.index(List(first, second, third))
         SampleIndexableManager.refresh()
         val categoryResults = search(QueryBuilders.termQuery("category", "bar category"))

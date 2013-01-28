@@ -29,7 +29,7 @@ object Application extends Controller {
     IndexTestManager.index(IndexTest("4", "Finnaly is the fourth name", "Second category"))
 
     val indexQuery = IndexQuery[IndexTest]()
-      .builder(QueryBuilders.matchQuery("name", "Here"))
+      .withBuilder(QueryBuilders.matchQuery("name", "Here"))
     val results: IndexResults[IndexTest] = IndexTestManager.search(indexQuery)
 
     Logger.info("IndexTestManager.search()" + results);
