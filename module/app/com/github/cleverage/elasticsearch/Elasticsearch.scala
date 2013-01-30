@@ -15,23 +15,60 @@ import org.elasticsearch.action.search.{SearchResponse, SearchType}
  */
 object Elasticsearch {
 
+  /**
+   * Base trait for indexable classes
+   */
   trait Indexable {
+    /**
+     * Id used to store/retrieve the document in Elasticsearch
+     * @return
+     */
     def id: String
   }
 
+  /**
+   * Base trait for Manager objects
+   * It provides some high-level utilities to index/retrieve/search objects
+   * @tparam T The Indexable Type on which the manager applies
+   */
   trait IndexableManager[T <: Indexable] {
+    /**
+     * Elasticsearch type used to index objects
+     */
     val indexType: String
-    lazy val indexPath = new IndexQueryPath(indexType)
 
+    /**
+     * Elasticsearch index used to index objects
+     */
+    val index: String = IndexService.INDEX_DEFAULT;
+
+    /**
+     * IndexQueryPath used to index objects
+     */
+    lazy val indexPath = new IndexQueryPath(index, indexType)
+
+    /**
+     * Reads used to convert a Json value to an T instance
+     */
     val reads: Reads[T]
+
+    /**
+     * Writes used to convert a T instance to a Json value
+     */
     val writes: Writes[T]
 
+    /**
+     * Retrieve a T instance from the Elasticsearch index
+     * @param id Id of the object to retrieve
+     * @return the object
+     */
     def get(id: String): Option[T] = {
       val json = Option(IndexService.getAsString(indexPath, id))
       json.map {
         Json.parse(_).as[T](reads)
       }
     }
+
     def index(t: T): IndexResponse = IndexService.index(indexPath, t.id, Json.toJson(t)(writes).toString())
     def index(tSeq: Seq[T]): Seq[IndexResponse] = tSeq.map(t => IndexService.index(indexPath, t.id, Json.toJson(t)(writes).toString()))
     def delete(id: String): DeleteResponse = IndexService.delete(indexPath, id)
@@ -41,6 +78,17 @@ object Elasticsearch {
 
   }
 
+  /**
+   * Query wrapper for scala
+   * @param builder the Elasticsearch QueryBuilder to use
+   * @param facetBuilders the Elasticsearch FacetBuilders to use
+   * @param sortBuilders the Elasticsearch SortBuilders to use
+   * @param from the first element to retrieve
+   * @param size the number of element to retrieve
+   * @param explain flag used to activate explain
+   * @param noField flag used to activate the "noField"
+   * @tparam T Type into which the results will be converted
+   */
   case class IndexQuery[T <: Indexable](
     val builder: QueryBuilder = QueryBuilders.matchAllQuery(),
     val facetBuilders: List[AbstractFacetBuilder] = Nil,
@@ -57,6 +105,13 @@ object Elasticsearch {
     def withSize(size: Int): IndexQuery[T] = copy(size = Some(size))
     def withExplain(explain: Boolean): IndexQuery[T] = copy(explain = Some(explain))
     def withNoField(noField: Boolean): IndexQuery[T] = copy(noField = noField)
+
+    /**
+     * Executes the query
+     * @param indexPath indexPath on which we run the query
+     * @param reads Reads used to convert results back
+     * @return results of the query
+     */
     def fetch(indexPath: IndexQueryPath, reads: Reads[T]): IndexResults[T] = {
       val request = IndexClient.client.prepareSearch(indexPath.index)
         .setTypes(indexPath.`type`)
@@ -73,6 +128,16 @@ object Elasticsearch {
     }
   }
 
+  /**
+   * Results wrapper for scala
+   * @param totalCount the totalHits returned by elasticsearch
+   * @param pageSize the pageSize (used to paginate results)
+   * @param pageCurrent the current page
+   * @param pageNb the number of pages
+   * @param results List of results converted back to Indexable instances
+   * @param facets List of facets
+   * @tparam T Type into which the results are converted
+   */
   case class IndexResults[T <: Indexable](
     totalCount: Long,
     pageSize: Long,
@@ -82,6 +147,14 @@ object Elasticsearch {
     facets: Facets)
 
   object IndexResults {
+    /**
+     * Construct an IndexResults
+     * @param indexQuery the indexQuery used to request Elasticsearch
+     * @param searchResponse the raw Elasticsearch response
+     * @param reads Reads used to convert the results back to Indexable instances
+     * @tparam T Type into which the results are converted
+     * @return constructed IndexResults
+     */
     def apply[T <: Indexable](indexQuery: IndexQuery[T], searchResponse: SearchResponse, reads: Reads[T]): IndexResults[T] = {
       val totalCount: Long = searchResponse.hits().totalHits()
       val pageSize: Long =
@@ -93,6 +166,7 @@ object Elasticsearch {
           indexQuery.from.fold (1L){ f => ((f / pageSize) + 1) }
         },
         pageNb = if (pageSize == 0) 1 else math.round(math.ceil(totalCount / pageSize)),
+        // Converting Json hits to Indexable entities
         results = searchResponse.hits().asScala.toList.map {
           h => Json.parse(h.getSourceAsString).as[T](reads)
         },
