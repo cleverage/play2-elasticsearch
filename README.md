@@ -12,6 +12,7 @@ This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.19.10) in
  * 0.4.2 -> upgrade play2.0.4 + allow index settings in conf 
 
  * 0.5.0 -> compatibility with play 2.1-RC1
+ * 0.5.1 -> upgrade to ES 0.20.4 - works correctly with play 2.1-RC3
 
 ## Installing
 
@@ -21,7 +22,7 @@ The dependency declaration is
 ```
 or 
 ```
-"com.github.cleverage" %% "elasticsearch" % "0.5.0"
+"com.github.cleverage" %% "elasticsearch" % "0.5.1"
 ```
 
 The resolver repository is 
@@ -54,7 +55,7 @@ object ApplicationBuild extends Build {
 }
 ```
 
-or for play 2.1-RC1 : 
+or for play 2.1-RC3 : 
 ```
 import sbt._
 import Keys._
@@ -67,7 +68,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "com.github.cleverage" %% "elasticsearch" % "0.5.0"
+      "com.github.cleverage" %% "elasticsearch" % "0.5.1"
     )
 
     val main = play.Project(appName, appVersion, appDependencies).settings(

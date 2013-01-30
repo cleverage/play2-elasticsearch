@@ -5,12 +5,13 @@ import play.Project._
 object ApplicationBuild extends Build {
 
     val appName         = "elasticsearch"
-    val appVersion      = "0.5.0"
+    val appVersion      = "0.5.1"
 
     val appDependencies = Seq(
       javaCore,
       // Add your project dependencies here
-      "org.elasticsearch" % "elasticsearch" % "0.19.12"
+      "org.elasticsearch" % "elasticsearch" % "0.20.4",
+      "com.spatial4j" % "spatial4j" % "0.3"
     )
 
     val main =  play.Project(appName, appVersion, appDependencies).settings(
