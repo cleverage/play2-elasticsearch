@@ -92,12 +92,9 @@ public class IndexConfig {
         this.indexSettings = app.configuration().getString("elasticsearch.index.settings");
         this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
 
-        this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request");
+        this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request", false);
 
-        Boolean dropOnShutdown = app.configuration().getBoolean("elasticsearch.index.dropOnShutdown");
-        if (dropOnShutdown != null) {
-            this.dropOnShutdown = dropOnShutdown;
-        }
+        this.dropOnShutdown = app.configuration().getBoolean("elasticsearch.index.dropOnShutdown", false);
 
         loadMappingFromAnnotations();
         loadMappingFromConfig();
