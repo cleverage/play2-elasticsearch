@@ -1,10 +1,9 @@
 package indexing
 
-import com.github.cleverage.elasticsearch.Elasticsearch
-import com.github.cleverage.elasticsearch.Elasticsearch.IndexableManager
+import com.github.cleverage.elasticsearch.ScalaHelpers._
 
 
-case class IndexTest(id: String, name: String, category: String) extends Elasticsearch.Indexable
+case class IndexTest(id: String, name: String, category: String) extends Indexable
 
 object IndexTestManager extends IndexableManager[IndexTest] {
   import play.api.libs.json._

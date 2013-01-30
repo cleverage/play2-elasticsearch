@@ -2,7 +2,6 @@ package com.github.cleverage.elasticsearch
 
 import collection.JavaConverters._
 import play.api.libs.json.{Json, Writes, Reads}
-import play.api.Logger
 import org.elasticsearch.search.facet.{AbstractFacetBuilder, Facets}
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.index.IndexResponse
@@ -13,7 +12,7 @@ import org.elasticsearch.action.search.{SearchResponse, SearchType}
 /**
  * Scala helpers
  */
-object Elasticsearch {
+object ScalaHelpers {
 
   /**
    * Base trait for indexable classes
@@ -49,11 +48,17 @@ object Elasticsearch {
 
     /**
      * Reads used to convert a Json value to an T instance
+     * You can use the standard macro to generate a default one :
+     * <pre>Json.reads[MyIndexableClass]<pre>
+     * or define a custom one if needed
      */
     val reads: Reads[T]
 
     /**
      * Writes used to convert a T instance to a Json value
+     * Use the standard macro to generate a default one :
+     * <pre>Json.writes[MyIndexableClass]<pre>
+     * or define a custom one if needed
      */
     val writes: Writes[T]
 
@@ -69,11 +74,45 @@ object Elasticsearch {
       }
     }
 
+    /**
+     * Index an object
+     * @param t the object to index
+     * @return the IndexResponse from Elasticsearch
+     */
     def index(t: T): IndexResponse = IndexService.index(indexPath, t.id, Json.toJson(t)(writes).toString())
-    def index(tSeq: Seq[T]): Seq[IndexResponse] = tSeq.map(t => IndexService.index(indexPath, t.id, Json.toJson(t)(writes).toString()))
+
+    /**
+     * Index multiple objects
+     * @param tSeq a Sequence of objects to index
+     * @return a Sequence of IndexResponse from Elasticsearch
+     */
+    def index(tSeq: Seq[T]): Seq[IndexResponse] = tSeq.map(t =>
+      IndexService.index(indexPath, t.id, Json.toJson(t)(writes).toString())
+    )
+
+    /**
+     * Delete an object from the elasticsearch index
+     * @param id Id of the object to delete
+     * @return the DeleteResponse from Elasticsearch
+     */
     def delete(id: String): DeleteResponse = IndexService.delete(indexPath, id)
+
+    /**
+     * Executes a query on the Elasticsearch index
+     * @param indexQuery the IndexQuery to execute
+     * @return an IndexResults containing the results and associated metadata
+     */
     def search(indexQuery: IndexQuery[T]): IndexResults[T] = indexQuery.fetch(indexPath, reads)
+
+    /**
+     * Refresh the index
+     */
     def refresh() = IndexService.refresh()
+
+    /**
+     * Initialize a query for the correct object type
+     * @return a default query
+     */
     def query: IndexQuery[T] = IndexQuery[T]()
 
   }
@@ -159,12 +198,12 @@ object Elasticsearch {
       val totalCount: Long = searchResponse.hits().totalHits()
       val pageSize: Long =
         indexQuery.size.fold(searchResponse.hits().hits().length.toLong)(_.toLong)
+      val pageCurrent: Long = indexQuery.from.fold (1L){ f => ((f / pageSize) + 1) }
+
       new IndexResults[T](
         totalCount = totalCount,
         pageSize = pageSize,
-        pageCurrent = {
-          indexQuery.from.fold (1L){ f => ((f / pageSize) + 1) }
-        },
+        pageCurrent = pageCurrent,
         pageNb = if (pageSize == 0) 1 else math.round(math.ceil(totalCount / pageSize)),
         // Converting Json hits to Indexable entities
         results = searchResponse.hits().asScala.toList.map {

@@ -4,8 +4,7 @@ import play.api._
 import play.api.mvc._
 import indexing.{IndexTestManager, IndexTest}
 import org.elasticsearch.index.query.QueryBuilders
-import com.github.cleverage.elasticsearch.Elasticsearch.IndexResults
-import com.github.cleverage.elasticsearch.Elasticsearch.IndexQuery
+import com.github.cleverage.elasticsearch.ScalaHelpers._
 
 object Application extends Controller {
   

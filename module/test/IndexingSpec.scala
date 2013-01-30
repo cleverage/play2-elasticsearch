@@ -1,5 +1,5 @@
 import collection.JavaConverters._
-import com.github.cleverage.elasticsearch.Elasticsearch._
+import com.github.cleverage.elasticsearch.ScalaHelpers._
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
 import org.specs2.mutable.Specification
 import play.api.libs.json.{Json, Writes, Reads}
