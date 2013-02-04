@@ -2,17 +2,16 @@ package com.github.cleverage.elasticsearch;
 
 import com.github.cleverage.elasticsearch.annotations.IndexMapping;
 import com.github.cleverage.elasticsearch.annotations.IndexType;
+import org.reflections.Reflections;
 import play.Application;
 import play.Configuration;
 import play.Logger;
+import play.libs.ReflectionsCache;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import play.libs.ReflectionsCache;
-import org.reflections.Reflections;
 
 
 
@@ -35,6 +34,12 @@ public class IndexConfig {
      *  Mode local or network
      */
     public static Boolean local = false;
+
+    /**
+     * elasticsearch.local.config = configuration file load on local mode.
+     * eg : conf/elasticsearch.yml
+     */
+    public static String localConfig = null;
 
     /**
      *  elasticsearch.client = list of client separate by commas ex : 192.168.0.1:9300,192.168.0.2:9300
@@ -86,6 +91,7 @@ public class IndexConfig {
         this.application = app;
         this.client = app.configuration().getString("elasticsearch.client");
         this.local = app.configuration().getBoolean("elasticsearch.local");
+        this.localConfig = app.configuration().getString("elasticsearch.config.resource");
         this.clusterName = app.configuration().getString("elasticsearch.cluster.name");
 
         this.indexName = app.configuration().getString("elasticsearch.index.name");
