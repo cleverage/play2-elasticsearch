@@ -38,11 +38,12 @@ object ScalaHelpers {
 
     /**
      * Elasticsearch index used to index objects
+     * Default is elasticsearch.index.name config value. Can be overriden
      */
     val index: String = IndexService.INDEX_DEFAULT;
 
     /**
-     * IndexQueryPath used to index objects
+     * IndexQueryPath used to index objects built from index and indexType
      */
     lazy val indexPath = new IndexQueryPath(index, indexType)
 
