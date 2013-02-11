@@ -73,7 +73,7 @@ public abstract class IndexService {
      */
     public static IndexResponse index(IndexQueryPath indexPath, String id, Index indexable) {
 
-        IndexResponse indexResponse = IndexClient.client.prepareIndex(INDEX_DEFAULT, indexPath.type, id)
+        IndexResponse indexResponse = IndexClient.client.prepareIndex(indexPath.index, indexPath.type, id)
                 .setSource(indexable.toIndex())
                 .execute()
                 .actionGet();
@@ -91,13 +91,12 @@ public abstract class IndexService {
      * @return
      */
     public static IndexResponse index(IndexQueryPath indexPath, String id, String json) {
-        IndexResponse indexResponse = IndexClient.client.prepareIndex(INDEX_DEFAULT, indexPath.type, id)
+        IndexResponse indexResponse = IndexClient.client.prepareIndex(indexPath.index, indexPath.type, id)
                 .setSource(json)
                 .execute()
                 .actionGet();
         return indexResponse;
     }
-
 
     /**
      * Delete element in index
