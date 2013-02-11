@@ -20,6 +20,11 @@ class ElasticsearchPluginSpec extends Specification with ElasticsearchTestHelper
         IndexClient.node must not beNull
       }
     }
+    "load custom settings on local node " in {
+      running(esFakeApp) {
+        IndexClient.node.settings().get("cluster.name") must beEqualTo("play2-elasticsearch")
+      }
+    }
     "create the index on start" in {
       running(esFakeApp) {
         IndexService.existsIndex must beTrue

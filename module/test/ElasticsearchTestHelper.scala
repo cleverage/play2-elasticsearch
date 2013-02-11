@@ -11,6 +11,7 @@ trait ElasticsearchTestHelper {
 
   val elasticsearchAdditionalConf = Map(
     "elasticsearch.local" -> true,
+    "elasticsearch.config.resource" -> "elasticsearch.yml",
     "elasticsearch.cluster.name" -> "test-cluster",
     "elasticsearch.index.name" -> "test-index",
     "elasticsearch.index.dropOnShutdown" -> true,
