@@ -4,8 +4,8 @@ import play.Project._
 
 object ApplicationBuild extends Build {
 
-    val appName         = "elasticsearch"
-    val appVersion      = "0.5.2"
+    val appName         = "play2-elasticsearch"
+    val appVersion      = "0.5.3"
 
     val appDependencies = Seq(
       javaCore,
@@ -15,7 +15,7 @@ object ApplicationBuild extends Build {
     )
 
     val main =  play.Project(appName, appVersion, appDependencies).settings(
-      organization := "com.github.cleverage",
+      organization := "com.cleverage",
       resolvers += "oss sonytape (release)" at "http://oss.sonatype.org/content/repositories/releases/",
       publishArtifact in(Compile, packageDoc) := false
     )

@@ -1,38 +1,61 @@
 # play2-elasticsearch
 ===================
 
-This module provides [Elasticsearch](http://www.elasticsearch.org/)(v0.20.4) in a play2 application
+This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.20.4) integration in a play2 application
 
 ## Versions
- * 0.1 -> init version
+ * 0.1 -> initial version
  * 0.2 -> Percolators support
- * 0.3 -> IndexResult : add pagination data
+ * 0.3 -> IndexResult : adding pagination data
  * 0.4 -> upgrade ES to 0.19.10
- * 0.4.1 -> allow advanced query ( with hightlight, .... ) 
+ * 0.4.1 -> allow advanced query ( with highlight, .... ) 
  * 0.4.2 -> upgrade play2.0.4 + allow index settings in conf 
 
  * 0.5.0 -> compatibility with play 2.1-RC1
  * 0.5.1 -> upgrade to ES 0.20.4 - works correctly with play 2.1-RC3
  * 0.5.2 -> upgrade to play 2.1.0 - includes scala helpers
+ * 0.5.3 -> moving artifact's organization from "com.github.cleverage / elasticsearch" to "com.cleverage / play2-elasticsearch"
 
-## Installing
+## Install
 
-The dependency declaration is
+The dependency declaration is :
+```
+"com.cleverage" %% "play2-elasticsearch" % "0.5.3"
+```
+or, for play 2.0 :
 ```
 "com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.2"
 ```
-or 
-```
-"com.github.cleverage" %% "elasticsearch" % "0.5.2"
-```
 
-The resolver repository is 
-
+The resolver repository is for now :
 ```
  resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
 ```
 
-So the Build.scala looks like 
+So the Build.scala should look like :
+```
+import sbt._
+import Keys._
+import play.Project._
+
+object ApplicationBuild extends Build {
+
+    val appName         = "elasticsearch-sample"
+    val appVersion      = "1.0-SNAPSHOT"
+
+    val appDependencies = Seq(
+      // Add your project dependencies here,
+      "com.cleverage" %% "play2-elasticsearch" % "0.5.3"
+    )
+
+    val main = play.Project(appName, appVersion, appDependencies).settings(
+      // Add your own project settings here      
+      resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
+    )
+
+}
+```
+or for play 2.0 : 
 ```
 import sbt._
 import Keys._
@@ -52,45 +75,19 @@ object ApplicationBuild extends Build {
       // Add your own project settings here      
       resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
     )
-
-}
-```
-
-or for play 2.1-RC3 : 
-```
-import sbt._
-import Keys._
-import play.Project._
-
-object ApplicationBuild extends Build {
-
-    val appName         = "elasticsearch-sample"
-    val appVersion      = "1.0-SNAPSHOT"
-
-    val appDependencies = Seq(
-      // Add your project dependencies here,
-      "com.github.cleverage" %% "elasticsearch" % "0.5.2"
-    )
-
-    val main = play.Project(appName, appVersion, appDependencies).settings(
-      // Add your own project settings here      
-      resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
-    )
-
 }
 ```
 
 ## Activate the plugin
 
-Play2-elasticsearch requires its plugin to be declared in the conf/play.plugins file.  If this file doesn't exist (it's not created by default when you create a new project),
+The Play2-elasticsearch module requires its plugin class to be declared in the conf/play.plugins file. If this file doesn't exist (it's not created by default when you create a new project),
 just create it in the conf directory first, and then add
-
 ```
 9000:com.github.cleverage.elasticsearch.plugin.IndexPlugin
 ```
 
 ## Configuration
-Add settings in conf/application.conf
+You can configure the module in conf/application.conf (or in any configuration file included in your application.conf)
 
 ```
 ## ElasticSearch Configuration
@@ -98,7 +95,7 @@ Add settings in conf/application.conf
 ## define local mode or not
 elasticsearch.local=false
 
-## list clients
+## Coma-separated list of clients
 elasticsearch.client="192.168.0.46:9300"
 # ex : elasticsearch.client="192.168.0.46:9300,192.168.0.47:9300"
 
@@ -111,14 +108,14 @@ elasticsearch.index.settings="{ analysis: { analyzer: { my_analyzer: { type: \"c
 ## define package or class separate by commas for loading @IndexType and @IndexMapping information
 elasticsearch.index.clazzs="indexing.*"
 
-## show request & result json of search request in log
+## show request & result json of search request in log (it will be logged using Logger.debug())
 elasticsearch.index.show_request=true
 ```
 
 ## Usage
 
 ### HelloWorld
-Create an Class extends "com.github.cleverage.elasticsearch.Index"
+Create a Class extending "com.github.cleverage.elasticsearch.Index"
 
 Example : [IndexTest.java](https://github.com/cleverage/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/IndexTest.java)
 
@@ -142,9 +139,13 @@ Example : https://github.com/cleverage/play2-elasticsearch/blob/master/samples/e
 
 See samples/elasticsearch-java application for more sample
 
-## Javadoc
-http://cleverage.github.com/play2-elasticsearch/javadoc/
+## Scala
+Starting from version 0.5.2, Scala helpers are available (see module com.github.cleverage.elasticsearch.ScalaHelpers).
 
-## Author
-@nboire & @mguillermin
+See samples/elasticsearch-scala application for a basic example
 
+## Authors
+http://twitter.com/nboire & http://twitter.com/mguillermin
+
+## License
+This code is released under the MIT License
