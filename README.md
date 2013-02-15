@@ -10,26 +10,32 @@ This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.2
  * 0.4 -> upgrade ES to 0.19.10
  * 0.4.1 -> allow advanced query ( with highlight, .... ) 
  * 0.4.2 -> upgrade play2.0.4 + allow index settings in conf 
-
+ 
  * 0.5.0 -> compatibility with play 2.1-RC1
  * 0.5.1 -> upgrade to ES 0.20.4 - works correctly with play 2.1-RC3
  * 0.5.2 -> upgrade to play 2.1.0 - includes scala helpers
- * 0.5.3 -> moving artifact's organization from "com.github.cleverage / elasticsearch" to "com.cleverage / play2-elasticsearch"
+ * 0.5.3 -> upgrade to ES 0.20.5 / moving artifact's organization from "com.github.cleverage / elasticsearch" to "com.clever-age / play2-elasticsearch"
 
 ## Install
 
 The dependency declaration is :
 ```
-"com.cleverage" %% "play2-elasticsearch" % "0.5.3"
+"com.clever-age" % "play2-elasticsearch" % "0.5.3"
 ```
 or, for play 2.0 :
 ```
 "com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.2"
 ```
 
-The resolver repository is for now :
+Starting from 0.5.3, the library is published on the sbt community repository. You can use the following resolvers :
 ```
- resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
+resolvers += Resolver.url("play-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns),
+resolvers += Resolver.url("play-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
+```
+
+For older versions, you should use the following resolver :
+```
+resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
 ```
 
 So the Build.scala should look like :
@@ -45,12 +51,13 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "com.cleverage" %% "play2-elasticsearch" % "0.5.3"
+      "com.clever-age" % "play2-elasticsearch" % "0.5.3"
     )
 
     val main = play.Project(appName, appVersion, appDependencies).settings(
       // Add your own project settings here      
-      resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
+      resolvers += Resolver.url("play-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns),
+      resolvers += Resolver.url("play-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
     )
 
 }

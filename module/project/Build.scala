@@ -5,7 +5,7 @@ import play.Project._
 object ApplicationBuild extends Build {
 
     val appName         = "play2-elasticsearch"
-    val appVersion      = "0.5.3"
+    val appVersion      = "0.5-SNAPSHOT"
 
     val appDependencies = Seq(
       javaCore,
@@ -15,9 +15,18 @@ object ApplicationBuild extends Build {
     )
 
     val main =  play.Project(appName, appVersion, appDependencies).settings(
-      organization := "com.cleverage",
+      organization := "com.clever-age",
+      crossPaths := false,
+      publishMavenStyle := false,
       resolvers += "oss sonytape (release)" at "http://oss.sonatype.org/content/repositories/releases/",
-      publishArtifact in(Compile, packageDoc) := false
+      publishTo <<= (version) { version: String =>
+        val scalasbt = "http://repo.scala-sbt.org/scalasbt/"
+        val (name, url) = if (version.contains("-SNAPSHOT"))
+          ("sbt-plugin-snapshots", scalasbt+"sbt-plugin-snapshots")
+        else
+          ("sbt-plubin-releases", scalasbt+"sbt-plugin-releases")
+        Some(Resolver.url(name, new URL(url))(Resolver.ivyStylePatterns))
+      }
     )
 
 }
