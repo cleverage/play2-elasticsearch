@@ -10,7 +10,7 @@ object ApplicationBuild extends Build {
     val appDependencies = Seq(
       javaCore,
       // Add your project dependencies here
-      "org.elasticsearch" % "elasticsearch" % "0.20.4",
+      "org.elasticsearch" % "elasticsearch" % "0.20.5",
       "com.spatial4j" % "spatial4j" % "0.3"
     )
 
