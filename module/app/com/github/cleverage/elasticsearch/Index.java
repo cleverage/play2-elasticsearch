@@ -1,11 +1,13 @@
 package com.github.cleverage.elasticsearch;
 
+import com.github.cleverage.elasticsearch.annotations.IndexType;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.search.SearchHit;
 import play.Logger;
-import com.github.cleverage.elasticsearch.annotations.IndexType;
 
+@JsonIgnoreProperties({"searchHit"})
 public abstract class Index implements Indexable {
 
     public String id;
@@ -15,7 +17,6 @@ public abstract class Index implements Indexable {
      * It's contains information like "_index", "_type", "_id", "_score", "hightlight", ...
      */
     public SearchHit searchHit;
-
 
     /**
      * Return indexName and indexType
