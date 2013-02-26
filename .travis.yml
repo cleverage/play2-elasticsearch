@@ -1,14 +1,15 @@
-language: java
+language: scala
 env:
-  - PLAY_VERSION=2.0.2
+  - PLAY_VERSION=2.1.0
 before_script:
-  - wget http://download.playframework.org/releases/play-${PLAY_VERSION}.zip
+  - wget http://downloads.typesafe.com/play/${PLAY_VERSION}/play-${PLAY_VERSION}.zip
   - unzip -q play-${PLAY_VERSION}.zip
 script:
-  - cd samples/elasticsearch-java
-  - ../../play-${PLAY_VERSION}/play test
+  - cd module
+  - ../play-${PLAY_VERSION}/play test
 notifications:
   # Email notifications are disabled to not annoy anybody.
   # See http://about.travis-ci.org/docs/user/build-configuration/ to learn more
   # about configuring notification recipients and more.
-  email: false
+  email: 
+    - mguillermin@clever-age.com

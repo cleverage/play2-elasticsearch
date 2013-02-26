@@ -44,18 +44,13 @@ public class IndexClient {
         if (this.isLocalMode()) {
             Logger.info("ElasticSearch : Starting in Local Mode");
 
-            String pathData = "data";
-            if(IndexConfig.application.isDev()) {
-                pathData += "-dev";
+            // load settings on local mode
+            if(IndexConfig.localConfig != null) {
+                Logger.info("Elasticsearch : load settings from " + IndexConfig.localConfig);
+                settings.loadFromClasspath(IndexConfig.localConfig);
             }
-            if(IndexConfig.application.isProd()) {
-                pathData += "-prod";
-            }
-            if(IndexConfig.application.isTest()) {
-                pathData += "-test";
-            }
-            settings.put("path.data", pathData);
             settings.build();
+            Logger.info("Elasticsearch : settings  " + settings.internalMap().toString());
 
             NodeBuilder nb = nodeBuilder().settings(settings).local(true).client(false).data(true);
             node = nb.node();

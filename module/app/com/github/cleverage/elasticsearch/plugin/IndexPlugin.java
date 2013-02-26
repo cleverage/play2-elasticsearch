@@ -3,6 +3,7 @@ package com.github.cleverage.elasticsearch.plugin;
 import com.github.cleverage.elasticsearch.IndexClient;
 import com.github.cleverage.elasticsearch.IndexConfig;
 import com.github.cleverage.elasticsearch.IndexService;
+import org.elasticsearch.client.transport.NoNodeAvailableException;
 import play.Application;
 import play.Logger;
 import play.Plugin;
@@ -33,25 +34,37 @@ public class IndexPlugin extends Plugin
         try {
             client.start();
         } catch (Exception e) {
-            e.printStackTrace();
-            Logger.error("ElasticSearch : Error when start elasticSearch Client ",e);
+            Logger.error("ElasticSearch : Error when starting ElasticSearch Client ",e);
         }
 
-        // Create Index and Mapping if not Exists
-        if (!IndexService.existsIndex()) {
-            Logger.debug("ElasticSearch : creating index " + IndexService.INDEX_DEFAULT);
-            IndexService.createIndex();
+        // We catch these exceptions to allow application to start even if the module start fails
+        try {
+            // Create Index and Mapping if not Exists
+            if (!IndexService.existsIndex()) {
+                Logger.debug("ElasticSearch : creating index " + IndexService.INDEX_DEFAULT);
+                IndexService.createIndex();
 
-            // Prepare Index ( define mapping if present )
-            IndexService.prepareIndex();
+                // Prepare Index ( define mapping if present )
+                IndexService.prepareIndex();
+            }
+            Logger.info("ElasticSearch : Plugin has started");
+
+        } catch (NoNodeAvailableException e) {
+            Logger.error("ElasticSearch : No ElasticSearch node is available. Please check that your configuration is " +
+                    "correct, that you ES server is up and reachable from the network. Index has not been created and prepared.", e);
+        } catch (Exception e) {
+            Logger.error("ElasticSearch : An unexpected exception has occurred during index preparation. Index has not been created and prepared.", e);
         }
 
-        Logger.info("ElasticSearch : Plugin has started");
     }
 
     @Override
     public void onStop()
     {
+        if (IndexConfig.dropOnShutdown && IndexService.existsIndex()) {
+            IndexService.deleteIndex();
+        }
+
         if(client!= null) {
             try {
                 client.stop();

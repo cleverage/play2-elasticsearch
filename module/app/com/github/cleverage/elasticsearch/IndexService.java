@@ -2,8 +2,8 @@ package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.IndicesExistsRequestBuilder;
-import org.elasticsearch.action.admin.indices.exists.IndicesExistsResponse;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
+import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
@@ -17,6 +17,8 @@ import org.elasticsearch.action.percolate.PercolateResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.cluster.ClusterState;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
@@ -71,13 +73,28 @@ public abstract class IndexService {
      */
     public static IndexResponse index(IndexQueryPath indexPath, String id, Index indexable) {
 
-        IndexResponse indexResponse = IndexClient.client.prepareIndex(INDEX_DEFAULT, indexPath.type, id)
+        IndexResponse indexResponse = IndexClient.client.prepareIndex(indexPath.index, indexPath.type, id)
                 .setSource(indexable.toIndex())
                 .execute()
                 .actionGet();
         if (Logger.isDebugEnabled()) {
             Logger.debug("ElasticSearch : Index : " + indexResponse.getIndex() + "/" + indexResponse.getType() + "/" + indexResponse.getId() + " from " + indexable.toString());
         }
+        return indexResponse;
+    }
+
+    /**
+     * Add a json document to the index
+     * @param indexPath
+     * @param id
+     * @param json
+     * @return
+     */
+    public static IndexResponse index(IndexQueryPath indexPath, String id, String json) {
+        IndexResponse indexResponse = IndexClient.client.prepareIndex(indexPath.index, indexPath.type, id)
+                .setSource(json)
+                .execute()
+                .actionGet();
         return indexResponse;
     }
 
@@ -97,6 +114,19 @@ public abstract class IndexService {
         }
 
         return deleteResponse;
+    }
+
+    /**
+     * Get the json representation of a document from an id
+     * @param indexPath
+     * @param id
+     * @return
+     */
+    public static String getAsString(IndexQueryPath indexPath, String id) {
+        return IndexClient.client.prepareGet(indexPath.index, indexPath.type, id)
+                .execute()
+                .actionGet()
+                .getSourceAsString();
     }
 
     /**
@@ -142,6 +172,7 @@ public abstract class IndexService {
         GetResponse getResponse = getRequestBuilder.execute().actionGet();
         return getResponse;
     }
+
 
     /**
      * Search information on Index from a query
@@ -217,6 +248,24 @@ public abstract class IndexService {
         Logger.debug("ElasticSearch : Creating Mapping " + indexType + " :  " + indexMapping);
         PutMappingResponse response = IndexClient.client.admin().indices().preparePutMapping(IndexService.INDEX_DEFAULT).setType(indexType).setSource(indexMapping).execute().actionGet();
         return response;
+    }
+
+    /**
+     * Read the Mapping for a type
+     * @param indexType
+     * @return
+     */
+    public static String getMapping(String indexType) {
+        ClusterState state = IndexClient.client.admin().cluster()
+                .prepareState()
+                .setFilterIndices(IndexService.INDEX_DEFAULT)
+                .execute().actionGet().getState();
+        MappingMetaData mappingMetaData = state.getMetaData().index(IndexService.INDEX_DEFAULT).mapping(indexType);
+        if (mappingMetaData != null) {
+            return mappingMetaData.source().toString();
+        } else {
+            return null;
+        }
     }
 
     /**

@@ -1,0 +1,5 @@
+##################### ElasticSearch Configuration exemple on local mode #####################
+
+cluster.name: play2-elasticsearch
+
+path.data: data

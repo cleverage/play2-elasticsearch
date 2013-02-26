@@ -2,13 +2,18 @@ package com.github.cleverage.elasticsearch;
 
 import com.github.cleverage.elasticsearch.annotations.IndexMapping;
 import com.github.cleverage.elasticsearch.annotations.IndexType;
+import org.reflections.Reflections;
 import play.Application;
+import play.Configuration;
 import play.Logger;
+import play.libs.ReflectionsCache;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+
 
 /**
  * User: nboire
@@ -29,6 +34,12 @@ public class IndexConfig {
      *  Mode local or network
      */
     public static Boolean local = false;
+
+    /**
+     * elasticsearch.local.config = configuration file load on local mode.
+     * eg : conf/elasticsearch.yml
+     */
+    public static String localConfig = null;
 
     /**
      *  elasticsearch.client = list of client separate by commas ex : 192.168.0.1:9300,192.168.0.2:9300
@@ -66,6 +77,12 @@ public class IndexConfig {
     public static Map<String, String> indexTypes = new HashMap<String, String>();
 
     /**
+     * Drop the index on application shutdown
+     * Should probably be used only in tests
+     */
+    public static boolean dropOnShutdown = false;
+
+    /**
      * Play application
      */
     public static Application application;
@@ -74,22 +91,26 @@ public class IndexConfig {
         this.application = app;
         this.client = app.configuration().getString("elasticsearch.client");
         this.local = app.configuration().getBoolean("elasticsearch.local");
+        this.localConfig = app.configuration().getString("elasticsearch.config.resource");
         this.clusterName = app.configuration().getString("elasticsearch.cluster.name");
 
         this.indexName = app.configuration().getString("elasticsearch.index.name");
         this.indexSettings = app.configuration().getString("elasticsearch.index.settings");
         this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
 
-        this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request");
+        this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request", false);
 
-        loadMapping();
+        this.dropOnShutdown = app.configuration().getBoolean("elasticsearch.index.dropOnShutdown", false);
+
+        loadMappingFromAnnotations();
+        loadMappingFromConfig();
     }
 
 
     /**
      * Load classes with @IndexType and initialize mapping if present on the @IndexMapping
      */
-    private void loadMapping() {
+    private void loadMappingFromAnnotations() {
 
         Set<String> classes = getClazzs();
 
@@ -110,6 +131,23 @@ public class IndexConfig {
                 }
             } catch (Throwable e) {
                 Logger.error(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Load additional mappings from config entry "elasticsearch.index.mapping"
+     */
+    private void loadMappingFromConfig() {
+        Configuration mappingConfig = application.configuration().getConfig("elasticsearch.index.mappings");
+        if (mappingConfig != null) {
+            Map<String, Object> mappings = mappingConfig.asMap();
+            for (String indexType : mappings.keySet()) {
+                if (mappings.get(indexType) instanceof String) {
+                    indexTypes.put(indexType, (String)mappings.get(indexType));
+                } else {
+                    Logger.warn("Incorrect value in elasticsearch.index.mappings");
+                }
             }
         }
     }
@@ -139,7 +177,10 @@ public class IndexConfig {
             for (String load : toLoad) {
                 load = load.trim();
                 if (load.endsWith(".*")) {
-                    classes.addAll(application.getTypesAnnotatedWith(load.substring(0, load.length() - 2), IndexType.class));
+                        Reflections reflections = ReflectionsCache.getReflections(application.classloader(), load.substring(0, load.length() - 2));
+                        for(Class c :reflections.getTypesAnnotatedWith(IndexType.class)){
+                        classes.add(c.getName());
+                    }
                 } else {
                     classes.add(load);
                 }
