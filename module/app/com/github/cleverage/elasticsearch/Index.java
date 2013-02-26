@@ -6,6 +6,7 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.search.SearchHit;
 import play.Logger;
+import scala.concurrent.Future;
 
 @JsonIgnoreProperties({"searchHit"})
 public abstract class Index implements Indexable {
@@ -103,6 +104,11 @@ public abstract class Index implements Indexable {
          * @throws Exception
          */
         public IndexResults<T> search(IndexQuery<T> query) {
+
+            return IndexService.search(queryPath, query);
+        }
+
+        public Future<IndexResults<T>> searchFuture(IndexQuery<T> query) {
 
             return IndexService.search(queryPath, query);
         }

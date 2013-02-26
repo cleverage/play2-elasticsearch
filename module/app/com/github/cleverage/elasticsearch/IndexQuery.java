@@ -2,6 +2,7 @@ package com.github.cleverage.elasticsearch;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -14,6 +15,8 @@ import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import play.Logger;
+import scala.concurrent.Future;
+import scala.concurrent.Promise;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -267,6 +270,28 @@ public class IndexQuery<T extends Index> {
 
         // Return Results
         return new IndexResults<T>(count, pageSize, pageCurrent, pageNb, results, facetsResponse);
+    }
+
+    public <T extends Index> Future<IndexResults<T>> fetchFuture(IndexQueryPath indexQueryPath) {
+
+        SearchRequestBuilder request = getSearchRequestBuilder(indexQueryPath);
+
+        final Promise<IndexResults<T>> promise = new Promise<IndexResults<T>>();
+
+        request.execute(new ActionListener<SearchResponse>() {
+            @Override
+            public void onResponse(SearchResponse searchResponse) {
+                IndexResults<T> searchResults = (IndexResults<T>) toSearchResults(searchResponse);
+                promise.success(searchResults);
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                promise.failure(e);
+            }
+        });
+
+        return promise.future();
     }
 }
 
