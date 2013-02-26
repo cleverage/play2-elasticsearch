@@ -27,18 +27,18 @@ class ElasticsearchPluginSpec extends Specification with ElasticsearchTestHelper
     }
     "create the index on start" in {
       running(esFakeApp) {
-        IndexService.existsIndex must beTrue
+        IndexService.existsIndex("test-index") must beTrue
       }
     }
     "allow deleting an index" in {
       running(esFakeApp) {
-        IndexService.deleteIndex
-        IndexService.existsIndex must beFalse
+        IndexService.deleteIndex("test-index")
+        IndexService.existsIndex("test-index") must beFalse
       }
     }
     "create configured mapping" in {
       running(esFakeApp) {
-        IndexService.getMapping("testType") must beEqualTo(testMapping.get("testType"))
+        IndexService.getMapping("test-index","testType") must beEqualTo(testMapping.get("testType"))
       }
     }
   }

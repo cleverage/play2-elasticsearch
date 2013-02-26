@@ -2,17 +2,14 @@ package com.github.cleverage.elasticsearch;
 
 import com.github.cleverage.elasticsearch.annotations.IndexMapping;
 import com.github.cleverage.elasticsearch.annotations.IndexType;
+import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import play.Application;
 import play.Configuration;
 import play.Logger;
 import play.libs.ReflectionsCache;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 
 
 /**
@@ -59,12 +56,12 @@ public class IndexConfig {
     /**
      * The name of the index
      */
-    public static String indexName = null;
+    public static String[] indexNames = new String[0];
 
     /**
      * Custom settings to apply when creating the index. ex: "{ analysis: { analyzer: { my_analyzer: { type : "custom", tokenizer: "standard" } } } }" 
      */
-    public static String indexSettings = null;
+    public static Map<String, String> indexSettings = new HashMap<String, String>();
 
     /**
      * list of class extends "Index" ex: myPackage.myClass,myPackage2.*
@@ -94,13 +91,33 @@ public class IndexConfig {
         this.localConfig = app.configuration().getString("elasticsearch.config.resource");
         this.clusterName = app.configuration().getString("elasticsearch.cluster.name");
 
-        this.indexName = app.configuration().getString("elasticsearch.index.name");
-        this.indexSettings = app.configuration().getString("elasticsearch.index.settings");
-        this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
 
         this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request", false);
-
         this.dropOnShutdown = app.configuration().getBoolean("elasticsearch.index.dropOnShutdown", false);
+        this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
+
+        String indexNameConf = app.configuration().getString("elasticsearch.index.name");
+        if(indexNameConf != null) {
+            LinkedList<String> indexNamesL = new LinkedList<String>();
+            String[] indexNamesTab = indexNameConf.split(",");
+            for (String indexNameElem : indexNamesTab) {
+                String indexNameTmp = indexNameElem.trim();
+                indexNamesL.add(indexNameTmp);
+            }
+            indexNames = indexNamesL.toArray(indexNames);
+
+            for (String indexName : indexNames) {
+
+                // Load settings
+                String setting = app.configuration().getString("elasticsearch." + indexName + ".settings");
+                if(StringUtils.isNotEmpty(setting)) {
+                    indexSettings.put(indexName, setting);
+                }
+            }
+
+        } else {
+            Logger.info("ElasticSearch : no indexNames(s) defined in property 'elasticsearch.index.name'");
+        }
 
         loadMappingFromAnnotations();
         loadMappingFromConfig();

@@ -33,7 +33,7 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public abstract class IndexService {
 
-    public static final String INDEX_DEFAULT = IndexConfig.indexName;
+    public static final String INDEX_DEFAULT = IndexConfig.indexNames[0];
     public static final String INDEX_PERCOLATOR = "_percolator";
 
     /**
@@ -190,12 +190,12 @@ public abstract class IndexService {
      * Test if an indice Exists
      * @return true if exists
      */
-    public static boolean existsIndex() {
+    public static boolean existsIndex(String indexName) {
 
         Client client = IndexClient.client;
         AdminClient admin = client.admin();
         IndicesAdminClient indices = admin.indices();
-        IndicesExistsRequestBuilder indicesExistsRequestBuilder = indices.prepareExists(INDEX_DEFAULT);
+        IndicesExistsRequestBuilder indicesExistsRequestBuilder = indices.prepareExists(indexName);
         IndicesExistsResponse response = indicesExistsRequestBuilder.execute().actionGet();
 
         return response.exists();
@@ -204,11 +204,12 @@ public abstract class IndexService {
     /**
      * Create the index
      */
-    public static void createIndex() {
+    public static void createIndex(String indexName) {
         try {
-            CreateIndexRequestBuilder creator = IndexClient.client.admin().indices().prepareCreate(INDEX_DEFAULT);
-            if (IndexConfig.indexSettings != null) {
-            	creator.setSettings(IndexConfig.indexSettings);
+            CreateIndexRequestBuilder creator = IndexClient.client.admin().indices().prepareCreate(indexName);
+            String setting = IndexConfig.indexSettings.get(indexName);
+            if (setting != null) {
+                creator.setSettings(setting);
             }
             creator.execute().actionGet();
         } catch (Exception e) {
@@ -219,11 +220,11 @@ public abstract class IndexService {
     /**
      * Delete the index
      */
-    public static void deleteIndex() {
+    public static void deleteIndex(String indexName) {
         try {
-            IndexClient.client.admin().indices().prepareDelete(INDEX_DEFAULT).execute().actionGet();
+            IndexClient.client.admin().indices().prepareDelete(indexName).execute().actionGet();
         } catch (IndexMissingException indexMissing) {
-            Logger.debug("ElasticSearch : Index " + INDEX_DEFAULT + " no exists");
+            Logger.debug("ElasticSearch : Index " + indexName + " no exists");
         } catch (Exception e) {
             Logger.error("ElasticSearch : Index drop error : " + e.toString());
         }
@@ -241,12 +242,13 @@ public abstract class IndexService {
      * }
      * }
      *
+     * @param indexName
      * @param indexType
      * @param indexMapping
      */
-    public static PutMappingResponse createMapping(String indexType, String indexMapping) {
+    public static PutMappingResponse createMapping(String indexName, String indexType, String indexMapping) {
         Logger.debug("ElasticSearch : Creating Mapping " + indexType + " :  " + indexMapping);
-        PutMappingResponse response = IndexClient.client.admin().indices().preparePutMapping(IndexService.INDEX_DEFAULT).setType(indexType).setSource(indexMapping).execute().actionGet();
+        PutMappingResponse response = IndexClient.client.admin().indices().preparePutMapping(indexName).setType(indexType).setSource(indexMapping).execute().actionGet();
         return response;
     }
 
@@ -255,12 +257,12 @@ public abstract class IndexService {
      * @param indexType
      * @return
      */
-    public static String getMapping(String indexType) {
+    public static String getMapping(String indexName, String indexType) {
         ClusterState state = IndexClient.client.admin().cluster()
                 .prepareState()
                 .setFilterIndices(IndexService.INDEX_DEFAULT)
                 .execute().actionGet().getState();
-        MappingMetaData mappingMetaData = state.getMetaData().index(IndexService.INDEX_DEFAULT).mapping(indexType);
+        MappingMetaData mappingMetaData = state.getMetaData().index(indexName).mapping(indexType);
         if (mappingMetaData != null) {
             return mappingMetaData.source().toString();
         } else {
@@ -270,42 +272,73 @@ public abstract class IndexService {
 
     /**
      * call createMapping for list of @indexType
+     * @param indexName
      */
-    public static void prepareIndex() {
+    public static void prepareIndex(String indexName) {
 
+        //TODO gestion des indexTypes par indexNames
         Map<String, String> indexTypes = IndexConfig.indexTypes;
         for (String indexType : indexTypes.keySet()) {
 
             String indexMapping = indexTypes.get(indexType);
             if (indexMapping != null) {
-                createMapping(indexType, indexMapping);
+                createMapping(indexName, indexType, indexMapping);
             }
         }
     }
 
     public static void cleanIndex() {
 
-        if (IndexService.existsIndex()) {
-            IndexService.deleteIndex();
+        String[] indexNames = IndexConfig.indexNames;
+        for (String indexName : indexNames) {
+            cleanIndex(indexName);
         }
-        IndexService.createIndex();
-        IndexService.prepareIndex();
+    }
+
+    public static void cleanIndex(String indexName) {
+
+        if (IndexService.existsIndex(indexName)) {
+            IndexService.deleteIndex(indexName);
+        }
+        IndexService.createIndex(indexName);
+        IndexService.prepareIndex(indexName);
     }
 
     /**
      * Refresh full index
      */
     public static void refresh() {
-        IndexClient.client.admin().indices().refresh(new RefreshRequest(INDEX_DEFAULT)).actionGet();
+        String[] indexNames = IndexConfig.indexNames;
+        for (String indexName : indexNames) {
+            refresh(indexName);
+        }
+    }
+
+    /**
+     * Refresh an index
+     * @param indexName
+     */
+    private static void refresh(String indexName) {
+        IndexClient.client.admin().indices().refresh(new RefreshRequest(indexName)).actionGet();
     }
 
     /**
      * Flush full index
      */
     public static void flush() {
-        IndexClient.client.admin().indices().flush(new FlushRequest(INDEX_DEFAULT)).actionGet();
+        String[] indexNames = IndexConfig.indexNames;
+        for (String indexName : indexNames) {
+            flush(indexName);
+        }
     }
 
+    /**
+     * Flush an index
+     * @param indexName
+     */
+    public static void flush(String indexName) {
+        IndexClient.client.admin().indices().flush(new FlushRequest(indexName)).actionGet();
+    }
 
     /**
      * Create Percolator from a queryBuilder

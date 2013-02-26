@@ -19,7 +19,7 @@ public abstract class Index implements Indexable {
     public SearchHit searchHit;
 
     /**
-     * Return indexName and indexType
+     * Return indexNames and indexType
      * @return
      */
     public IndexQueryPath getIndexPath() {

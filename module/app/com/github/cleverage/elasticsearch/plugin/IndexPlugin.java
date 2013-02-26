@@ -39,14 +39,21 @@ public class IndexPlugin extends Plugin
 
         // We catch these exceptions to allow application to start even if the module start fails
         try {
-            // Create Index and Mapping if not Exists
-            if (!IndexService.existsIndex()) {
-                Logger.debug("ElasticSearch : creating index " + IndexService.INDEX_DEFAULT);
-                IndexService.createIndex();
+            // Create Indexs and Mappings if not Exists
+            String[] indexNames = IndexConfig.indexNames;
+            for (String indexName : indexNames) {
 
-                // Prepare Index ( define mapping if present )
-                IndexService.prepareIndex();
+                if (!IndexService.existsIndex(indexName)) {
+                    Logger.debug("ElasticSearch : creating index " + indexName);
+
+                    // Create index
+                    IndexService.createIndex(indexName);
+
+                    // Prepare Index ( define mapping if present )
+                    IndexService.prepareIndex(indexName);
+                }
             }
+
             Logger.info("ElasticSearch : Plugin has started");
 
         } catch (NoNodeAvailableException e) {
@@ -61,8 +68,13 @@ public class IndexPlugin extends Plugin
     @Override
     public void onStop()
     {
-        if (IndexConfig.dropOnShutdown && IndexService.existsIndex()) {
-            IndexService.deleteIndex();
+        if (IndexConfig.dropOnShutdown) {
+            String[] indexNames = IndexConfig.indexNames;
+            for (String indexName : indexNames) {
+                if(IndexService.existsIndex(indexName)) {
+                    IndexService.deleteIndex(indexName);
+                }
+            }
         }
 
         if(client!= null) {
