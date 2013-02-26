@@ -23,6 +23,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
 import play.Logger;
+import scala.concurrent.Future;
 
 import java.io.IOException;
 import java.util.List;
@@ -185,6 +186,17 @@ public abstract class IndexService {
         return indexQuery.fetch(indexPath);
     }
 
+    /**
+     * Search information on Index from a query
+     * @param indexQuery
+     * @param <T>
+     * @return
+     */
+    public static <T extends Index> Future<IndexResults<T>> searchFuture(IndexQueryPath indexPath, IndexQuery<T> indexQuery) {
+
+        return indexQuery.fetchFuture(indexPath);
+    }
+
 
     /**
      * Test if an indice Exists
@@ -276,13 +288,15 @@ public abstract class IndexService {
      */
     public static void prepareIndex(String indexName) {
 
-        //TODO gestion des indexTypes par indexNames
-        Map<String, String> indexTypes = IndexConfig.indexTypes;
-        for (String indexType : indexTypes.keySet()) {
+        Map<IndexQueryPath, String> indexMappings = IndexConfig.indexMappings;
+        for (IndexQueryPath indexQueryPath : indexMappings.keySet()) {
 
-            String indexMapping = indexTypes.get(indexType);
-            if (indexMapping != null) {
-                createMapping(indexName, indexType, indexMapping);
+            if(indexName != null && indexName.equals(indexQueryPath.index)) {
+                String indexType = indexQueryPath.type;
+                String indexMapping = indexMappings.get(indexQueryPath);
+                if (indexMapping != null) {
+                    createMapping(indexName, indexType, indexMapping);
+                }
             }
         }
     }

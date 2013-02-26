@@ -1,6 +1,7 @@
 package com.github.cleverage.elasticsearch;
 
 import com.github.cleverage.elasticsearch.annotations.IndexMapping;
+import com.github.cleverage.elasticsearch.annotations.IndexName;
 import com.github.cleverage.elasticsearch.annotations.IndexType;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
@@ -71,7 +72,7 @@ public class IndexConfig {
     /**
      * List of IndexType and IndexMapping associate
      */
-    public static Map<String, String> indexTypes = new HashMap<String, String>();
+    public static Map<IndexQueryPath, String> indexMappings = new HashMap<IndexQueryPath, String>();
 
     /**
      * Drop the index on application shutdown
@@ -109,25 +110,32 @@ public class IndexConfig {
             for (String indexName : indexNames) {
 
                 // Load settings
-                String setting = app.configuration().getString("elasticsearch." + indexName + ".settings");
-                if(StringUtils.isNotEmpty(setting)) {
-                    indexSettings.put(indexName, setting);
-                }
+                loadSettingsFromConfig(indexName);
+
+                // Load Mapping from conf
+                loadMappingFromConfig(indexName);
             }
 
         } else {
             Logger.info("ElasticSearch : no indexNames(s) defined in property 'elasticsearch.index.name'");
         }
 
-        loadMappingFromAnnotations();
-        loadMappingFromConfig();
+        loadMappingFromAnnotations(indexNames);
+    }
+
+    private void loadSettingsFromConfig(String indexName) {
+        String setting = application.configuration().getString("elasticsearch." + indexName + ".settings");
+        if(StringUtils.isNotEmpty(setting)) {
+            indexSettings.put(indexName, setting);
+        }
     }
 
 
     /**
      * Load classes with @IndexType and initialize mapping if present on the @IndexMapping
+     * @param indexNames
      */
-    private void loadMappingFromAnnotations() {
+    private void loadMappingFromAnnotations(String[] indexNames) {
 
         Set<String> classes = getClazzs();
 
@@ -142,9 +150,11 @@ public class IndexConfig {
 
                 String indexType = getIndexType(o);
                 String indexMapping = getIndexMapping(o);
+                String indexName = getIndexName(o, indexNames);
 
                 if (indexType != null) {
-                    indexTypes.put(indexType, indexMapping);
+                    IndexQueryPath path = new IndexQueryPath(indexName, indexType);
+                    indexMappings.put(path, indexMapping);
                 }
             } catch (Throwable e) {
                 Logger.error(e.getMessage());
@@ -154,19 +164,32 @@ public class IndexConfig {
 
     /**
      * Load additional mappings from config entry "elasticsearch.index.mapping"
+     * @param indexName
      */
-    private void loadMappingFromConfig() {
-        Configuration mappingConfig = application.configuration().getConfig("elasticsearch.index.mappings");
+    private void loadMappingFromConfig(String indexName) {
+        Configuration mappingConfig = application.configuration().getConfig("elasticsearch." + indexName + ".mappings");
         if (mappingConfig != null) {
             Map<String, Object> mappings = mappingConfig.asMap();
             for (String indexType : mappings.keySet()) {
                 if (mappings.get(indexType) instanceof String) {
-                    indexTypes.put(indexType, (String)mappings.get(indexType));
+                    IndexQueryPath indexQueryPath = new IndexQueryPath(indexName, indexType);
+                    indexMappings.put(indexQueryPath, (String) mappings.get(indexType));
                 } else {
                     Logger.warn("Incorrect value in elasticsearch.index.mappings");
                 }
             }
         }
+    }
+
+    private String getIndexName(Object instance, String[] indexNames) {
+        IndexName indexNameAnnotation = instance.getClass().getAnnotation(IndexName.class);
+        if (indexNameAnnotation == null) {
+            if(indexNames.length>0) {
+                return indexNames[0];
+            }
+            return null;
+        }
+        return indexNameAnnotation.name();
     }
 
     private String getIndexType(Object instance) {
