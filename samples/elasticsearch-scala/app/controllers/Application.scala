@@ -5,6 +5,10 @@ import play.api.mvc._
 import indexing.{IndexTestManager, IndexTest}
 import org.elasticsearch.index.query.QueryBuilders
 import com.github.cleverage.elasticsearch.ScalaHelpers._
+import play.api.libs.concurrent.Execution.Implicits._
+import com.github.cleverage.elasticsearch.ScalaHelpers.IndexQuery
+import indexing.IndexTest
+import concurrent.Future
 
 object Application extends Controller {
   
@@ -38,6 +42,33 @@ object Application extends Controller {
     //IndexTestManager.delete("4")
 
     Ok(views.html.index("Your new application is ready."))
+  }
+
+  def async = Action {
+    IndexTestManager.index(IndexTest("1", "Here is the first name", "First category"))
+    IndexTestManager.index(IndexTest("2", "Then comes the second name", "First category"))
+    IndexTestManager.index(IndexTest("3", "Here is the third name", "Second category"))
+    IndexTestManager.index(IndexTest("4", "Finnaly is the fourth name", "Second category"))
+
+    IndexTestManager.refresh()
+
+    val indexQuery = IndexTestManager.query
+      .withBuilder(QueryBuilders.matchQuery("name", "Here"))
+    val indexQuery2 = IndexTestManager.query
+      .withBuilder(QueryBuilders.matchQuery("name", "third"))
+
+    // Combining futures
+    val l: Future[(IndexResults[IndexTest], IndexResults[IndexTest])] = for {
+      result1 <- IndexTestManager.searchAsync(indexQuery)
+      result2 <- IndexTestManager.searchAsync(indexQuery2)
+    } yield (result1, result2)
+
+    Async {
+      l.map { case (r1, r2) =>
+        Ok(r1.totalCount + " - " + r2.totalCount)
+      }
+    }
+
   }
   
 }

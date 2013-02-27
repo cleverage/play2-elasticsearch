@@ -7,8 +7,11 @@ import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.index.query.{QueryBuilders, QueryBuilder}
 import org.elasticsearch.search.sort.SortBuilder
-import org.elasticsearch.action.search.{SearchResponse, SearchType}
 import org.elasticsearch.search.SearchHit
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchType}
+import concurrent.Future
+import concurrent.promise
+import org.elasticsearch.action.ActionListener
 
 /**
  * Scala helpers
@@ -107,6 +110,13 @@ object ScalaHelpers {
     def search(indexQuery: IndexQuery[T]): IndexResults[T] = indexQuery.fetch(indexPath, reads)
 
     /**
+     * Executes a query on the Elasticsearch index asynchronously
+     * @param indexQuery
+     * @return a Future of IndexResults
+     */
+    def searchAsync(indexQuery: IndexQuery[T]): Future[IndexResults[T]] = indexQuery.fetchAsync(indexPath, reads)
+
+    /**
      * Refresh the index
      */
     def refresh() = IndexService.refresh()
@@ -154,18 +164,62 @@ object ScalaHelpers {
      * @return results of the query
      */
     def fetch(indexPath: IndexQueryPath, reads: Reads[T]): IndexResults[T] = {
+      val request = buildRequest(indexPath)
+      val response = request.execute().actionGet()
+      IndexResults(this, response, reads)
+    }
+
+    /**
+     * Executes the query asynchronously
+     * @param indexPath
+     * @param reads
+     * @return
+     */
+    def fetchAsync(indexPath: IndexQueryPath, reads: Reads[T]): Future[IndexResults[T]] = {
+      val request = buildRequest(indexPath)
+      // This will allow to access the indexQuery from the ActionListener
+      val indexQuery = this
+      // Promise used to complete the future
+      val p = promise[IndexResults[T]]
+      request.execute(new ActionListener[SearchResponse] {
+        // In case of an exception, fail the future
+        def onFailure(t: Throwable) {p failure(t)}
+        // In case of a response, complete the future
+        def onResponse(r: SearchResponse) { p success(IndexResults(indexQuery, r, reads))}
+      })
+      // Returning the future
+      p.future
+    }
+
+    /**
+     * Build a SearchRequestBuilder from the indexQuery members
+     * @param indexPath
+     * @return
+     */
+    def buildRequest(indexPath: IndexQueryPath): SearchRequestBuilder = {
       val request = IndexClient.client.prepareSearch(indexPath.index)
         .setTypes(indexPath.`type`)
         .setSearchType(SearchType.QUERY_THEN_FETCH)
       request.setQuery(builder)
-      facetBuilders.foreach { request.addFacet(_) }
-      sortBuilders.foreach { request.addSort(_) }
-      from.foreach { request.setFrom(_) }
-      size.foreach { request.setSize(_) }
-      explain.foreach { request.setExplain(_) }
-      if (noField) { request.setNoFields() }
-      val response = request.execute().actionGet()
-      IndexResults(this, response, reads)
+      facetBuilders.foreach {
+        request.addFacet(_)
+      }
+      sortBuilders.foreach {
+        request.addSort(_)
+      }
+      from.foreach {
+        request.setFrom(_)
+      }
+      size.foreach {
+        request.setSize(_)
+      }
+      explain.foreach {
+        request.setExplain(_)
+      }
+      if (noField) {
+        request.setNoFields()
+      }
+      request
     }
   }
 
