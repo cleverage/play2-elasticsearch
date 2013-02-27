@@ -8,6 +8,7 @@ import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.index.query.{QueryBuilders, QueryBuilder}
 import org.elasticsearch.search.sort.SortBuilder
 import org.elasticsearch.action.search.{SearchResponse, SearchType}
+import org.elasticsearch.search.SearchHit
 
 /**
  * Scala helpers
@@ -169,6 +170,14 @@ object ScalaHelpers {
   }
 
   /**
+   * Case class used to store a "Rich" result (the result with its associated SearchHit)
+   * @param result
+   * @param hit
+   * @tparam T
+   */
+  case class IndexResult[T <: Indexable](result: T, hit: SearchHit)
+
+  /**
    * Results wrapper for scala
    * @param totalCount the totalHits returned by elasticsearch
    * @param pageSize the pageSize (used to paginate results)
@@ -184,7 +193,13 @@ object ScalaHelpers {
     pageCurrent: Long,
     pageNb: Long,
     results: List[T],
-    facets: Facets)
+    hits: List[SearchHit],
+    facets: Facets) {
+    /**
+     * Use this if you need the SearchHit associated with your Result
+     */
+    lazy val richResults: List[IndexResult[T]] = for ((result, hit) <- results.zip(hits)) yield IndexResult(result, hit)
+  }
 
   object IndexResults {
     /**
@@ -200,6 +215,7 @@ object ScalaHelpers {
       val pageSize: Long =
         indexQuery.size.fold(searchResponse.hits().hits().length.toLong)(_.toLong)
       val pageCurrent: Long = indexQuery.from.fold (1L){ f => ((f / pageSize) + 1) }
+      val hits = searchResponse.hits().asScala.toList
 
       new IndexResults[T](
         totalCount = totalCount,
@@ -207,7 +223,8 @@ object ScalaHelpers {
         pageCurrent = pageCurrent,
         pageNb = if (pageSize == 0) 1 else math.round(math.ceil(totalCount / pageSize)),
         // Converting Json hits to Indexable entities
-        results = searchResponse.hits().asScala.toList.map {
+        hits = hits,
+        results = hits.map {
           h => Json.parse(h.getSourceAsString).as[T](reads)
         },
         facets = searchResponse.facets

@@ -79,6 +79,9 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
         val countResults = search(QueryBuilders.termQuery("count", 5))
         countResults.totalCount must beEqualTo(2)
         countResults.results must containAllOf(List(first, third))
+        // hits should also contain 2 elements
+        countResults.hits.size must beEqualTo(2)
+        countResults.richResults.size must beEqualTo(2)
       }
     }
   }
