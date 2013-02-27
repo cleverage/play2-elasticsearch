@@ -9,13 +9,20 @@ trait ElasticsearchTestHelper {
     "{\"testType\":{\"properties\":{\"name\":{\"type\":\"string\",\"analyzer\":\"keyword\"}}}}"
   ).asJava
 
+  val testMapping2 = Map("testType2" ->
+    "{\"testType2\":{\"properties\":{\"name\":{\"type\":\"string\",\"analyzer\":\"keyword\"}}}}"
+  ).asJava
+
   val elasticsearchAdditionalConf = Map(
     "elasticsearch.local" -> true,
     "elasticsearch.config.resource" -> "elasticsearch.yml",
     "elasticsearch.cluster.name" -> "test-cluster",
-    "elasticsearch.index.name" -> "test-index",
+    "elasticsearch.index.name" -> "test-index1,test-index2",
     "elasticsearch.index.dropOnShutdown" -> true,
-    "elasticsearch.index.mappings" -> testMapping
+    "elasticsearch.test-index1.settings" -> "",
+    "elasticsearch.test-index2.settings" -> "",
+    "elasticsearch.test-index1.mappings" -> testMapping,
+    "elasticsearch.test-index2.mappings" -> testMapping2
   )
 
   val additionalPlugins = Seq(

@@ -34,7 +34,7 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public abstract class IndexService {
 
-    public static final String INDEX_DEFAULT = IndexConfig.indexNames[0];
+    public static final String INDEX_DEFAULT = IndexClient.config.indexNames[0];
     public static final String INDEX_PERCOLATOR = "_percolator";
 
     /**
@@ -217,9 +217,10 @@ public abstract class IndexService {
      * Create the index
      */
     public static void createIndex(String indexName) {
+        Logger.debug("ElasticSearch : creating index [" + indexName + "]");
         try {
             CreateIndexRequestBuilder creator = IndexClient.client.admin().indices().prepareCreate(indexName);
-            String setting = IndexConfig.indexSettings.get(indexName);
+            String setting = IndexClient.config.indexSettings.get(indexName);
             if (setting != null) {
                 creator.setSettings(setting);
             }
@@ -233,6 +234,7 @@ public abstract class IndexService {
      * Delete the index
      */
     public static void deleteIndex(String indexName) {
+        Logger.debug("ElasticSearch : deleting index [" + indexName + "]");
         try {
             IndexClient.client.admin().indices().prepareDelete(indexName).execute().actionGet();
         } catch (IndexMissingException indexMissing) {
@@ -259,7 +261,7 @@ public abstract class IndexService {
      * @param indexMapping
      */
     public static PutMappingResponse createMapping(String indexName, String indexType, String indexMapping) {
-        Logger.debug("ElasticSearch : Creating Mapping " + indexType + " :  " + indexMapping);
+        Logger.debug("ElasticSearch : creating mapping [" + indexName + "/" + indexType + "] :  " + indexMapping);
         PutMappingResponse response = IndexClient.client.admin().indices().preparePutMapping(indexName).setType(indexType).setSource(indexMapping).execute().actionGet();
         return response;
     }
@@ -288,7 +290,7 @@ public abstract class IndexService {
      */
     public static void prepareIndex(String indexName) {
 
-        Map<IndexQueryPath, String> indexMappings = IndexConfig.indexMappings;
+        Map<IndexQueryPath, String> indexMappings = IndexClient.config.indexMappings;
         for (IndexQueryPath indexQueryPath : indexMappings.keySet()) {
 
             if(indexName != null && indexName.equals(indexQueryPath.index)) {
@@ -303,7 +305,7 @@ public abstract class IndexService {
 
     public static void cleanIndex() {
 
-        String[] indexNames = IndexConfig.indexNames;
+        String[] indexNames = IndexClient.config.indexNames;
         for (String indexName : indexNames) {
             cleanIndex(indexName);
         }
@@ -322,7 +324,7 @@ public abstract class IndexService {
      * Refresh full index
      */
     public static void refresh() {
-        String[] indexNames = IndexConfig.indexNames;
+        String[] indexNames = IndexClient.config.indexNames;
         for (String indexName : indexNames) {
             refresh(indexName);
         }
@@ -340,7 +342,7 @@ public abstract class IndexService {
      * Flush full index
      */
     public static void flush() {
-        String[] indexNames = IndexConfig.indexNames;
+        String[] indexNames = IndexClient.config.indexNames;
         for (String indexName : indexNames) {
             flush(indexName);
         }

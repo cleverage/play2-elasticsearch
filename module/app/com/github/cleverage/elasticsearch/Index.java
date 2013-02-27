@@ -110,7 +110,7 @@ public abstract class Index implements Indexable {
 
         public Future<IndexResults<T>> searchFuture(IndexQuery<T> query) {
 
-            return IndexService.search(queryPath, query);
+            return IndexService.searchFuture(queryPath, query);
         }
     }
 

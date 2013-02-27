@@ -14,6 +14,12 @@ public class IndexClient {
 
     public static org.elasticsearch.client.Client client = null;
 
+    public static IndexConfig config;
+
+    public IndexClient(IndexConfig config) {
+        this.config = config;
+    }
+
     /**
      * Checks if is local mode.
      *
@@ -21,14 +27,14 @@ public class IndexClient {
      */
     private boolean isLocalMode() {
         try {
-            if (IndexConfig.client == null) {
+            if (config.client == null) {
                 return true;
             }
-            if (IndexConfig.client.equalsIgnoreCase("false") || IndexConfig.client.equalsIgnoreCase("true")) {
+            if (config.client.equalsIgnoreCase("false") || config.client.equalsIgnoreCase("true")) {
                 return true;
             }
 
-            return IndexConfig.local;
+            return config.local;
         } catch (Exception e) {
             Logger.error("Error! Starting in Local Model: %s", e);
             return true;
@@ -45,9 +51,9 @@ public class IndexClient {
             Logger.info("ElasticSearch : Starting in Local Mode");
 
             // load settings on local mode
-            if(IndexConfig.localConfig != null) {
-                Logger.info("Elasticsearch : load settings from " + IndexConfig.localConfig);
-                settings.loadFromClasspath(IndexConfig.localConfig);
+            if(config.localConfig != null) {
+                Logger.info("Elasticsearch : load settings from " + config.localConfig);
+                settings.loadFromClasspath(config.localConfig);
             }
             settings.build();
             Logger.info("Elasticsearch : settings  " + settings.internalMap().toString());
@@ -60,18 +66,18 @@ public class IndexClient {
         else
         {
             settings.put("client.transport.sniff", true);
-            if (IndexConfig.clusterName != null) {
-                settings.put("cluster.name", IndexConfig.clusterName);
+            if (config.clusterName != null) {
+                settings.put("cluster.name", config.clusterName);
             }
             settings.build();
 
             Logger.info("ElasticSearch : Starting in Client Mode");
             TransportClient c = new TransportClient(settings);
-            if (IndexConfig.client == null) {
+            if (config.client == null) {
                 throw new Exception("Configuration required - elasticsearch.client when local model is disabled!");
             }
 
-            String[] hosts = IndexConfig.client.trim().split(",");
+            String[] hosts = config.client.trim().split(",");
             boolean done = false;
             for (String host : hosts) {
                 String[] parts = host.split(":");

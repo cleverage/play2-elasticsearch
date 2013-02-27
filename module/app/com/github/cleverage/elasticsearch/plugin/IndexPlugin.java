@@ -30,7 +30,7 @@ public class IndexPlugin extends Plugin
         IndexConfig config = new IndexConfig(application);
 
         // ElasticSearch client start on local or network
-        client = new IndexClient();
+        client = new IndexClient(config);
         try {
             client.start();
         } catch (Exception e) {
@@ -40,12 +40,10 @@ public class IndexPlugin extends Plugin
         // We catch these exceptions to allow application to start even if the module start fails
         try {
             // Create Indexs and Mappings if not Exists
-            String[] indexNames = IndexConfig.indexNames;
+            String[] indexNames = client.config.indexNames;
             for (String indexName : indexNames) {
 
                 if (!IndexService.existsIndex(indexName)) {
-                    Logger.debug("ElasticSearch : creating index " + indexName);
-
                     // Create index
                     IndexService.createIndex(indexName);
 
@@ -68,8 +66,8 @@ public class IndexPlugin extends Plugin
     @Override
     public void onStop()
     {
-        if (IndexConfig.dropOnShutdown) {
-            String[] indexNames = IndexConfig.indexNames;
+        if (client.config.dropOnShutdown) {
+            String[] indexNames = client.config.indexNames;
             for (String indexName : indexNames) {
                 if(IndexService.existsIndex(indexName)) {
                     IndexService.deleteIndex(indexName);

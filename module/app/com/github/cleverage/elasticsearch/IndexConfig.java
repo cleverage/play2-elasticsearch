@@ -31,59 +31,59 @@ public class IndexConfig {
      *  elasticsearch.local= true / false
      *  Mode local or network
      */
-    public static Boolean local = false;
+    public Boolean local = false;
 
     /**
      * elasticsearch.local.config = configuration file load on local mode.
      * eg : conf/elasticsearch.yml
      */
-    public static String localConfig = null;
+    public String localConfig = null;
 
     /**
      *  elasticsearch.client = list of client separate by commas ex : 192.168.0.1:9300,192.168.0.2:9300
      */
-    public static String client = null;
+    public String client = null;
 
     /**
      * elasticsearch.cluster.name = name of the elasticsearch cluster
      */
-    public static String clusterName = null;
+    public String clusterName = null;
 
     /**
      * Debug mode for log search request and response
      */
-    public static Boolean showRequest = false;
+    public Boolean showRequest = false;
 
     /**
      * The name of the index
      */
-    public static String[] indexNames = new String[0];
+    public String[] indexNames = new String[0];
 
     /**
      * Custom settings to apply when creating the index. ex: "{ analysis: { analyzer: { my_analyzer: { type : "custom", tokenizer: "standard" } } } }" 
      */
-    public static Map<String, String> indexSettings = new HashMap<String, String>();
+    public Map<String, String> indexSettings = new HashMap<String, String>();
 
     /**
      * list of class extends "Index" ex: myPackage.myClass,myPackage2.*
      */
-    public static String indexClazzs = null;
+    public String indexClazzs = null;
 
     /**
      * List of IndexType and IndexMapping associate
      */
-    public static Map<IndexQueryPath, String> indexMappings = new HashMap<IndexQueryPath, String>();
+    public Map<IndexQueryPath, String> indexMappings = new HashMap<IndexQueryPath, String>();
 
     /**
      * Drop the index on application shutdown
      * Should probably be used only in tests
      */
-    public static boolean dropOnShutdown = false;
+    public boolean dropOnShutdown = false;
 
     /**
      * Play application
      */
-    public static Application application;
+    public Application application;
 
     public IndexConfig(Application app) {
         this.application = app;

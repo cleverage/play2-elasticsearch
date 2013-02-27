@@ -19,6 +19,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
    * Sample IndexableManager for managing SampleIndexable objects
    */
   object SampleIndexableManager extends IndexableManager[SampleIndexable]{
+    override val index = "test-index2"
     val indexType = "sampleIndexable"
     val reads = Json.reads[SampleIndexable]
     val writes = Json.writes[SampleIndexable]
@@ -28,7 +29,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   val second = SampleIndexable("2", "blabla is second title", 10, "bar category")
   val third = SampleIndexable("3", "here is third title", 5, "bar category")
 
-  val sampleIndexableMappingConf = Map("elasticsearch.index.mappings" ->
+  val sampleIndexableMappingConf = Map("elasticsearch.test-index2.mappings" ->
     Map("sampleIndexable" ->
       """
         |{
