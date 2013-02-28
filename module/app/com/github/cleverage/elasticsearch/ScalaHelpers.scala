@@ -7,7 +7,11 @@ import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.index.query.{QueryBuilders, QueryBuilder}
 import org.elasticsearch.search.sort.SortBuilder
-import org.elasticsearch.action.search.{SearchResponse, SearchType}
+import org.elasticsearch.search.SearchHit
+import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchType}
+import concurrent.Future
+import concurrent.promise
+import org.elasticsearch.action.ActionListener
 
 /**
  * Scala helpers
@@ -106,6 +110,13 @@ object ScalaHelpers {
     def search(indexQuery: IndexQuery[T]): IndexResults[T] = indexQuery.fetch(indexPath, reads)
 
     /**
+     * Executes a query on the Elasticsearch index asynchronously
+     * @param indexQuery
+     * @return a Future of IndexResults
+     */
+    def searchAsync(indexQuery: IndexQuery[T]): Future[IndexResults[T]] = indexQuery.fetchAsync(indexPath, reads)
+
+    /**
      * Refresh the index
      */
     def refresh() = IndexService.refresh()
@@ -153,20 +164,72 @@ object ScalaHelpers {
      * @return results of the query
      */
     def fetch(indexPath: IndexQueryPath, reads: Reads[T]): IndexResults[T] = {
+      val request = buildRequest(indexPath)
+      val response = request.execute().actionGet()
+      IndexResults(this, response, reads)
+    }
+
+    /**
+     * Executes the query asynchronously
+     * @param indexPath
+     * @param reads
+     * @return
+     */
+    def fetchAsync(indexPath: IndexQueryPath, reads: Reads[T]): Future[IndexResults[T]] = {
+      val request = buildRequest(indexPath)
+      // This will allow to access the indexQuery from the ActionListener
+      val indexQuery = this
+      // Promise used to complete the future
+      val p = promise[IndexResults[T]]
+      request.execute(new ActionListener[SearchResponse] {
+        // In case of an exception, fail the future
+        def onFailure(t: Throwable) {p failure(t)}
+        // In case of a response, complete the future
+        def onResponse(r: SearchResponse) { p success(IndexResults(indexQuery, r, reads))}
+      })
+      // Returning the future
+      p.future
+    }
+
+    /**
+     * Build a SearchRequestBuilder from the indexQuery members
+     * @param indexPath
+     * @return
+     */
+    def buildRequest(indexPath: IndexQueryPath): SearchRequestBuilder = {
       val request = IndexClient.client.prepareSearch(indexPath.index)
         .setTypes(indexPath.`type`)
         .setSearchType(SearchType.QUERY_THEN_FETCH)
       request.setQuery(builder)
-      facetBuilders.foreach { request.addFacet(_) }
-      sortBuilders.foreach { request.addSort(_) }
-      from.foreach { request.setFrom(_) }
-      size.foreach { request.setSize(_) }
-      explain.foreach { request.setExplain(_) }
-      if (noField) { request.setNoFields() }
-      val response = request.execute().actionGet()
-      IndexResults(this, response, reads)
+      facetBuilders.foreach {
+        request.addFacet(_)
+      }
+      sortBuilders.foreach {
+        request.addSort(_)
+      }
+      from.foreach {
+        request.setFrom(_)
+      }
+      size.foreach {
+        request.setSize(_)
+      }
+      explain.foreach {
+        request.setExplain(_)
+      }
+      if (noField) {
+        request.setNoFields()
+      }
+      request
     }
   }
+
+  /**
+   * Case class used to store a "Rich" result (the result with its associated SearchHit)
+   * @param result
+   * @param hit
+   * @tparam T
+   */
+  case class IndexResult[T <: Indexable](result: T, hit: SearchHit)
 
   /**
    * Results wrapper for scala
@@ -184,7 +247,13 @@ object ScalaHelpers {
     pageCurrent: Long,
     pageNb: Long,
     results: List[T],
-    facets: Facets)
+    hits: List[SearchHit],
+    facets: Facets) {
+    /**
+     * Use this if you need the SearchHit associated with your Result
+     */
+    lazy val richResults: List[IndexResult[T]] = for ((result, hit) <- results.zip(hits)) yield IndexResult(result, hit)
+  }
 
   object IndexResults {
     /**
@@ -200,6 +269,7 @@ object ScalaHelpers {
       val pageSize: Long =
         indexQuery.size.fold(searchResponse.hits().hits().length.toLong)(_.toLong)
       val pageCurrent: Long = indexQuery.from.fold (1L){ f => ((f / pageSize) + 1) }
+      val hits = searchResponse.hits().asScala.toList
 
       new IndexResults[T](
         totalCount = totalCount,
@@ -207,7 +277,8 @@ object ScalaHelpers {
         pageCurrent = pageCurrent,
         pageNb = if (pageSize == 0) 1 else math.round(math.ceil(totalCount / pageSize)),
         // Converting Json hits to Indexable entities
-        results = searchResponse.hits().asScala.toList.map {
+        hits = hits,
+        results = hits.map {
           h => Json.parse(h.getSourceAsString).as[T](reads)
         },
         facets = searchResponse.facets

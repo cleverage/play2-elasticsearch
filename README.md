@@ -3,6 +3,8 @@
 
 This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.20.4) integration in a play2 application
 
+[![Build Status](https://travis-ci.org/cleverage/play2-elasticsearch.png?branch=master)](https://travis-ci.org/cleverage/play2-elasticsearch)
+
 ## Versions
  * 0.1 -> initial version
  * 0.2 -> Percolators support
