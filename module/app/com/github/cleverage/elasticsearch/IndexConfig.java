@@ -119,8 +119,6 @@ public class IndexConfig {
         } else {
             Logger.info("ElasticSearch : no indexNames(s) defined in property 'elasticsearch.index.name'");
         }
-
-        loadMappingFromAnnotations(indexNames);
     }
 
     private void loadSettingsFromConfig(String indexName) {
@@ -130,12 +128,10 @@ public class IndexConfig {
         }
     }
 
-
     /**
-     * Load classes with @IndexType and initialize mapping if present on the @IndexMapping
-     * @param indexNames
+     * Load classes with @IndexType,@IndexName and initialize mapping if present on the @IndexMapping
      */
-    private void loadMappingFromAnnotations(String[] indexNames) {
+    public void loadFromAnnotations() {
 
         Set<String> classes = getClazzs();
 
@@ -217,8 +213,11 @@ public class IndexConfig {
             for (String load : toLoad) {
                 load = load.trim();
                 if (load.endsWith(".*")) {
-                        Reflections reflections = ReflectionsCache.getReflections(application.classloader(), load.substring(0, load.length() - 2));
-                        for(Class c :reflections.getTypesAnnotatedWith(IndexType.class)){
+                    Reflections reflections = ReflectionsCache.getReflections(application.classloader(), load.substring(0, load.length() - 2));
+                    for(Class c :reflections.getTypesAnnotatedWith(IndexName.class)){
+                        classes.add(c.getName());
+                    }
+                    for(Class c :reflections.getTypesAnnotatedWith(IndexType.class)){
                         classes.add(c.getName());
                     }
                 } else {
@@ -227,5 +226,20 @@ public class IndexConfig {
             }
         }
         return classes;
+    }
+
+    @Override
+    public String toString() {
+        return "IndexConfig{" +
+                "local=" + local +
+                ", localConfig='" + localConfig + '\'' +
+                ", clusterName='" + clusterName + '\'' +
+                ", showRequest=" + showRequest +
+                ", indexNames=" + (indexNames == null ? null : Arrays.asList(indexNames)) +
+                ", indexSettings=" + indexSettings +
+                ", indexClazzs='" + indexClazzs + '\'' +
+                ", indexMappings=" + indexMappings +
+                ", dropOnShutdown=" + dropOnShutdown +
+                '}';
     }
 }

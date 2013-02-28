@@ -4,6 +4,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.NodeBuilder;
+import play.Application;
 import play.Logger;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
@@ -16,8 +17,9 @@ public class IndexClient {
 
     public static IndexConfig config;
 
-    public IndexClient(IndexConfig config) {
-        this.config = config;
+    public IndexClient(Application application) {
+        // ElasticSearch config load from application.conf
+        this.config = new IndexConfig(application);
     }
 
     /**
@@ -52,7 +54,7 @@ public class IndexClient {
 
             // load settings on local mode
             if(config.localConfig != null) {
-                Logger.info("Elasticsearch : load settings from " + config.localConfig);
+                Logger.info("Elasticsearch : load default settings from " + config.localConfig);
                 settings.loadFromClasspath(config.localConfig);
             }
             settings.build();

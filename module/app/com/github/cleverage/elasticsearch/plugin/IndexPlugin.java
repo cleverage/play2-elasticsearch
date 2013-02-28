@@ -1,7 +1,6 @@
 package com.github.cleverage.elasticsearch.plugin;
 
 import com.github.cleverage.elasticsearch.IndexClient;
-import com.github.cleverage.elasticsearch.IndexConfig;
 import com.github.cleverage.elasticsearch.IndexService;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
 import play.Application;
@@ -26,11 +25,12 @@ public class IndexPlugin extends Plugin
     @Override
     public void onStart()
     {
-        // ElasticSearch config load from application.conf
-        IndexConfig config = new IndexConfig(application);
-
         // ElasticSearch client start on local or network
-        client = new IndexClient(config);
+        client = new IndexClient(application);
+
+        // Load indexName, indexType, indexMapping from annotation
+        client.config.loadFromAnnotations();
+
         try {
             client.start();
         } catch (Exception e) {
@@ -66,16 +66,18 @@ public class IndexPlugin extends Plugin
     @Override
     public void onStop()
     {
-        if (client.config.dropOnShutdown) {
-            String[] indexNames = client.config.indexNames;
-            for (String indexName : indexNames) {
-                if(IndexService.existsIndex(indexName)) {
-                    IndexService.deleteIndex(indexName);
+        if(client!= null) {
+            // Deleting index(s) if define in conf
+            if (client.config.dropOnShutdown) {
+                String[] indexNames = client.config.indexNames;
+                for (String indexName : indexNames) {
+                    if(IndexService.existsIndex(indexName)) {
+                        IndexService.deleteIndex(indexName);
+                    }
                 }
             }
-        }
 
-        if(client!= null) {
+            // Stopping the client
             try {
                 client.stop();
             } catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.github.cleverage.elasticsearch;
 
+import com.github.cleverage.elasticsearch.annotations.IndexName;
 import com.github.cleverage.elasticsearch.annotations.IndexType;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -31,7 +32,13 @@ public abstract class Index implements Indexable {
         }
         String indexType = indexTypeAnnotation.name();
 
-        return new IndexQueryPath(IndexService.INDEX_DEFAULT, indexType);
+        String indexName = IndexService.INDEX_DEFAULT;
+        IndexName indexNameAnnotation = this.getClass().getAnnotation(IndexName.class);
+        if(indexNameAnnotation != null) {
+            indexName = indexNameAnnotation.name();
+        }
+
+        return new IndexQueryPath(indexName, indexType);
     }
 
     /**
