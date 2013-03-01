@@ -12,6 +12,7 @@ import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, Se
 import concurrent.Future
 import concurrent.promise
 import org.elasticsearch.action.ActionListener
+import org.elasticsearch.action.bulk.BulkResponse
 
 /**
  * Scala helpers
@@ -96,6 +97,18 @@ object ScalaHelpers {
     )
 
     /**
+     * Index multiple objects in bulk mode
+     * @param tSeq
+     * @return
+     */
+    def indexBulk(tSeq: Seq[T]): BulkResponse = {
+      val tMap = tSeq.map {
+        t => t.id -> Json.toJson(t)(writes).toString()
+      }.toMap
+      IndexService.indexBulk(indexPath, tMap.asJava)
+    }
+
+    /**
      * Delete an object from the elasticsearch index
      * @param id Id of the object to delete
      * @return the DeleteResponse from Elasticsearch
@@ -114,7 +127,7 @@ object ScalaHelpers {
      * @param indexQuery
      * @return a Future of IndexResults
      */
-    def searchAsync(indexQuery: IndexQuery[T]): Future[IndexResults[T]] = indexQuery.fetchAsync(indexPath, reads)
+    def searchAsync(indexQuery: IndexQuery[T])(implicit executor : scala.concurrent.ExecutionContext): Future[IndexResults[T]] = indexQuery.fetchAsync(indexPath, reads)
 
     /**
      * Refresh the index
@@ -175,20 +188,11 @@ object ScalaHelpers {
      * @param reads
      * @return
      */
-    def fetchAsync(indexPath: IndexQueryPath, reads: Reads[T]): Future[IndexResults[T]] = {
+    def fetchAsync(indexPath: IndexQueryPath, reads: Reads[T])(implicit executor : scala.concurrent.ExecutionContext): Future[IndexResults[T]] = {
       val request = buildRequest(indexPath)
-      // This will allow to access the indexQuery from the ActionListener
-      val indexQuery = this
-      // Promise used to complete the future
-      val p = promise[IndexResults[T]]
-      request.execute(new ActionListener[SearchResponse] {
-        // In case of an exception, fail the future
-        def onFailure(t: Throwable) {p failure(t)}
-        // In case of a response, complete the future
-        def onResponse(r: SearchResponse) { p success(IndexResults(indexQuery, r, reads))}
-      })
-      // Returning the future
-      p.future
+      AsyncUtils.executeAsync(request).map {
+        r => IndexResults(this, r, reads)
+      }
     }
 
     /**

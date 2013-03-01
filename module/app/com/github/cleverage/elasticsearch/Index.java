@@ -7,6 +7,7 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.search.SearchHit;
 import play.Logger;
+import play.libs.F;
 import scala.concurrent.Future;
 
 @JsonIgnoreProperties({"searchHit"})
@@ -115,9 +116,9 @@ public abstract class Index implements Indexable {
             return IndexService.search(queryPath, query);
         }
 
-        public Future<IndexResults<T>> searchFuture(IndexQuery<T> query) {
+        public F.Promise<IndexResults<T>> searchAsync(IndexQuery<T> query) {
 
-            return IndexService.searchFuture(queryPath, query);
+            return IndexService.searchAsync(queryPath, query);
         }
     }
 

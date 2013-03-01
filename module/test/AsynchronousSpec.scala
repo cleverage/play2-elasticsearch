@@ -1,3 +1,4 @@
+import com.github.cleverage.elasticsearch.IndexQuery
 import concurrent.Await
 import concurrent.Future
 import concurrent.duration._
@@ -5,6 +6,7 @@ import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
 import org.specs2.mutable.Specification
 import play.api.test.Helpers._
 import play.api.libs.concurrent.Execution.Implicits._
+import play.libs.F
 
 /**
  * Specifications of the Asynchronous API

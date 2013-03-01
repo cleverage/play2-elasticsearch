@@ -35,6 +35,12 @@ public class Index1Type1 extends Index {
     public Index1Type1() {
     }
 
+    public Index1Type1(String name, String category, Date dateCreate) {
+        this.name = name;
+        this.category = category;
+        this.dateCreate = dateCreate;
+    }
+
     @Override
     public Map toIndex() {
         Map map = new HashMap();

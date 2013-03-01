@@ -7,6 +7,8 @@ import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRespon
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
@@ -17,12 +19,14 @@ import org.elasticsearch.action.percolate.PercolateResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.client.Requests;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
 import play.Logger;
+import play.libs.F;
 import scala.concurrent.Future;
 
 import java.io.IOException;
@@ -97,6 +101,39 @@ public abstract class IndexService {
                 .execute()
                 .actionGet();
         return indexResponse;
+    }
+
+    /**
+     * Bulk index a list of indexables
+     * @param indexPath
+     * @param indexables
+     * @return
+     */
+    public static BulkResponse indexBulk(IndexQueryPath indexPath, List<Index> indexables) {
+        BulkRequestBuilder bulkRequestBuilder = IndexClient.client.prepareBulk();
+        for (Index indexable : indexables) {
+            bulkRequestBuilder.add(Requests.indexRequest(indexPath.index)
+                    .type(indexPath.type)
+                    .id(indexable.id)
+                    .source(indexable.toIndex()));
+        }
+        return bulkRequestBuilder.execute().actionGet();
+
+    }
+
+    /**
+     * Bulk index a Map of json documents.
+     * The id of the document is the key of the Map
+     * @param indexPath
+     * @param jsonMap
+     * @return
+     */
+    public static BulkResponse indexBulk(IndexQueryPath indexPath, Map<String, String> jsonMap) {
+        BulkRequestBuilder bulkRequestBuilder = IndexClient.client.prepareBulk();
+        for (String id : jsonMap.keySet()) {
+            bulkRequestBuilder.add(Requests.indexRequest(indexPath.index).type(indexPath.type).id(id).source(jsonMap.get(id)));
+        }
+        return bulkRequestBuilder.execute().actionGet();
     }
 
     /**
@@ -182,21 +219,19 @@ public abstract class IndexService {
      * @return
      */
     public static <T extends Index> IndexResults<T> search(IndexQueryPath indexPath, IndexQuery<T> indexQuery) {
-
         return indexQuery.fetch(indexPath);
     }
 
     /**
-     * Search information on Index from a query
+     * Search asynchronously information on Index from a query
+     * @param indexPath
      * @param indexQuery
      * @param <T>
      * @return
      */
-    public static <T extends Index> Future<IndexResults<T>> searchFuture(IndexQueryPath indexPath, IndexQuery<T> indexQuery) {
-
-        return indexQuery.fetchFuture(indexPath);
+    public static <T extends Index> F.Promise<IndexResults<T>> searchAsync(IndexQueryPath indexPath, IndexQuery<T> indexQuery) {
+        return indexQuery.fetchAsync(indexPath);
     }
-
 
     /**
      * Test if an indice Exists
