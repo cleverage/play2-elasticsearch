@@ -81,6 +81,18 @@ object ScalaHelpers {
     }
 
     /**
+     * Retrieve asynchronously a T instance from the Elasticsearch index
+     * @param id
+     * @return
+     */
+    def getAsync(id: String)(implicit executor : scala.concurrent.ExecutionContext): Future[T] = {
+      val getResponseFuture = AsyncUtils.executeAsync(IndexService.getGetRequestBuilder(indexPath, id))
+      getResponseFuture.map { response =>
+        Json.parse(response.getSourceAsString).as[T](reads)
+      }
+    }
+
+    /**
      * Index an object
      * @param t the object to index
      * @return the IndexResponse from Elasticsearch
@@ -88,7 +100,16 @@ object ScalaHelpers {
     def index(t: T): IndexResponse = IndexService.index(indexPath, t.id, Json.toJson(t)(writes).toString())
 
     /**
-     * Index multiple objects
+     * Index an object asynchronously
+     * @param t
+     * @return
+     */
+    def indexAsync(t: T): Future[IndexResponse] = {
+      AsyncUtils.executeAsync(IndexService.getIndexRequestBuilder(indexPath, t.id, Json.toJson(t)(writes).toString()))
+    }
+
+    /**
+      * Index multiple objects
      * @param tSeq a Sequence of objects to index
      * @return a Sequence of IndexResponse from Elasticsearch
      */
@@ -97,15 +118,41 @@ object ScalaHelpers {
     )
 
     /**
+     * Index multiple objects asynchronously
+     * @param tSeq
+     * @return
+     */
+    def indexAsync(tSeq: Seq[T])(implicit executor : scala.concurrent.ExecutionContext): Future[Seq[IndexResponse]] = {
+      Future.sequence(
+        tSeq.map(t =>
+          AsyncUtils.executeAsync(IndexService.getIndexRequestBuilder(indexPath, t.id, Json.toJson(t)(writes).toString()))
+        )
+      )
+    }
+
+    protected def createBulkMap(tSeq: Seq[T]) = {
+      tSeq.map {
+        t => t.id -> Json.toJson(t)(writes).toString()
+      }.toMap
+    }
+
+    /**
      * Index multiple objects in bulk mode
      * @param tSeq
      * @return
      */
     def indexBulk(tSeq: Seq[T]): BulkResponse = {
-      val tMap = tSeq.map {
-        t => t.id -> Json.toJson(t)(writes).toString()
-      }.toMap
-      IndexService.indexBulk(indexPath, tMap.asJava)
+      IndexService.indexBulk(indexPath, createBulkMap(tSeq).asJava)
+    }
+
+
+    /**
+     * Index multiple objects in bulk mode asynchronously
+     * @param tSeq
+     * @return
+     */
+    def indexBulkAsync(tSeq: Seq[T]): Future[BulkResponse] = {
+      AsyncUtils.executeAsync(IndexService.getBulkRequestBuilder(indexPath, createBulkMap(tSeq).asJava))
     }
 
     /**
@@ -114,6 +161,15 @@ object ScalaHelpers {
      * @return the DeleteResponse from Elasticsearch
      */
     def delete(id: String): DeleteResponse = IndexService.delete(indexPath, id)
+
+    /**
+     * Delete an object from the elasticsearch index asynchronously
+     * @param id Id of the object to delete
+     * @return the DeleteResponse from Elasticsearch
+     */
+    def deleteAsync(id: String): Future[DeleteResponse] = {
+      AsyncUtils.executeAsync(IndexService.getDeleteRequestBuilder(indexPath, id))
+    }
 
     /**
      * Executes a query on the Elasticsearch index

@@ -15,6 +15,50 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
   sequential
 
   "Asynchronous API" should {
+    "allow parallel indexing" in {
+      running(esFakeApp()) {
+        implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
+        val future1 = SampleIndexableManager.indexAsync(first)
+        val future2 = SampleIndexableManager.indexAsync(second)
+        val future3 = SampleIndexableManager.indexAsync(third)
+
+        val combinedFuture = Future.sequence(List(future1, future2, future3))
+        val results = Await.result(combinedFuture, Duration(10, SECONDS))
+        results.map {_.id()} must be equalTo(List("1","2","3"))
+      }
+    }
+    "allow parallel indexing of multiple objects" in {
+      running(esFakeApp()) {
+        implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
+        val future = SampleIndexableManager.indexAsync(List(first, second, third))
+
+        val results = Await.result(future, Duration(10, SECONDS))
+        results.map {_.id()} must be equalTo(List("1","2","3"))
+      }
+    }
+    "allow parallel bulk indexing of multiple objects" in {
+      running(esFakeApp()) {
+        implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
+        val future = SampleIndexableManager.indexBulkAsync(List(first, second, third))
+
+        val results = Await.result(future, Duration(10, SECONDS))
+        results.items().size must be equalTo(3)
+      }
+    }
+    "allow parallel delete" in {
+      running(esFakeApp()) {
+        implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
+        SampleIndexableManager.index(List(first, second, third))
+
+        val future1 = SampleIndexableManager.deleteAsync("1")
+        val future2 = SampleIndexableManager.deleteAsync("2")
+        val future3 = SampleIndexableManager.deleteAsync("3")
+        val future = Future.sequence(List(future1, future2, future3))
+        val results = Await.result(future, Duration(10, SECONDS))
+        results.forall(_.isNotFound) must beFalse
+        results.map {_.id()} must beEqualTo(List("1", "2", "3"))
+      }
+    }
     "allow parallel requests" in {
       running(esFakeApp()) {
         implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext

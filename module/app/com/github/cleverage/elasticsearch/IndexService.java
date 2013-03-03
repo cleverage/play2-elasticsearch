@@ -9,6 +9,7 @@ import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
@@ -96,11 +97,18 @@ public abstract class IndexService {
      * @return
      */
     public static IndexResponse index(IndexQueryPath indexPath, String id, String json) {
-        IndexResponse indexResponse = IndexClient.client.prepareIndex(indexPath.index, indexPath.type, id)
-                .setSource(json)
-                .execute()
-                .actionGet();
-        return indexResponse;
+        return getIndexRequestBuilder(indexPath, id, json).execute().actionGet();
+    }
+
+    /**
+     * Create an IndexRequestBuilder for a Json-encoded object
+     * @param indexPath
+     * @param id
+     * @param json
+     * @return
+     */
+    public static IndexRequestBuilder getIndexRequestBuilder(IndexQueryPath indexPath, String id, String json) {
+        return IndexClient.client.prepareIndex(indexPath.index, indexPath.type, id).setSource(json);
     }
 
     /**
@@ -122,6 +130,20 @@ public abstract class IndexService {
     }
 
     /**
+     * Create a BulkRequestBuilder
+     * @param indexPath
+     * @param jsonMap
+     * @return
+     */
+    public static BulkRequestBuilder getBulkRequestBuilder(IndexQueryPath indexPath, Map<String, String> jsonMap) {
+        BulkRequestBuilder bulkRequestBuilder = IndexClient.client.prepareBulk();
+        for (String id : jsonMap.keySet()) {
+            bulkRequestBuilder.add(Requests.indexRequest(indexPath.index).type(indexPath.type).id(id).source(jsonMap.get(id)));
+        }
+        return bulkRequestBuilder;
+    }
+
+    /**
      * Bulk index a Map of json documents.
      * The id of the document is the key of the Map
      * @param indexPath
@@ -129,11 +151,18 @@ public abstract class IndexService {
      * @return
      */
     public static BulkResponse indexBulk(IndexQueryPath indexPath, Map<String, String> jsonMap) {
-        BulkRequestBuilder bulkRequestBuilder = IndexClient.client.prepareBulk();
-        for (String id : jsonMap.keySet()) {
-            bulkRequestBuilder.add(Requests.indexRequest(indexPath.index).type(indexPath.type).id(id).source(jsonMap.get(id)));
-        }
+        BulkRequestBuilder bulkRequestBuilder = getBulkRequestBuilder(indexPath, jsonMap);
         return bulkRequestBuilder.execute().actionGet();
+    }
+
+    /**
+     * Create a DeleteRequestBuilder
+     * @param indexPath
+     * @param id
+     * @return
+     */
+    public static DeleteRequestBuilder getDeleteRequestBuilder(IndexQueryPath indexPath, String id) {
+        return IndexClient.client.prepareDelete(indexPath.index, indexPath.type, id);
     }
 
     /**
@@ -142,8 +171,7 @@ public abstract class IndexService {
      * @return
      */
     public static DeleteResponse delete(IndexQueryPath indexPath, String id) {
-
-        DeleteResponse deleteResponse = IndexClient.client.prepareDelete(indexPath.index, indexPath.type, id)
+        DeleteResponse deleteResponse = getDeleteRequestBuilder(indexPath, id)
                 .execute()
                 .actionGet();
 
@@ -155,13 +183,23 @@ public abstract class IndexService {
     }
 
     /**
+     * Create a GetRequestBuilder
+     * @param indexPath
+     * @param id
+     * @return
+     */
+    public static GetRequestBuilder getGetRequestBuilder(IndexQueryPath indexPath, String id) {
+        return IndexClient.client.prepareGet(indexPath.index, indexPath.type, id);
+    }
+
+    /**
      * Get the json representation of a document from an id
      * @param indexPath
      * @param id
      * @return
      */
     public static String getAsString(IndexQueryPath indexPath, String id) {
-        return IndexClient.client.prepareGet(indexPath.index, indexPath.type, id)
+        return getGetRequestBuilder(indexPath, id)
                 .execute()
                 .actionGet()
                 .getSourceAsString();
@@ -178,7 +216,7 @@ public abstract class IndexService {
 
         T t = IndexUtils.getInstanceIndex(clazz);
 
-        GetRequestBuilder getRequestBuilder = IndexClient.client.prepareGet(indexPath.index, indexPath.type, id);
+        GetRequestBuilder getRequestBuilder = getGetRequestBuilder(indexPath, id);
         GetResponse getResponse = getRequestBuilder.execute().actionGet();
 
         if (!getResponse.exists()) {
