@@ -71,6 +71,18 @@ public abstract class IndexService {
     }
 
     /**
+     * Create an IndexRequestBuilder
+     * @param indexPath
+     * @param id
+     * @param indexable
+     * @return
+     */
+    private static IndexRequestBuilder getIndexRequestBuilder(IndexQueryPath indexPath, String id, Index indexable) {
+        return IndexClient.client.prepareIndex(indexPath.index, indexPath.type, id)
+                .setSource(indexable.toIndex());
+    }
+
+    /**
      * Add Indexable object in the index
      *
      * @param indexPath
@@ -78,9 +90,7 @@ public abstract class IndexService {
      * @return
      */
     public static IndexResponse index(IndexQueryPath indexPath, String id, Index indexable) {
-
-        IndexResponse indexResponse = IndexClient.client.prepareIndex(indexPath.index, indexPath.type, id)
-                .setSource(indexable.toIndex())
+        IndexResponse indexResponse = getIndexRequestBuilder(indexPath, id, indexable)
                 .execute()
                 .actionGet();
         if (Logger.isDebugEnabled()) {
@@ -88,6 +98,18 @@ public abstract class IndexService {
         }
         return indexResponse;
     }
+
+    /**
+     * Add Indexable object in the index asynchronously
+     *
+     * @param indexPath
+     * @param indexable
+     * @return
+     */
+    public static F.Promise<IndexResponse> indexAsync(IndexQueryPath indexPath, String id, Index indexable) {
+        return AsyncUtils.executeAsyncJava(getIndexRequestBuilder(indexPath, id, indexable));
+    }
+
 
     /**
      * Add a json document to the index
@@ -112,12 +134,12 @@ public abstract class IndexService {
     }
 
     /**
-     * Bulk index a list of indexables
+     * Create a BulkRequestBuilder for a List of Index objects
      * @param indexPath
      * @param indexables
      * @return
      */
-    public static BulkResponse indexBulk(IndexQueryPath indexPath, List<Index> indexables) {
+    private static BulkRequestBuilder getBulkRequestBuilder(IndexQueryPath indexPath, List<? extends Index> indexables) {
         BulkRequestBuilder bulkRequestBuilder = IndexClient.client.prepareBulk();
         for (Index indexable : indexables) {
             bulkRequestBuilder.add(Requests.indexRequest(indexPath.index)
@@ -125,12 +147,32 @@ public abstract class IndexService {
                     .id(indexable.id)
                     .source(indexable.toIndex()));
         }
-        return bulkRequestBuilder.execute().actionGet();
-
+        return bulkRequestBuilder;
     }
 
     /**
-     * Create a BulkRequestBuilder
+     * Bulk index a list of indexables
+     * @param indexPath
+     * @param indexables
+     * @return
+     */
+    public static BulkResponse indexBulk(IndexQueryPath indexPath, List<? extends Index> indexables) {
+        BulkRequestBuilder bulkRequestBuilder = getBulkRequestBuilder(indexPath, indexables);
+        return bulkRequestBuilder.execute().actionGet();
+    }
+
+    /**
+     * Bulk index a list of indexables asynchronously
+     * @param indexPath
+     * @param indexables
+     * @return
+     */
+    public static F.Promise<BulkResponse> indexBulkAsync(IndexQueryPath indexPath, List<? extends Index> indexables) {
+        return AsyncUtils.executeAsyncJava(getBulkRequestBuilder(indexPath, indexables));
+    }
+
+    /**
+     * Create a BulkRequestBuilder for a List of json-encoded objects
      * @param indexPath
      * @param jsonMap
      * @return
@@ -163,6 +205,15 @@ public abstract class IndexService {
      */
     public static DeleteRequestBuilder getDeleteRequestBuilder(IndexQueryPath indexPath, String id) {
         return IndexClient.client.prepareDelete(indexPath.index, indexPath.type, id);
+    }
+
+    /**
+     * Delete element in index asynchronously
+     * @param indexPath
+     * @return
+     */
+    public static F.Promise<DeleteResponse> deleteAsync(IndexQueryPath indexPath, String id) {
+        return AsyncUtils.executeAsyncJava(getDeleteRequestBuilder(indexPath, id));
     }
 
     /**
@@ -205,20 +256,8 @@ public abstract class IndexService {
                 .getSourceAsString();
     }
 
-    /**
-     * Get Indexable Object for an Id
-     *
-     * @param indexPath
-     * @param clazz
-     * @return
-     */
-    public static <T extends Index> T get(IndexQueryPath indexPath, Class<T> clazz, String id) {
-
+    private static <T extends Index> T getTFromGetResponse(Class<T> clazz, GetResponse getResponse) {
         T t = IndexUtils.getInstanceIndex(clazz);
-
-        GetRequestBuilder getRequestBuilder = getGetRequestBuilder(indexPath, id);
-        GetResponse getResponse = getRequestBuilder.execute().actionGet();
-
         if (!getResponse.exists()) {
             return null;
         }
@@ -228,11 +267,39 @@ public abstract class IndexService {
 
         t = (T) t.fromIndex(map);
         t.id = getResponse.getId();
-
-        if (Logger.isDebugEnabled()) {
-            Logger.debug("ElasticSearch : Get " + t.toString());
-        }
         return t;
+    }
+
+    /**
+     * Get Indexable Object for an Id
+     *
+     * @param indexPath
+     * @param clazz
+     * @return
+     */
+    public static <T extends Index> T get(IndexQueryPath indexPath, Class<T> clazz, String id) {
+        GetRequestBuilder getRequestBuilder = getGetRequestBuilder(indexPath, id);
+        GetResponse getResponse = getRequestBuilder.execute().actionGet();
+        return getTFromGetResponse(clazz, getResponse);
+    }
+
+    /**
+     * Get Indexable Object for an Id asynchronously
+     * @param indexPath
+     * @param clazz
+     * @param id
+     * @param <T>
+     * @return
+     */
+    public static <T extends Index> F.Promise<T> getAsync(IndexQueryPath indexPath, final Class<T> clazz, String id) {
+        F.Promise<GetResponse> responsePromise = AsyncUtils.executeAsyncJava(getGetRequestBuilder(indexPath, id));
+        return responsePromise.map(
+            new F.Function<GetResponse, T>() {
+                public T apply(GetResponse getResponse) {
+                    return getTFromGetResponse(clazz, getResponse);
+                }
+            }
+        );
     }
 
     /**

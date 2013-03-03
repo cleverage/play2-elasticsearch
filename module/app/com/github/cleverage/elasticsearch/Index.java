@@ -48,8 +48,16 @@ public abstract class Index implements Indexable {
      * @throws Exception
      */
     public IndexResponse index() {
-
         return IndexService.index(getIndexPath(), id, this);
+    }
+
+    /**
+     * Index this Document asynchronously
+     * @return
+     * @throws Exception
+     */
+    public F.Promise<IndexResponse> indexAsync() {
+        return IndexService.indexAsync(getIndexPath(), id, this);
     }
 
     /**
@@ -58,8 +66,16 @@ public abstract class Index implements Indexable {
      * @throws Exception
      */
     public DeleteResponse delete() {
-
         return IndexService.delete(getIndexPath(), id);
+    }
+
+    /**
+     * Delete this Document asynchronously
+     * @return
+     * @throws Exception
+     */
+    public F.Promise<DeleteResponse> deleteAsync() {
+        return IndexService.deleteAsync(getIndexPath(), id);
     }
 
 

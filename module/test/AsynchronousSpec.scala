@@ -45,6 +45,20 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
         results.items().size must be equalTo(3)
       }
     }
+    "allow parallel get" in {
+      running(esFakeApp()) {
+        implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
+        SampleIndexableManager.index(List(first, second, third))
+
+        val future = Future.sequence(List(
+          SampleIndexableManager.getAsync("1"),
+          SampleIndexableManager.getAsync("2"),
+          SampleIndexableManager.getAsync("3")
+        ))
+        val results = Await.result(future, Duration(10, SECONDS))
+        results must beEqualTo(List(first, second, third))
+      }
+    }
     "allow parallel delete" in {
       running(esFakeApp()) {
         implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext

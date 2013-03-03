@@ -1,9 +1,8 @@
-import com.github.cleverage.elasticsearch.IndexClient;
-import com.github.cleverage.elasticsearch.IndexQuery;
-import com.github.cleverage.elasticsearch.IndexResults;
-import com.github.cleverage.elasticsearch.IndexService;
+import com.github.cleverage.elasticsearch.*;
 import indextype.Index1Type1;
 import indextype.Index2Type1;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.junit.Test;
 import play.libs.F;
@@ -106,11 +105,95 @@ public class ElasticsearchTestJava {
     }
 
     @Test
+    public void asynchronousIndex() {
+        running(esFakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
+                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date());
+                F.Promise<IndexResponse> promise1 = index1Type1.indexAsync();
+                F.Promise<IndexResponse> promise2 = index1Type1Bis.indexAsync();
+
+                F.Promise<List<IndexResponse>> promise = F.Promise.sequence(promise1, promise2);
+                List<IndexResponse> indexResponses = promise.get(10L, TimeUnit.SECONDS);
+                assertThat(indexResponses.size()).isEqualTo(2);
+            }
+        });
+    }
+
+    @Test
+    public void asynchronousIndexBulk() {
+        running(esFakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
+                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date());
+                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date());
+
+                F.Promise<BulkResponse> promise = IndexService.indexBulkAsync(
+                        index1Type1.getIndexPath(),
+                        Arrays.asList(index1Type1, index1Type1Bis, index1Type1Ter)
+                );
+
+                BulkResponse response = promise.get(10L, TimeUnit.SECONDS);
+                assertThat(response.items().length).isEqualTo(3);
+            }
+        });
+    }
+
+    @Test
+    public void asynchronousDelete() {
+        running(esFakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
+                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date());
+                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date());
+                IndexService.indexBulk(index1Type1.getIndexPath(), Arrays.asList(index1Type1, index1Type1Bis, index1Type1Ter));
+
+                F.Promise<DeleteResponse> promise1 = index1Type1.deleteAsync();
+                F.Promise<DeleteResponse> promise2 = index1Type1Bis.deleteAsync();
+                F.Promise<DeleteResponse> promise3 = index1Type1Ter.deleteAsync();
+
+                F.Promise<List<DeleteResponse>> promise = F.Promise.sequence(promise1, promise2, promise3);
+                List<DeleteResponse> deleteResponses = promise.get(10L, TimeUnit.SECONDS);
+
+                assertThat(deleteResponses.size()).isEqualTo(3);
+            }
+        });
+    }
+
+    @Test
+    public void asynchronousGet() {
+        running(esFakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
+                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date());
+                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date());
+                IndexService.indexBulk(index1Type1.getIndexPath(), Arrays.asList(index1Type1, index1Type1Bis, index1Type1Ter));
+
+                F.Promise<Index1Type1> promise1 = IndexService.getAsync(index1Type1.getIndexPath(), Index1Type1.class,  "1");
+                F.Promise<Index1Type1> promise2 = IndexService.getAsync(index1Type1.getIndexPath(), Index1Type1.class,  "2");
+                F.Promise<Index1Type1> promise3 = IndexService.getAsync(index1Type1.getIndexPath(), Index1Type1.class, "3");
+
+                F.Promise<List<Index1Type1>> promise = F.Promise.sequence(promise1, promise2, promise3);
+                List<Index1Type1> objects = promise.get(10L, TimeUnit.SECONDS);
+
+                assertThat(objects.size()).isEqualTo(3);
+                assertThat(objects.get(0)).isEqualTo(index1Type1);
+                assertThat(objects.get(1)).isEqualTo(index1Type1Bis);
+                assertThat(objects.get(2)).isEqualTo(index1Type1Ter);
+            }
+        });
+    }
+
+    @Test
     public void asynchronousSearch() {
         running(esFakeApplication(), new Runnable() {
             @Override
             public void run() {
-                Index1Type1 index1Type1 = new Index1Type1("name1", "category", new Date());
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
                 index1Type1.index();
                 IndexService.refresh();
 
