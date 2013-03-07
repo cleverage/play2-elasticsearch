@@ -1,11 +1,13 @@
 package com.github.cleverage.elasticsearch.plugin;
 
-import com.github.cleverage.elasticsearch.IndexClient;
-import com.github.cleverage.elasticsearch.IndexService;
 import org.elasticsearch.client.transport.NoNodeAvailableException;
+
 import play.Application;
 import play.Logger;
 import play.Plugin;
+
+import com.github.cleverage.elasticsearch.IndexClient;
+import com.github.cleverage.elasticsearch.IndexService;
 
 /**
  * ElasticSearch PLugin for Play 2 written in Java.
@@ -50,6 +52,11 @@ public class IndexPlugin extends Plugin
                     // Prepare Index ( define mapping if present )
                     IndexService.prepareIndex(indexName);
                 }
+            }
+
+            // Create "_percolator" index if not exists
+            if (!IndexService.existsIndex(IndexService.INDEX_PERCOLATOR)) {
+                IndexService.createIndex(IndexService.INDEX_PERCOLATOR);
             }
 
             Logger.info("ElasticSearch : Plugin has started");

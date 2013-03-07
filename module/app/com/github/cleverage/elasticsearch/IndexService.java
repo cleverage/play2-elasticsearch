@@ -1,5 +1,11 @@
 package com.github.cleverage.elasticsearch;
 
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
@@ -24,23 +30,18 @@ import org.elasticsearch.client.Requests;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.index.percolator.PercolatorService;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
+
 import play.Logger;
 import play.libs.F;
-import scala.concurrent.Future;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 
 public abstract class IndexService {
 
     public static final String INDEX_DEFAULT = IndexClient.config.indexNames[0];
-    public static final String INDEX_PERCOLATOR = "_percolator";
+    public static final String INDEX_PERCOLATOR = PercolatorService.INDEX_NAME;
 
     /**
      * get indexRequest to index from a specific request
