@@ -3,41 +3,35 @@
 
 This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.20.4) integration in a [Playframework](http://www.playframework.com/) 2 application
 
-![Playframework](http://fr.clever-age.com/local/cache-vignettes/L220xH78/play-logo-13d8c.png "Playframework")
-![Elasticsearch](http://fr.clever-age.com/local/cache-vignettes/L250xH78/logoelasticsearchsmall-292be.png "Elasticsearch")
-
 [![Build Status](https://travis-ci.org/cleverage/play2-elasticsearch.png?branch=master)](https://travis-ci.org/cleverage/play2-elasticsearch)
 
 ## Versions
-
-For Playframework version **2.0.x**, see **README-2.0.x.md**
-
 Module | Playframework | Elasticsearch | Comments
 --- | --- | --- | ---
- 0.5.0 | 2.1-RC1 | 0.19.10 | Compatibility with play 2.1-RC1
- 0.5.1 | 2.1-RC3 | 0.20.4 | upgrade to ES 0.20.4 - works correctly with play 2.1-RC3
- 0.5.2 | 2.1.0 | 0.20.4 | Upgrade to play 2.1.0 - includes scala helpers
- 0.5.3 | 2.1.0 | 0.20.5 | Upgrade to ES 0.20.5 - moving artifact's organization from "com.github.cleverage - elasticsearch" to "com.clever-age - play2-elasticsearch"
+ 0.1 | 2.0.3 | 0.19.4 | Initial version
+ 0.2 | 2.0.3 | 0.19.4 | Percolators support
+ 0.3 | 2.0.3 | 0.19.4 | IndexResult : adding pagination data
+ 0.4 | 2.0.3 | 0.19.10 | Upgrade ES to 0.19.10
+ 0.4.1 | 2.0.3 | 0.19.10 | Allow advanced query ( with highlight, .... ) 
+ 0.4.2 | 2.0.4 | 0.19.10 | Upgrade play2.0.4 + allow index settings in conf 
  
 ## Install
 
 The dependency declaration is :
 ```
-"com.clever-age" % "play2-elasticsearch" % "0.5.3"
+"com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.2"
 ```
 
-The library is published on the sbt community repository. 
-You can use the following resolvers :
+You should use the following resolver :
 ```
-resolvers += Resolver.url("play-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns),
-resolvers += Resolver.url("play-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
+resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
 ```
 
-So the Build.scala should look like :
+So the Build.scala should look like : 
 ```
 import sbt._
 import Keys._
-import play.Project._
+import PlayProject._
 
 object ApplicationBuild extends Build {
 
@@ -46,15 +40,13 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "com.clever-age" % "play2-elasticsearch" % "0.5.3"
+      "com.github.cleverage" % "elasticsearch_2.9.1" % "0.4.2"
     )
 
-    val main = play.Project(appName, appVersion, appDependencies).settings(
+    val main = PlayProject(appName, appVersion, appDependencies, mainLang = JAVA).settings(
       // Add your own project settings here      
-      resolvers += Resolver.url("play-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns),
-      resolvers += Resolver.url("play-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
+      resolvers += Resolver.url("GitHub Play2-elasticsearch Repository", url("http://cleverage.github.com/play2-elasticsearch/releases/"))(Resolver.ivyStylePatterns)
     )
-
 }
 ```
 
@@ -118,11 +110,6 @@ IndexResults<IndexTest> results = IndexTest.find.search(indexQuery);
 Example : https://github.com/cleverage/play2-elasticsearch/blob/master/samples/elasticsearch-java/app/indexing/Team.java
 
 See samples/elasticsearch-java application for more sample
-
-## Scala
-Starting from version 0.5.2, Scala helpers are available (see module com.github.cleverage.elasticsearch.ScalaHelpers).
-
-See samples/elasticsearch-scala application for a basic example
 
 ## Authors
 http://twitter.com/nboire & http://twitter.com/mguillermin
