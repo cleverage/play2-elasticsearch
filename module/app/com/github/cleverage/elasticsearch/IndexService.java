@@ -1,11 +1,5 @@
 package com.github.cleverage.elasticsearch;
 
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
@@ -33,9 +27,14 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.percolator.PercolatorService;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
-
 import play.Logger;
 import play.libs.F;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 
 public abstract class IndexService {
@@ -108,9 +107,17 @@ public abstract class IndexService {
      * @return
      */
     public static F.Promise<IndexResponse> indexAsync(IndexQueryPath indexPath, String id, Index indexable) {
-        return AsyncUtils.executeAsyncJava(getIndexRequestBuilder(indexPath, id, indexable));
+        return indexAsync(getIndexRequestBuilder(indexPath, id, indexable));
     }
 
+    /**
+     * call IndexRequestBuilder on asynchronously
+     * @param indexRequestBuilder
+     * @return
+     */
+    public static F.Promise<IndexResponse> indexAsync(IndexRequestBuilder indexRequestBuilder) {
+        return AsyncUtils.executeAsyncJava(indexRequestBuilder);
+    }
 
     /**
      * Add a json document to the index
