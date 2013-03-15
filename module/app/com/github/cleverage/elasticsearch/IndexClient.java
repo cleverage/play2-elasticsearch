@@ -2,6 +2,7 @@ package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.SettingsException;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.NodeBuilder;
 import play.Application;
@@ -22,57 +23,20 @@ public class IndexClient {
         this.config = new IndexConfig(application);
     }
 
-    /**
-     * Checks if is local mode.
-     *
-     * @return true, if is local mode
-     */
-    private boolean isLocalMode() {
-        try {
-            if (config.client == null) {
-                return true;
-            }
-            if (config.client.equalsIgnoreCase("false") || config.client.equalsIgnoreCase("true")) {
-                return true;
-            }
-
-            return config.local;
-        } catch (Exception e) {
-            Logger.error("Error! Starting in Local Model: %s", e);
-            return true;
-        }
-    }
-
     public void start() throws Exception {
-        // Start Node Builder
 
-        ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder();
+        // Load Elasticsearch Settings
+        ImmutableSettings.Builder settings = loadSettings();
 
         // Check Model
         if (this.isLocalMode()) {
             Logger.info("ElasticSearch : Starting in Local Mode");
 
-            // load settings on local mode
-            if(config.localConfig != null) {
-                Logger.info("Elasticsearch : load default settings from " + config.localConfig);
-                settings.loadFromClasspath(config.localConfig);
-            }
-            settings.build();
-            Logger.info("Elasticsearch : settings  " + settings.internalMap().toString());
-
             NodeBuilder nb = nodeBuilder().settings(settings).local(true).client(false).data(true);
             node = nb.node();
             client = node.client();
             Logger.info("ElasticSearch : Started in Local Mode");
-        }
-        else
-        {
-            settings.put("client.transport.sniff", true);
-            if (config.clusterName != null) {
-                settings.put("cluster.name", config.clusterName);
-            }
-            settings.build();
-
+        } else {
             Logger.info("ElasticSearch : Starting in Client Mode");
             TransportClient c = new TransportClient(settings);
             if (config.client == null) {
@@ -103,11 +67,63 @@ public class IndexClient {
         }
     }
 
-    public void stop() throws Exception {
-         client.close();
+    /**
+     * Checks if is local mode.
+     *
+     * @return true, if is local mode
+     */
+    private boolean isLocalMode() {
+        try {
+            if (config.client == null) {
+                return true;
+            }
+            if (config.client.equalsIgnoreCase("false") || config.client.equalsIgnoreCase("true")) {
+                return true;
+            }
 
-         if(node != null) {
-             node.close();
-         }
+            return config.local;
+        } catch (Exception e) {
+            Logger.error("Error! Starting in Local Model: %s", e);
+            return true;
+        }
+    }
+
+    /**
+     * Load settings from resource file
+     *
+     * @return
+     * @throws Exception
+     */
+    private ImmutableSettings.Builder loadSettings() throws Exception {
+        ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder();
+
+        // set default settings
+        settings.put("client.transport.sniff", true);
+        if (config.clusterName != null) {
+            settings.put("cluster.name", config.clusterName);
+        }
+
+        // load settings
+        if (config.localConfig != null) {
+            Logger.debug("Elasticsearch : Load settings from " + config.localConfig);
+            try {
+                settings.loadFromClasspath(config.localConfig);
+            } catch (SettingsException settingsException) {
+                Logger.error("Elasticsearch : Error when loading settings from " + config.localConfig);
+                throw new Exception(settingsException);
+            }
+        }
+        settings.build();
+        Logger.info("Elasticsearch : Settings  " + settings.internalMap().toString());
+        return settings;
+    }
+
+    public void stop() throws Exception {
+        if (client != null) {
+            client.close();
+        }
+        if (node != null) {
+            node.close();
+        }
     }
 }
