@@ -31,6 +31,7 @@ import play.Logger;
 import play.libs.F;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -189,6 +190,27 @@ public abstract class IndexService {
         BulkRequestBuilder bulkRequestBuilder = IndexClient.client.prepareBulk();
         for (String id : jsonMap.keySet()) {
             bulkRequestBuilder.add(Requests.indexRequest(indexPath.index).type(indexPath.type).id(id).source(jsonMap.get(id)));
+        }
+        return bulkRequestBuilder;
+    }
+
+    /**
+     * Bulk index a list of indexables asynchronously
+     * @param bulkRequestBuilder
+     * @return
+     */
+    public static F.Promise<BulkResponse> indexBulkAsync(BulkRequestBuilder bulkRequestBuilder) {
+        return AsyncUtils.executeAsyncJava(bulkRequestBuilder);
+    }
+
+    /**
+     * Create a BulkRequestBuilder for a List of IndexRequestBuilder
+     * @return
+     */
+    public static BulkRequestBuilder getBulkRequestBuilder(Collection<IndexRequestBuilder> indexRequestBuilder) {
+        BulkRequestBuilder bulkRequestBuilder = IndexClient.client.prepareBulk();
+        for (IndexRequestBuilder requestBuilder : indexRequestBuilder) {
+            bulkRequestBuilder.add(requestBuilder);
         }
         return bulkRequestBuilder;
     }
