@@ -12,12 +12,13 @@ This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.2
 
 For Playframework version **2.0.x**, see **README-2.0.x.md**
 
-Module | Playframework | Elasticsearch | Comments
---- | --- | --- | ---
+Module | Playframework | Elasticsearch | Comments | Diff
+--- | --- | --- | --- | ---
  0.5.0 | 2.1-RC1 | 0.19.10 | Compatibility with play 2.1-RC1
  0.5.1 | 2.1-RC3 | 0.20.4 | upgrade to ES 0.20.4 - works correctly with play 2.1-RC3
  0.5.2 | 2.1.0 | 0.20.4 | Upgrade to play 2.1.0 - includes scala helpers
  0.5.3 | 2.1.0 | 0.20.5 | Upgrade to ES 0.20.5 - moving artifact's organization from "com.github.cleverage - elasticsearch" to "com.clever-age - play2-elasticsearch"
+ 0.5.4 | 2.1.0 | 0.20.5 | API Async, Bulk, manage multi-index" | [v0.5.3 -> v0.5.4](https://github.com/cleverage/play2-elasticsearch/compare/v0.5.3...v0.5.4)
  
 ## Install
 
