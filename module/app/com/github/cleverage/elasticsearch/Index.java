@@ -1,14 +1,15 @@
 package com.github.cleverage.elasticsearch;
 
-import com.github.cleverage.elasticsearch.annotations.IndexName;
-import com.github.cleverage.elasticsearch.annotations.IndexType;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.search.SearchHit;
+
 import play.Logger;
 import play.libs.F;
-import scala.concurrent.Future;
+
+import com.github.cleverage.elasticsearch.annotations.IndexName;
+import com.github.cleverage.elasticsearch.annotations.IndexType;
 
 @JsonIgnoreProperties({"searchHit"})
 public abstract class Index implements Indexable {
@@ -43,12 +44,32 @@ public abstract class Index implements Indexable {
     }
 
     /**
+     * Return indexQueryPath for a specific indexName
+     * @return
+     */
+    public IndexQueryPath getIndexPath(String indexName) {
+
+        IndexQueryPath queryPath = getIndexPath();
+        queryPath.index = indexName;
+        return queryPath;
+    }
+
+    /**
      * Index this Document
      * @return
      * @throws Exception
      */
     public IndexResponse index() {
         return IndexService.index(getIndexPath(), id, this);
+    }
+
+    /**
+     * Index this Document on this indexName
+     * @return
+     * @throws Exception
+     */
+    public IndexResponse index(String indexName) {
+        return IndexService.index(getIndexPath(indexName), id, this);
     }
 
     /**
@@ -61,12 +82,30 @@ public abstract class Index implements Indexable {
     }
 
     /**
+     * Index this Document asynchronously
+     * @return
+     * @throws Exception
+     */
+    public F.Promise<IndexResponse> indexAsync(String indexName) {
+        return IndexService.indexAsync(getIndexPath(indexName), id, this);
+    }
+
+    /**
      * Delete this Document
      * @return
      * @throws Exception
      */
     public DeleteResponse delete() {
         return IndexService.delete(getIndexPath(), id);
+    }
+
+    /**
+     * Delete this Document for this indexName
+     * @return
+     * @throws Exception
+     */
+    public DeleteResponse delete(String indexName) {
+        return IndexService.delete(getIndexPath(indexName), id);
     }
 
     /**
@@ -78,6 +117,14 @@ public abstract class Index implements Indexable {
         return IndexService.deleteAsync(getIndexPath(), id);
     }
 
+    /**
+     * Delete this Document asynchronously for this indexName
+     * @return
+     * @throws Exception
+     */
+    public F.Promise<DeleteResponse> deleteAsync(String indexName) {
+        return IndexService.deleteAsync(getIndexPath(indexName), id);
+    }
 
     /**
      * Helper for index queries.
@@ -95,6 +142,16 @@ public abstract class Index implements Indexable {
             this.type = type;
             T t = IndexUtils.getInstanceIndex(type);
             this.queryPath = t.getIndexPath();
+        }
+
+        /**
+         * Creates a finder for document of type <code>T</code> for a specific indexName
+         * @param type
+         */
+        public Finder(Class<T> type, String indexName) {
+            this.type = type;
+            T t = IndexUtils.getInstanceIndex(type);
+            this.queryPath = t.getIndexPath(indexName);
         }
 
         /**
