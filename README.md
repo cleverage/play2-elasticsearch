@@ -24,7 +24,7 @@ Module | Playframework | Elasticsearch | Comments | Diff
 
 The dependency declaration is :
 ```
-"com.clever-age" % "play2-elasticsearch" % "0.5.3"
+"com.clever-age" % "play2-elasticsearch" % "0.5.4"
 ```
 
 The library is published on the sbt community repository. 
@@ -47,7 +47,7 @@ object ApplicationBuild extends Build {
 
     val appDependencies = Seq(
       // Add your project dependencies here,
-      "com.clever-age" % "play2-elasticsearch" % "0.5.3"
+      "com.clever-age" % "play2-elasticsearch" % "0.5.4"
     )
 
     val main = play.Project(appName, appVersion, appDependencies).settings(
