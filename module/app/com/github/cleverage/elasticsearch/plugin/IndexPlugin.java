@@ -24,6 +24,16 @@ public class IndexPlugin extends Plugin
         this.application = application;
     }
 
+    private boolean isPluginDisabled() {
+        String status =  application.configuration().getString("elasticsearch.plugin");
+        return status != null && status.equals("disabled");
+    }
+
+    @Override
+    public boolean enabled() {
+        return isPluginDisabled() == false;
+    }
+
     @Override
     public void onStart()
     {
