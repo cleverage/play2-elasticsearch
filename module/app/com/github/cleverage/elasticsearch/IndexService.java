@@ -288,12 +288,12 @@ public abstract class IndexService {
 
     private static <T extends Index> T getTFromGetResponse(Class<T> clazz, GetResponse getResponse) {
         T t = IndexUtils.getInstanceIndex(clazz);
-        if (!getResponse.exists()) {
+        if (!getResponse.isExists()) {
             return null;
         }
 
         // Create a new Indexable Object for the return
-        Map<String, Object> map = getResponse.sourceAsMap();
+        Map<String, Object> map = getResponse.getSourceAsMap();
 
         t = (T) t.fromIndex(map);
         t.id = getResponse.getId();
@@ -380,7 +380,7 @@ public abstract class IndexService {
         IndicesExistsRequestBuilder indicesExistsRequestBuilder = indices.prepareExists(indexName);
         IndicesExistsResponse response = indicesExistsRequestBuilder.execute().actionGet();
 
-        return response.exists();
+        return response.isExists();
     }
 
     /**
@@ -581,7 +581,7 @@ public abstract class IndexService {
     public static boolean precolatorExists(String namePercolator) {
         try {
             GetResponse responseExist = IndexService.getPercolator(namePercolator);
-            return (responseExist.exists());
+            return (responseExist.isExists());
         } catch (IndexMissingException e) {
             return false;
         }
@@ -603,7 +603,7 @@ public abstract class IndexService {
     public static void deletePercolators() {
         try {
             DeleteIndexResponse deleteIndexResponse = IndexClient.client.admin().indices().prepareDelete(INDEX_PERCOLATOR).execute().actionGet();
-            if(!deleteIndexResponse.acknowledged()){
+            if(!deleteIndexResponse.isAcknowledged()){
                 throw new Exception(" no acknowledged");
             }
         } catch (IndexMissingException indexMissing) {
@@ -653,6 +653,6 @@ public abstract class IndexService {
         if (percolateResponse == null) {
             return null;
         }
-        return percolateResponse.matches();
+        return percolateResponse.getMatches();
     }
 }

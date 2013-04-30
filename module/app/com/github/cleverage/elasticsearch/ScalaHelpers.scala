@@ -2,7 +2,7 @@ package com.github.cleverage.elasticsearch
 
 import collection.JavaConverters._
 import play.api.libs.json.{Json, Writes, Reads}
-import org.elasticsearch.search.facet.{AbstractFacetBuilder, Facets}
+import org.elasticsearch.search.facet.{FacetBuilder, Facets}
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.index.IndexResponse
 import org.elasticsearch.index.query.{QueryBuilders, QueryBuilder}
@@ -211,7 +211,7 @@ object ScalaHelpers {
    */
   case class IndexQuery[T <: Indexable](
     val builder: QueryBuilder = QueryBuilders.matchAllQuery(),
-    val facetBuilders: List[AbstractFacetBuilder] = Nil,
+    val facetBuilders: List[FacetBuilder] = Nil,
     val sortBuilders: List[SortBuilder] = Nil,
     val from: Option[Int] = None,
     val size: Option[Int] = None,
@@ -219,7 +219,7 @@ object ScalaHelpers {
     val noField: Boolean = false
   ) {
     def withBuilder(builder: QueryBuilder): IndexQuery[T] = copy(builder = builder)
-    def addFacet(facet: AbstractFacetBuilder): IndexQuery[T] = copy(facetBuilders = facet :: facetBuilders)
+    def addFacet(facet: FacetBuilder): IndexQuery[T] = copy(facetBuilders = facet :: facetBuilders)
     def addSort(sort: SortBuilder): IndexQuery[T] = copy(sortBuilders = sort :: sortBuilders)
     def withFrom(from: Int): IndexQuery[T] = copy(from = Some(from))
     def withSize(size: Int): IndexQuery[T] = copy(size = Some(size))
@@ -325,11 +325,11 @@ object ScalaHelpers {
      * @return constructed IndexResults
      */
     def apply[T <: Indexable](indexQuery: IndexQuery[T], searchResponse: SearchResponse, reads: Reads[T]): IndexResults[T] = {
-      val totalCount: Long = searchResponse.hits().totalHits()
+      val totalCount: Long = searchResponse.getHits().totalHits()
       val pageSize: Long =
-        indexQuery.size.fold(searchResponse.hits().hits().length.toLong)(_.toLong)
+        indexQuery.size.fold(searchResponse.getHits().hits().length.toLong)(_.toLong)
       val pageCurrent: Long = indexQuery.from.fold (1L){ f => ((f / pageSize) + 1) }
-      val hits = searchResponse.hits().asScala.toList
+      val hits = searchResponse.getHits().asScala.toList
 
       new IndexResults[T](
         totalCount = totalCount,
@@ -341,7 +341,7 @@ object ScalaHelpers {
         results = hits.map {
           h => Json.parse(h.getSourceAsString).as[T](reads)
         },
-        facets = searchResponse.facets
+        facets = searchResponse.getFacets()
       )
     }
   }

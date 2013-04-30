@@ -9,7 +9,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.facet.AbstractFacetBuilder;
+import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.Facets;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -41,7 +41,7 @@ public class IndexQuery<T extends Index> {
      */
     private QueryBuilder builder = QueryBuilders.matchAllQuery();
     private String query = null;
-    private List<AbstractFacetBuilder> facets = new ArrayList<AbstractFacetBuilder>();
+    private List<FacetBuilder> facets = new ArrayList<FacetBuilder>();
     private List<SortBuilder> sorts = new ArrayList<SortBuilder>();
 
     private int from = -1;
@@ -107,7 +107,7 @@ public class IndexQuery<T extends Index> {
      *            the facet
      * @return self
      */
-    public IndexQuery<T> addFacet(AbstractFacetBuilder facet) {
+    public IndexQuery<T> addFacet(FacetBuilder facet) {
         Validate.notNull(facet, "facet cannot be null");
         facets.add(facet);
 
@@ -210,7 +210,7 @@ public class IndexQuery<T extends Index> {
         }
 
         // Facets
-        for (AbstractFacetBuilder facet : facets) {
+        for (FacetBuilder facet : facets) {
             request.addFacet(facet);
         }
 
@@ -246,16 +246,16 @@ public class IndexQuery<T extends Index> {
 
     private IndexResults<T> toSearchResults(SearchResponse searchResponse) {
         // Get Total Records Found
-        long count = searchResponse.hits().totalHits();
+        long count = searchResponse.getHits().totalHits();
 
         // Get Facets
-        Facets facetsResponse = searchResponse.facets();
+        Facets facetsResponse = searchResponse.getFacets();
 
         // Get List results
         List<T> results = new ArrayList<T>();
 
         // Loop on each one
-        for (SearchHit h : searchResponse.hits()) {
+        for (SearchHit h : searchResponse.getHits()) {
 
             // Get Data Map
             Map<String, Object> map = h.sourceAsMap();

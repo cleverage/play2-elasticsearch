@@ -72,7 +72,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
     "be indexable in bulk mode" in {
       running(esFakeApp) {
         val bulkResponse = SampleIndexableManager.indexBulk(List(first, second, third))
-        bulkResponse.items().size must be equalTo(3)
+        bulkResponse.getItems().size must be equalTo(3)
       }
     }
   }

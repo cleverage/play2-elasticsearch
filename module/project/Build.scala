@@ -10,8 +10,8 @@ object ApplicationBuild extends Build {
     val appDependencies = Seq(
       javaCore,
       // Add your project dependencies here
-      "org.elasticsearch" % "elasticsearch" % "0.20.5",
-      "com.spatial4j" % "spatial4j" % "0.3"
+      "org.elasticsearch" % "elasticsearch" % "0.90.0",
+      "org.apache.commons" % "commons-lang3" % "3.1"
     )
 
     val main =  play.Project(appName, appVersion, appDependencies).settings(

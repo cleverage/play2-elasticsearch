@@ -136,7 +136,7 @@ public class ElasticsearchTestJava {
                 );
 
                 BulkResponse response = promise.get(10L, TimeUnit.SECONDS);
-                assertThat(response.items().length).isEqualTo(3);
+                assertThat(response.getItems().length).isEqualTo(3);
             }
         });
     }
@@ -197,7 +197,7 @@ public class ElasticsearchTestJava {
                 index1Type1.index();
                 IndexService.refresh();
 
-                IndexQuery<Index1Type1> query = new IndexQuery<>(Index1Type1.class);
+                IndexQuery<Index1Type1> query = new IndexQuery<Index1Type1>(Index1Type1.class);
                 List<F.Promise<? extends IndexResults<Index1Type1>>> promises = new ArrayList<F.Promise<? extends IndexResults<Index1Type1>>>();
                 for (int i = 0; i < 10; i++) {
                     promises.add(query.fetchAsync(index1Type1.getIndexPath()));
