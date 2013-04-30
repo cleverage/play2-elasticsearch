@@ -17,6 +17,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
   "Asynchronous API" should {
     "allow parallel indexing" in {
       running(esFakeApp()) {
+        waitForYellowStatus()
         implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
         val future1 = SampleIndexableManager.indexAsync(first)
         val future2 = SampleIndexableManager.indexAsync(second)
@@ -29,6 +30,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
     }
     "allow parallel indexing of multiple objects" in {
       running(esFakeApp()) {
+        waitForYellowStatus()
         implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
         val future = SampleIndexableManager.indexAsync(List(first, second, third))
 
@@ -38,6 +40,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
     }
     "allow parallel bulk indexing of multiple objects" in {
       running(esFakeApp()) {
+        waitForYellowStatus()
         implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
         val future = SampleIndexableManager.indexBulkAsync(List(first, second, third))
 
@@ -47,6 +50,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
     }
     "allow parallel get" in {
       running(esFakeApp()) {
+        waitForYellowStatus()
         implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
         SampleIndexableManager.index(List(first, second, third))
 
@@ -61,6 +65,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
     }
     "allow parallel delete" in {
       running(esFakeApp()) {
+        waitForYellowStatus()
         implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
         SampleIndexableManager.index(List(first, second, third))
 
@@ -75,6 +80,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
     }
     "allow parallel requests" in {
       running(esFakeApp()) {
+        waitForYellowStatus()
         implicit val executionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
         SampleIndexableManager.index(first)
         SampleIndexableManager.refresh()

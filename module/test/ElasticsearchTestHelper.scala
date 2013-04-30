@@ -1,3 +1,5 @@
+import com.github.cleverage.elasticsearch.IndexClient
+import org.elasticsearch.client.Requests
 import scala.collection.JavaConverters._
 import play.api.test.FakeApplication
 
@@ -35,5 +37,7 @@ trait ElasticsearchTestHelper {
     additionalConfiguration = elasticsearchAdditionalConf ++ moreConfiguration,
     additionalPlugins = additionalPlugins
   )
+
+  def waitForYellowStatus() = IndexClient.client.admin().cluster().health(Requests.clusterHealthRequest().waitForYellowStatus()).actionGet()
 
 }

@@ -1,5 +1,7 @@
 import collection.JavaConverters._
+import com.github.cleverage.elasticsearch.IndexClient
 import com.github.cleverage.elasticsearch.ScalaHelpers._
+import org.elasticsearch.client.Requests
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
 import org.specs2.mutable.Specification
 import play.api.libs.json.{Json, Writes, Reads}
@@ -52,6 +54,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   "IndexableManager" should {
     "not retrieve anything if nothing is indexed" in {
       running(esFakeApp) {
+        waitForYellowStatus()
         SampleIndexableManager.get("1") must beNone
       }
     }
@@ -60,6 +63,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   "Indexable objects" should {
     "be indexable and retrievable" in {
       running(esFakeApp) {
+        waitForYellowStatus()
         val expected = SampleIndexable("1", "the title", 5, "foo category")
         SampleIndexableManager.index(expected)
         val result = SampleIndexableManager.get(expected.id)
@@ -71,6 +75,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   "Indexable objects" should {
     "be indexable in bulk mode" in {
       running(esFakeApp) {
+        waitForYellowStatus()
         val bulkResponse = SampleIndexableManager.indexBulk(List(first, second, third))
         bulkResponse.getItems().size must be equalTo(3)
       }
@@ -80,6 +85,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   "Indexable objects" should {
     "be returned by a query" in {
       running(esFakeApp) {
+        waitForYellowStatus()
         SampleIndexableManager.index(List(first, second, third))
         SampleIndexableManager.refresh()
         val titleResults = search(QueryBuilders.wildcardQuery("title", "blabla"))
@@ -99,6 +105,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   "String field without keyword mapping" should {
     "be tokenized" in {
       running(esFakeApp) {
+        waitForYellowStatus()
         SampleIndexableManager.index(List(first, second, third))
         SampleIndexableManager.refresh()
         val categoryResults = search(QueryBuilders.termQuery("category", "bar category"))
@@ -114,6 +121,7 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
   "String field with keyword mapping" should {
     "not be tokenized" in {
       running(esFakeApp(sampleIndexableMappingConf)) {
+        waitForYellowStatus()
         SampleIndexableManager.index(List(first, second, third))
         SampleIndexableManager.refresh()
         val categoryResults = search(QueryBuilders.termQuery("category", "bar category"))
