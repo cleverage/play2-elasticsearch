@@ -18,7 +18,8 @@ Module | Playframework | Elasticsearch | Comments | Diff
  0.5.1 | 2.1-RC3 | 0.20.4 | upgrade to ES 0.20.4 - works correctly with play 2.1-RC3
  0.5.2 | 2.1.0 | 0.20.4 | Upgrade to play 2.1.0 - includes scala helpers
  0.5.3 | 2.1.0 | 0.20.5 | Upgrade to ES 0.20.5 - moving artifact's organization from "com.github.cleverage - elasticsearch" to "com.clever-age - play2-elasticsearch"
- 0.5.4 | 2.1.0 | 0.20.5 | API Async, Bulk, manage multi-index" | [v0.5.3 -> v0.5.4](https://github.com/cleverage/play2-elasticsearch/compare/v0.5.3...v0.5.4)
+ 0.5.4 | 2.1.0 | 0.20.5 | API Async, Bulk, manage multi-index | [v0.5.3 -> v0.5.4](https://github.com/cleverage/play2-elasticsearch/compare/v0.5.3...v0.5.4)
+ 0.5.5 | 2.1.0 | 0.20.5 | Disabled plugin, use multiple index for an objet | [v0.5.4 -> v0.5.5](https://github.com/cleverage/play2-elasticsearch/compare/v0.5.4...v0.5.5)
  0.5-SNAPSHOT | 2.1.1 | 0.90.0 | Upgrade to ES 0.90.0
   
 ## Install
