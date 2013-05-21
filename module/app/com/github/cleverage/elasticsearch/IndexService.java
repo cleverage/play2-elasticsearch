@@ -358,6 +358,16 @@ public abstract class IndexService {
     }
 
     /**
+     * Search information on Index from a query
+     * @param indexQuery
+     * @param <T>
+     * @return
+     */
+    public static <T extends Index>  String searchAsJson(IndexQueryPath indexPath, IndexQuery<T> indexQuery) {
+        return indexQuery.fetchAsJson(indexPath);
+    }
+
+    /**
      * Search asynchronously information on Index from a query
      * @param indexPath
      * @param indexQuery

@@ -157,6 +157,20 @@ public class IndexQuery<T extends Index> {
         return executeSearchRequest(request);
     }
 
+
+
+    public String fetchAsJson(IndexQueryPath indexQueryPath) {
+
+        SearchRequestBuilder request = getSearchRequestBuilder(indexQueryPath);
+        SearchResponse searchResponse = request.execute().actionGet();
+
+        if (IndexClient.config.showRequest) {
+            Logger.debug("ElasticSearch : Response -> " + searchResponse.toString());
+        }
+
+        return searchResponse.toString();
+    }
+
     /**
      * Runs the query asynchronously
      * @param indexQueryPath

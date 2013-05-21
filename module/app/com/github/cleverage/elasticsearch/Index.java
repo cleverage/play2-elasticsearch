@@ -189,6 +189,11 @@ public abstract class Index implements Indexable {
             return IndexService.search(queryPath, query);
         }
 
+        public String searchAsJson(IndexQuery<T> query) {
+
+            return IndexService.searchAsJson(queryPath, query);
+        }
+
         public F.Promise<IndexResults<T>> searchAsync(IndexQuery<T> query) {
 
             return IndexService.searchAsync(queryPath, query);
