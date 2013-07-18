@@ -335,7 +335,7 @@ object ScalaHelpers {
         totalCount = totalCount,
         pageSize = pageSize,
         pageCurrent = pageCurrent,
-        pageNb = if (pageSize == 0) 1 else math.round(math.ceil(totalCount / pageSize)),
+        pageNb = if (pageSize == 0) 1 else math.round(math.ceil(totalCount / pageSize.toDouble)),
         // Converting Json hits to Indexable entities
         hits = hits,
         results = hits.map {
