@@ -32,6 +32,12 @@ public class IndexConfig {
      *  Mode local or network
      */
     public Boolean local = false;
+    
+    /**
+     *  elasticsearch.client.sniff = true / false
+     *  Sniff for nodes.
+     */
+    public Boolean sniffing = true;
 
     /**
      * elasticsearch.local.config = configuration file load on local mode.
@@ -88,6 +94,7 @@ public class IndexConfig {
     public IndexConfig(Application app) {
         this.application = app;
         this.client = app.configuration().getString("elasticsearch.client");
+        this.sniffing = app.configuration().getBoolean("elasticsearch.client.sniff", true);
         this.local = app.configuration().getBoolean("elasticsearch.local");
         this.localConfig = app.configuration().getString("elasticsearch.config.resource");
         this.clusterName = app.configuration().getString("elasticsearch.cluster.name");
@@ -235,6 +242,7 @@ public class IndexConfig {
                 ", localConfig='" + localConfig + '\'' +
                 ", clusterName='" + clusterName + '\'' +
                 ", showRequest=" + showRequest +
+                ", sniffing=" + sniffing +
                 ", indexNames=" + (indexNames == null ? null : Arrays.asList(indexNames)) +
                 ", indexSettings=" + indexSettings +
                 ", indexClazzs='" + indexClazzs + '\'' +
