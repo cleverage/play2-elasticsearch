@@ -94,7 +94,7 @@ public class IndexConfig {
     public IndexConfig(Application app) {
         this.application = app;
         this.client = app.configuration().getString("elasticsearch.client");
-        this.sniffing = app.configuration().getBoolean("elasticsearch.client.sniff", true);
+        this.sniffing = app.configuration().getBoolean("elasticsearch.sniff", true);
         this.local = app.configuration().getBoolean("elasticsearch.local");
         this.localConfig = app.configuration().getString("elasticsearch.config.resource");
         this.clusterName = app.configuration().getString("elasticsearch.cluster.name");
