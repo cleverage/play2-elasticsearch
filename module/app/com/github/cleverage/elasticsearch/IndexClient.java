@@ -98,7 +98,8 @@ public class IndexClient {
         ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder();
 
         // set default settings
-        settings.put("client.transport.sniff", true);
+        settings.put("client.transport.sniff", config.sniffing);
+        
         if (config.clusterName != null) {
             settings.put("cluster.name", config.clusterName);
         }
