@@ -220,7 +220,7 @@ object ScalaHelpers {
   ) {
     def withBuilder(builder: QueryBuilder): IndexQuery[T] = copy(builder = builder)
     def addFacet(facet: FacetBuilder): IndexQuery[T] = copy(facetBuilders = facet :: facetBuilders)
-    def addSort(sort: SortBuilder): IndexQuery[T] = copy(sortBuilders = sort :: sortBuilders)
+    def addSort(sort: SortBuilder): IndexQuery[T] = copy(sortBuilders = sortBuilders :+ sort)
     def withFrom(from: Int): IndexQuery[T] = copy(from = Some(from))
     def withSize(size: Int): IndexQuery[T] = copy(size = Some(size))
     def withExplain(explain: Boolean): IndexQuery[T] = copy(explain = Some(explain))
