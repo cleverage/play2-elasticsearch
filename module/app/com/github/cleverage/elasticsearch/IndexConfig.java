@@ -8,6 +8,7 @@ import org.reflections.Reflections;
 import play.Application;
 import play.Configuration;
 import play.Logger;
+import play.libs.Json;
 import play.libs.ReflectionsCache;
 
 import java.util.*;
@@ -174,11 +175,15 @@ public class IndexConfig {
         if (mappingConfig != null) {
             Map<String, Object> mappings = mappingConfig.asMap();
             for (String indexType : mappings.keySet()) {
+                IndexQueryPath indexQueryPath = new IndexQueryPath(indexName, indexType);
                 if (mappings.get(indexType) instanceof String) {
-                    IndexQueryPath indexQueryPath = new IndexQueryPath(indexName, indexType);
                     indexMappings.put(indexQueryPath, (String) mappings.get(indexType));
                 } else {
-                    Logger.warn("Incorrect value in elasticsearch.index.mappings");
+                    try {
+                        indexMappings.put(indexQueryPath, Json.toJson(mappings.get(indexType)).toString());
+                    } catch (Exception e) {
+                        Logger.warn("Incorrect value in elasticsearch.index.mappings", e);
+                    }
                 }
             }
         }
