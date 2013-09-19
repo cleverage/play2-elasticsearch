@@ -102,6 +102,21 @@ class IndexingSpec extends Specification with ElasticsearchTestHelper {
     }
   }
 
+  "Query pager" should {
+    "compute correctly pageCurrent" in {
+      running(esFakeApp) {
+        waitForYellowStatus()
+        SampleIndexableManager.index(first)
+        SampleIndexableManager.refresh()
+
+        val oneResult = search(QueryBuilders.termQuery("id", "1"))
+
+        oneResult.pageCurrent must beEqualTo(1)
+        oneResult.pageNb must beEqualTo(1)
+      }
+    }
+  }
+
   "String field without keyword mapping" should {
     "be tokenized" in {
       running(esFakeApp) {
