@@ -11,7 +11,8 @@ object ApplicationBuild extends Build {
       javaCore,
       // Add your project dependencies here
       "org.elasticsearch" % "elasticsearch" % "0.90.3",
-      "org.apache.commons" % "commons-lang3" % "3.1"
+      "org.apache.commons" % "commons-lang3" % "3.1",
+      "org.codehaus.jackson" % "jackson-core-asl" % "1.9.13"
     )
 
     val main =  play.Project(appName, appVersion, appDependencies).settings(
