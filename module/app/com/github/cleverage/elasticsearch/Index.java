@@ -1,6 +1,6 @@
 package com.github.cleverage.elasticsearch;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.search.SearchHit;
