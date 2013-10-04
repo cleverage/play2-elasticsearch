@@ -1,6 +1,6 @@
 language: scala
 env:
-  - PLAY_VERSION=2.1.3
+  - PLAY_VERSION=2.2.0
 before_script:
   - wget http://downloads.typesafe.com/play/${PLAY_VERSION}/play-${PLAY_VERSION}.zip
   - unzip -q play-${PLAY_VERSION}.zip
