@@ -20,6 +20,7 @@ import scala.concurrent.Future;
 import scala.concurrent.Promise;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -284,7 +285,7 @@ public class IndexQuery<T extends Index> {
             pageCurrent = ((int) (from / pageSize))+1;
         }
 
-        long pageNb = (long)Math.ceil(new BigDecimal(count).divide(new BigDecimal(pageSize)).doubleValue());
+        long pageNb = (long)Math.ceil(new BigDecimal(count).divide(new BigDecimal(pageSize), 2, RoundingMode.HALF_UP).doubleValue());
 
         // Return Results
         return new IndexResults<T>(count, pageSize, pageCurrent, pageNb, results, facetsResponse);
