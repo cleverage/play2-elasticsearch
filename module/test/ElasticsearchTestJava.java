@@ -4,6 +4,8 @@ import indextype.Index2Type1;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.index.get.GetField;
 import org.junit.Test;
 import play.libs.F;
 import play.test.FakeApplication;
@@ -209,6 +211,34 @@ public class ElasticsearchTestJava {
                 for (IndexResults<Index1Type1> indexResults : indexResultsList) {
                     assertThat(indexResults.totalCount).isEqualTo(1);
                 }
+            }
+        });
+    }
+
+    @Test
+    public void update() {
+        running(esFakeApplication(), new Runnable() {
+
+            @Override
+            public void run() {
+                // Blocking
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
+                index1Type1.index();
+                Map<String, Object> fieldNewValues = new HashMap<>();
+                fieldNewValues.put("name", "new-name");
+                String updateScript = "ctx._source.name = name";
+                index1Type1.update(fieldNewValues, updateScript);
+
+                Index1Type1 index1Type11 = Index1Type1.find.byId("1");
+                assertThat(index1Type11.name).isEqualTo("new-name");
+
+                // Async
+                fieldNewValues.put("name","new-name-async");
+                F.Promise<UpdateResponse> updateResponsePromise = index1Type1.updateAsync(fieldNewValues, updateScript);
+                updateResponsePromise.get(2L, TimeUnit.SECONDS);
+
+                index1Type11 = Index1Type1.find.byId("1");
+                assertThat(index1Type11.name).isEqualTo("new-name-async");
             }
         });
     }

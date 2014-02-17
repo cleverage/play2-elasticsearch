@@ -17,6 +17,8 @@ import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.percolate.PercolateRequestBuilder;
 import org.elasticsearch.action.percolate.PercolateResponse;
+import org.elasticsearch.action.update.UpdateRequestBuilder;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
@@ -228,6 +230,62 @@ public abstract class IndexService {
     }
 
     /**
+     * Create an UpdateRequestBuilder
+     * @param indexPath
+     * @param id
+     * @return
+     */
+    public static UpdateRequestBuilder getUpdateRequestBuilder(IndexQueryPath indexPath,
+                                                               String id,
+                                                               Map<String, Object> updateFieldValues,
+                                                               String updateScript) {
+        return IndexClient.client.prepareUpdate(indexPath.index, indexPath.type, id)
+                .setScriptParams(updateFieldValues)
+                .setScript(updateScript);
+    }
+
+    /**
+     * Update a document in the index
+     * @param indexPath
+     * @param id
+     * @param updateFieldValues The fields and new values for which the update should be done
+     * @param updateScript
+     * @return
+     */
+    public static UpdateResponse update(IndexQueryPath indexPath,
+                                        String id,
+                                        Map<String, Object> updateFieldValues,
+                                        String updateScript) {
+        return getUpdateRequestBuilder(indexPath, id, updateFieldValues, updateScript)
+                .execute()
+                .actionGet();
+    }
+
+    /**
+     * Update a document asynchronously
+     * @param indexPath
+     * @param id
+     * @param updateFieldValues The fields and new values for which the update should be done
+     * @param updateScript
+     * @return
+     */
+    public static F.Promise<UpdateResponse> updateAsync(IndexQueryPath indexPath,
+                                                        String id,
+                                                        Map<String, Object> updateFieldValues,
+                                                        String updateScript) {
+        return updateAsync(getUpdateRequestBuilder(indexPath, id, updateFieldValues, updateScript));
+    }
+
+    /**
+     * Call update asynchronously
+     * @param updateRequestBuilder
+     * @return
+     */
+    public static F.Promise<UpdateResponse> updateAsync(UpdateRequestBuilder updateRequestBuilder) {
+        return AsyncUtils.executeAsyncJava(updateRequestBuilder);
+    }
+
+    /**
      * Create a DeleteRequestBuilder
      * @param indexPath
      * @param id
@@ -345,7 +403,6 @@ public abstract class IndexService {
         GetResponse getResponse = getRequestBuilder.execute().actionGet();
         return getResponse;
     }
-
 
     /**
      * Search information on Index from a query
