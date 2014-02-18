@@ -4,10 +4,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import play.Logger;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class IndexUtils {
 
@@ -127,6 +124,9 @@ public abstract class IndexUtils {
             else {
                 return Float.valueOf(value.toString());
             }
+        }
+        else if (targetType.equals(UUID.class)) {
+            return UUID.fromString((String) value);
         }
         else {
             return value;
