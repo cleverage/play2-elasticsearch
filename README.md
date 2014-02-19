@@ -24,6 +24,7 @@ Module | Playframework | Elasticsearch | Comments | Diff
  0.6-SNAPSHOT | 2.1.1 | 0.90.2 | Upgrade to ES 0.90.2
  0.7-SNAPSHOT | 2.1.3 | 0.90.3 | Upgrade to ES 0.90.3 & play 2.1.3
  0.8-SNAPSHOT | 2.2.0 | 0.90.5 | Upgrade to ES 0.90.5 & play 2.2.0
+ 0.8.1 | 2.2.1 | 0.90.11 | Upgrade to ES 0.90.11 & play 2.2.1
   
 ## Install
 
