@@ -5,7 +5,12 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.get.GetField;
+import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.Test;
 import play.libs.F;
 import play.test.FakeApplication;
@@ -239,6 +244,41 @@ public class ElasticsearchTestJava {
 
                 index1Type11 = Index1Type1.find.byId("1");
                 assertThat(index1Type11.name).isEqualTo("new-name-async");
+            }
+        });
+    }
+
+    @Test
+    public void searchWithGeoFilter() {
+        running(esFakeApplication(), new Runnable() {
+            @Override
+            public void run() {
+                GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date(), location);
+                index1Type1.index();
+
+                location = new GeoPoint(12.6943566,-10.0430541);
+                Index1Type1 index1Type2 = new Index1Type1("2", "name1", "category", new Date(), location);
+                index1Type2.index();
+
+                // refresh the index so the documents appear in the search results
+                IndexService.refresh();
+
+                assertThat(Index1Type1.find.byId("1").name).isEqualTo("name1");
+                assertThat(Index1Type1.find.byId("2").name).isEqualTo("name1");
+
+                IndexQuery<Index1Type1> query = Index1Type1.find.query();
+                query.setBuilder(QueryBuilders.queryString("name1"));
+                GeoDistanceFilterBuilder filter = FilterBuilders.geoDistanceFilter("type1.location")
+                        .point(30, -88)
+                        .distance(100, DistanceUnit.KILOMETERS);
+
+                F.Promise<IndexResults<Index1Type1>> indexResultsPromise = Index1Type1.find.searchAsync(query, filter);
+                IndexResults<Index1Type1> index1Type1IndexResults = indexResultsPromise.get(2L, TimeUnit.SECONDS);
+                assertThat(index1Type1IndexResults.totalCount).isEqualTo(1);
+
+
+
             }
         });
     }

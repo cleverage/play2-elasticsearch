@@ -27,6 +27,7 @@ import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.percolator.PercolatorService;
+import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
 import play.Logger;
@@ -421,8 +422,10 @@ public abstract class IndexService {
      * @param <T>
      * @return
      */
-    public static <T extends Index> F.Promise<IndexResults<T>> searchAsync(IndexQueryPath indexPath, IndexQuery<T> indexQuery) {
-        return indexQuery.fetchAsync(indexPath);
+    public static <T extends Index> F.Promise<IndexResults<T>> searchAsync(IndexQueryPath indexPath,
+                                                                           IndexQuery<T> indexQuery,
+                                                                           FilterBuilder filter) {
+        return indexQuery.fetchAsync(indexPath, filter);
     }
 
     /**

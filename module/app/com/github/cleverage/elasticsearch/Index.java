@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.search.SearchHit;
 
 import play.Logger;
@@ -210,7 +211,11 @@ public abstract class Index implements Indexable {
 
         public F.Promise<IndexResults<T>> searchAsync(IndexQuery<T> query) {
 
-            return IndexService.searchAsync(queryPath, query);
+            return IndexService.searchAsync(queryPath, query, null);
+        }
+
+        public F.Promise<IndexResults<T>> searchAsync(IndexQuery<T> query, FilterBuilder filter){
+            return IndexService.searchAsync(queryPath, query, filter);
         }
     }
 
