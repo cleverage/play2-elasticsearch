@@ -209,6 +209,10 @@ public class IndexQuery<T extends Index> {
         return searchResults;
     }
 
+    public SearchRequestBuilder getSearchRequestBuilder(IndexQueryPath indexQueryPath){
+        return getSearchRequestBuilder(indexQueryPath, null);
+    }
+
     public SearchRequestBuilder getSearchRequestBuilder(IndexQueryPath indexQueryPath, FilterBuilder filter) {
 
         // Build request
