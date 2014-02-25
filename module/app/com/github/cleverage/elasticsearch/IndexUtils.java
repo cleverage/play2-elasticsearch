@@ -1,5 +1,6 @@
 package com.github.cleverage.elasticsearch;
 
+import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import play.Logger;
 
@@ -127,6 +128,10 @@ public abstract class IndexUtils {
         }
         else if (targetType.equals(UUID.class)) {
             return UUID.fromString((String) value);
+        }
+        else if (targetType.equals(GeoPoint.class)) {
+            Map geoValuesMap = (Map) value;
+            return new GeoPoint((Double)geoValuesMap.get("lat"),(Double)geoValuesMap.get("lon"));
         }
         else {
             return value;

@@ -6,6 +6,7 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -148,12 +149,22 @@ public class IndexQuery<T extends Index> {
 
     /**
      * Runs the query
-     *
-     * @return the search results
+     * @param indexQueryPath
+     * @return
      */
-    public IndexResults<T> fetch(IndexQueryPath indexQueryPath) {
+    public IndexResults<T> fetch(IndexQueryPath indexQueryPath){
+        return fetch(indexQueryPath, null);
+    }
 
-        SearchRequestBuilder request = getSearchRequestBuilder(indexQueryPath);
+    /**
+     * Runs the query with a filter
+     * @param indexQueryPath
+     * @param filter
+     * @return
+     */
+    public IndexResults<T> fetch(IndexQueryPath indexQueryPath, FilterBuilder filter) {
+
+        SearchRequestBuilder request = getSearchRequestBuilder(indexQueryPath, filter);
 
         return executeSearchRequest(request);
     }
@@ -164,7 +175,17 @@ public class IndexQuery<T extends Index> {
      * @return
      */
     public F.Promise<IndexResults<T>> fetchAsync(IndexQueryPath indexQueryPath) {
-        SearchRequestBuilder request = getSearchRequestBuilder(indexQueryPath);
+        return fetchAsync(indexQueryPath, null);
+    }
+
+    /**
+     * Runs the query asynchronously with a filter
+     * @param indexQueryPath
+     * @param filter
+     * @return
+     */
+    public F.Promise<IndexResults<T>> fetchAsync(IndexQueryPath indexQueryPath, FilterBuilder filter) {
+        SearchRequestBuilder request = getSearchRequestBuilder(indexQueryPath, filter);
         F.Promise<SearchResponse> searchResponsePromise = AsyncUtils.executeAsyncJava(request);
         return searchResponsePromise.map(new F.Function<SearchResponse, IndexResults<T>>() {
             @Override
@@ -188,13 +209,18 @@ public class IndexQuery<T extends Index> {
         return searchResults;
     }
 
-    public SearchRequestBuilder getSearchRequestBuilder(IndexQueryPath indexQueryPath) {
+    public SearchRequestBuilder getSearchRequestBuilder(IndexQueryPath indexQueryPath){
+        return getSearchRequestBuilder(indexQueryPath, null);
+    }
+
+    public SearchRequestBuilder getSearchRequestBuilder(IndexQueryPath indexQueryPath, FilterBuilder filter) {
 
         // Build request
         SearchRequestBuilder request = IndexClient.client
                 .prepareSearch(indexQueryPath.index)
                 .setTypes(indexQueryPath.type)
-                .setSearchType(SearchType.QUERY_THEN_FETCH);
+                .setSearchType(SearchType.QUERY_THEN_FETCH)
+                .setFilter(filter);
 
         // set Query
         if (StringUtils.isNotBlank(query)) {
