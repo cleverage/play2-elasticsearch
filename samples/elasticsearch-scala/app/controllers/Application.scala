@@ -44,7 +44,7 @@ object Application extends Controller {
     Ok(views.html.index("Your new application is ready."))
   }
 
-  def async = Action {
+  def async = Action.async {
     IndexTestManager.index(IndexTest("1", "Here is the first name", "First category"))
     IndexTestManager.index(IndexTest("2", "Then comes the second name", "First category"))
     IndexTestManager.index(IndexTest("3", "Here is the third name", "Second category"))
@@ -63,10 +63,8 @@ object Application extends Controller {
       result2 <- IndexTestManager.searchAsync(indexQuery2)
     } yield (result1, result2)
 
-    Async {
-      l.map { case (r1, r2) =>
-        Ok(r1.totalCount + " - " + r2.totalCount)
-      }
+    l.map { case (r1, r2) =>
+      Ok(r1.totalCount + " - " + r2.totalCount)
     }
 
   }
