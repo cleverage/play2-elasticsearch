@@ -1,12 +1,11 @@
 language: scala
-env:
-  - PLAY_VERSION=2.2.0
-before_script:
-  - wget http://downloads.typesafe.com/play/${PLAY_VERSION}/play-${PLAY_VERSION}.zip
-  - unzip -q play-${PLAY_VERSION}.zip
+scala:
+   - 2.10.2
+
 script:
   - cd module
-  - ../play-${PLAY_VERSION}/play test
+  - sbt ++$TRAVIS_SCALA_VERSION test
+
 notifications:
   # Email notifications are disabled to not annoy anybody.
   # See http://about.travis-ci.org/docs/user/build-configuration/ to learn more
