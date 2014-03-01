@@ -6,3 +6,4 @@ tmp
 .history
 dist
 data-*
+/data

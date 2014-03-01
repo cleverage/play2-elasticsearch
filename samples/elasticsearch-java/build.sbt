@@ -1,10 +1,10 @@
 import play.Project._
 
-name         := "elasticsearch-scala-sample"
+name         := "elasticsearch-java-sample"
 
 version      := "1.0-SNAPSHOT"
 
-play.Project.playScalaSettings
+play.Project.playJavaSettings
 
 lazy val esModule = RootProject(file("../../module"))
 
