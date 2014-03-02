@@ -41,7 +41,7 @@ object AsyncUtils {
    * @return
    */
   def executeAsyncJava[RQ <: ActionRequest[RQ],RS <: ActionResponse, RB <: ActionRequestBuilder[RQ,RS,RB]](requestBuilder: ActionRequestBuilder[RQ,RS,RB]): F.Promise[RS] = {
-    new F.Promise(executeAsync(requestBuilder))
+    F.Promise.wrap(executeAsync(requestBuilder))
   }
 
 }
