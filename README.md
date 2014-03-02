@@ -1,7 +1,7 @@
 # play2-elasticsearch
 ===================
 
-This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.20.4) integration in a [Playframework](http://www.playframework.com/) 2 application
+This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.90.12) integration in a [Playframework](http://www.playframework.com/) 2 application
 
 ![Playframework](http://fr.clever-age.com/local/cache-vignettes/L220xH78/play-logo-13d8c.png "Playframework")
 ![Elasticsearch](http://fr.clever-age.com/local/cache-vignettes/L250xH78/logoelasticsearchsmall-292be.png "Elasticsearch")
@@ -23,46 +23,40 @@ Module | Playframework | Elasticsearch | Comments | Diff
  0.5-SNAPSHOT | 2.1.1 | 0.90.0 | Upgrade to ES 0.90.0
  0.6-SNAPSHOT | 2.1.1 | 0.90.2 | Upgrade to ES 0.90.2
  0.7-SNAPSHOT | 2.1.3 | 0.90.3 | Upgrade to ES 0.90.3 & play 2.1.3
- 0.8-SNAPSHOT | 2.2.0 | 0.90.5 | Upgrade to ES 0.90.5 & play 2.2.0
- 0.8.1 | 2.2.1 | 0.90.11 | Upgrade to ES 0.90.11 & play 2.2.1
+ 0.8-SNAPSHOT | 2.2.1 | 0.90.12 | Upgrade to ES 0.90.12 & play 2.2.1
+ 0.8.1 | 2.2.1 | 0.90.12 | Upgrade to ES 0.90.12 & play 2.2.1
   
 ## Install
 
 The dependency declaration is :
 ```
-"com.clever-age" % "play2-elasticsearch" % "0.5.4"
+"com.clever-age" % "play2-elasticsearch" % "0.8.1"
 ```
 
-The library is published on the sbt community repository. 
-You can use the following resolvers :
+Since v0.8.1, releases are published on maven-central, so you don't have to define any specific resolvers.
+
+If you want to use a snapshot version, you will have to register the Sonatype OSS snapshot repository : 
 ```
-resolvers += Resolver.url("play-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns),
-resolvers += Resolver.url("play-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
+resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 ```
 
-So the Build.scala should look like :
+Your `build.sbt` should look like :
 ```
-import sbt._
-import Keys._
-import play.Project._
 
-object ApplicationBuild extends Build {
+name := "test-play2-elasticsearch"
 
-    val appName         = "elasticsearch-sample"
-    val appVersion      = "1.0-SNAPSHOT"
+version := "1.0-SNAPSHOT"
 
-    val appDependencies = Seq(
-      // Add your project dependencies here,
-      "com.clever-age" % "play2-elasticsearch" % "0.5.4"
-    )
+libraryDependencies ++= Seq(
+  jdbc,
+  cache,
+  "com.clever-age"          % "play2-elasticsearch"       % "0.8.1"
+)
 
-    val main = play.Project(appName, appVersion, appDependencies).settings(
-      // Add your own project settings here      
-      resolvers += Resolver.url("play-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns),
-      resolvers += Resolver.url("play-plugin-snapshots", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-snapshots/"))(Resolver.ivyStylePatterns)
-    )
+play.Project.playScalaSettings
 
-}
+// Uncomment this line if you use a snapshot version
+// resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 ```
 
 ## Activate the plugin
