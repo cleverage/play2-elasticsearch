@@ -55,7 +55,7 @@ libraryDependencies ++= Seq(
 
 play.Project.playScalaSettings
 
-// Uncommentdd this line if you use a snapshot version
+// Uncomment this line if you use a snapshot version
 // resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 ```
 
