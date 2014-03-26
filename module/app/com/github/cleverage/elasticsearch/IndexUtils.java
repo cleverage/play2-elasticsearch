@@ -46,18 +46,18 @@ public abstract class IndexUtils {
     }
     
     /**
-	 * Converts a Map<String, T> to a Map<String, Object> for serialize in the index
-	 * @param map
-	 * @return
-	 */
-	public static <T extends Indexable> Map<String, Object> toIndex(Map<String, T> map) {
-		Map<String, Object> result = new HashMap<>();
-		for (Entry<String, T> entry : map.entrySet()) {
-			result.put(entry.getKey(), entry.getValue().toIndex());
-		}
-		return result;
-	}
-
+     * Converts a Map<String, T> to a Map<String, Object> for serialize in the index
+     * @param map
+     * @return
+     */
+    public static <T extends Indexable> Map<String, Object> toIndex(Map<String, T> map) {
+        Map<String, Object> result = new HashMap<>();
+        for (Entry<String, T> entry : map.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().toIndex());
+        }
+        return result;
+    }
+    
     public static <T extends Index> T getInstanceIndex(Class<T> clazz) {
         T object = null;
         try {
