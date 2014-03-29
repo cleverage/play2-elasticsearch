@@ -1,11 +1,18 @@
 package com.github.cleverage.elasticsearch;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
+
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import play.Logger;
 
-import java.math.BigDecimal;
-import java.util.*;
+import play.Logger;
 
 public abstract class IndexUtils {
 
@@ -18,6 +25,25 @@ public abstract class IndexUtils {
             }
         }
         return list;
+    }
+    
+    /**
+     * Get indexables from Map
+     * @param map
+     * @param key
+     * @param clazz
+     * @return
+     */
+    public static <T extends Indexable> Map<String, T> getIndexablesFromMap(Map<String, Object> map, String key, Class<T> clazz) {
+        @SuppressWarnings("unchecked")
+        Map<String, Map<String, Object>> items = (Map<String, Map<String, Object>>) map.get(key);
+        Map<String, T> result = new HashMap<>();
+        if (items != null) {
+            for (Entry<String, Map<String, Object>> item : items.entrySet()) {
+                result.put(item.getKey(), getIndexable(item.getValue(), clazz));
+            }
+        }
+        return result;
     }
 
     public static <T extends Indexable> T getIndexable(Map map, String key, Class<T> t) {
