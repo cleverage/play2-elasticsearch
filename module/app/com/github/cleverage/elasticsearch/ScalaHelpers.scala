@@ -85,10 +85,12 @@ object ScalaHelpers {
      * @param id
      * @return
      */
-    def getAsync(id: String)(implicit executor : scala.concurrent.ExecutionContext): Future[T] = {
+    def getAsync(id: String)(implicit executor : scala.concurrent.ExecutionContext): Future[Option[T]] = {
       val getResponseFuture = AsyncUtils.executeAsync(IndexService.getGetRequestBuilder(indexPath, id))
       getResponseFuture.map { response =>
-        Json.parse(response.getSourceAsString).as[T](reads)
+        Option(response.getSourceAsString).map {
+          Json.parse(_).as[T](reads)
+        }
       }
     }
 

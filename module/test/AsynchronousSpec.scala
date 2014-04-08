@@ -60,7 +60,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
           SampleIndexableManager.getAsync("3")
         ))
         val results = Await.result(future, Duration(10, SECONDS))
-        results must beEqualTo(List(first, second, third))
+        results must beEqualTo(List(Some(first), Some(second), Some(third)))
       }
     }
     "allow parallel delete" in {
