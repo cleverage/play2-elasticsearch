@@ -25,12 +25,13 @@ Module | Playframework | Elasticsearch | Comments | Diff
  0.7-SNAPSHOT | 2.1.3 | 0.90.3 | Upgrade to ES 0.90.3 & play 2.1.3
  0.8-SNAPSHOT | 2.2.1 | 0.90.12 | Upgrade to ES 0.90.12 & play 2.2.1
  0.8.1 | 2.2.1 | 0.90.12 | Upgrade to ES 0.90.12 & play 2.2.1
+ 0.8.2 | 2.2.1 | 0.90.12 | Small fixes
   
 ## Install
 
 The dependency declaration is :
 ```
-"com.clever-age" % "play2-elasticsearch" % "0.8.1"
+"com.clever-age" % "play2-elasticsearch" % "0.8.2"
 ```
 
 Since v0.8.1, releases are published on maven-central, so you don't have to define any specific resolvers.
@@ -50,7 +51,7 @@ version := "1.0-SNAPSHOT"
 libraryDependencies ++= Seq(
   jdbc,
   cache,
-  "com.clever-age"          % "play2-elasticsearch"       % "0.8.1"
+  "com.clever-age"          % "play2-elasticsearch"       % "0.8.2"
 )
 
 play.Project.playScalaSettings
