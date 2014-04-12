@@ -7,7 +7,6 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -65,6 +64,12 @@ public class ElasticsearchTestJava {
                 type1.category = category;
                 type1.dateCreate = date;
 
+                // this is to go around the known bug in elasticsearch 1.1:
+                // https://github.com/elasticsearch/elasticsearch/issues/5680#issuecomment-39794200
+                // Issue is fixed on ES 1.1.1
+                GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
+                type1.location = location;
+
                 // indexing
                 IndexResponse index = type1.index();
 
@@ -117,7 +122,12 @@ public class ElasticsearchTestJava {
             @Override
             public void run() {
                 Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
+                GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
+                index1Type1.location = location;
+
                 Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date());
+                index1Type1Bis.location = location;
+
                 F.Promise<IndexResponse> promise1 = index1Type1.indexAsync();
                 F.Promise<IndexResponse> promise2 = index1Type1Bis.indexAsync();
 
@@ -133,9 +143,10 @@ public class ElasticsearchTestJava {
         running(esFakeApplication(), new Runnable() {
             @Override
             public void run() {
-                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
-                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date());
-                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date());
+                GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date(),location);
+                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date(),location);
+                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date(),location);
 
                 F.Promise<BulkResponse> promise = IndexService.indexBulkAsync(
                         index1Type1.getIndexPath(),
@@ -153,9 +164,10 @@ public class ElasticsearchTestJava {
         running(esFakeApplication(), new Runnable() {
             @Override
             public void run() {
-                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
-                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date());
-                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date());
+                GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date(), location);
+                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date(), location);
+                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date(), location);
                 IndexService.indexBulk(index1Type1.getIndexPath(), Arrays.asList(index1Type1, index1Type1Bis, index1Type1Ter));
 
                 F.Promise<DeleteResponse> promise1 = index1Type1.deleteAsync();
@@ -175,9 +187,10 @@ public class ElasticsearchTestJava {
         running(esFakeApplication(), new Runnable() {
             @Override
             public void run() {
-                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
-                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date());
-                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date());
+                GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date(), location);
+                Index1Type1 index1Type1Bis = new Index1Type1("2", "name2", "category", new Date(), location);
+                Index1Type1 index1Type1Ter = new Index1Type1("3", "name3", "category", new Date(), location);
                 IndexService.indexBulk(index1Type1.getIndexPath(), Arrays.asList(index1Type1, index1Type1Bis, index1Type1Ter));
 
                 F.Promise<Index1Type1> promise1 = IndexService.getAsync(index1Type1.getIndexPath(), Index1Type1.class,  "1");
@@ -200,7 +213,8 @@ public class ElasticsearchTestJava {
         running(esFakeApplication(), new Runnable() {
             @Override
             public void run() {
-                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
+                GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date(), location);
                 index1Type1.index();
                 IndexService.refresh();
 
@@ -227,7 +241,8 @@ public class ElasticsearchTestJava {
             @Override
             public void run() {
                 // Blocking
-                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
+                GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
+                Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date(),location);
                 index1Type1.index();
                 Map<String, Object> fieldNewValues = new HashMap<>();
                 fieldNewValues.put("name", "new-name");

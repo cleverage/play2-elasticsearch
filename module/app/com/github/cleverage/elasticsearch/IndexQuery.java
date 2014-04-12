@@ -220,7 +220,7 @@ public class IndexQuery<T extends Index> {
                 .prepareSearch(indexQueryPath.index)
                 .setTypes(indexQueryPath.type)
                 .setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setFilter(filter);
+                .setPostFilter(filter);
 
         // set Query
         if (StringUtils.isNotBlank(query)) {
