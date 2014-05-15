@@ -10,7 +10,7 @@ version := "1.1-SNAPSHOT"
 libraryDependencies ++= Seq(
   javaCore,
   // Add your project dependencies here
-  "org.elasticsearch" % "elasticsearch" % "1.1.0",
+  "org.elasticsearch" % "elasticsearch" % "1.1.1",
   "org.apache.commons" % "commons-lang3" % "3.1"
 )
 
