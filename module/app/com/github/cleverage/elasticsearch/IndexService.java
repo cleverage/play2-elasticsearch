@@ -1,7 +1,6 @@
 package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushRequest;
@@ -26,7 +25,6 @@ import org.elasticsearch.client.Requests;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.index.percolator.PercolatorService;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
@@ -34,6 +32,7 @@ import play.Logger;
 import play.libs.F;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 public abstract class IndexService {
 
     public static final String INDEX_DEFAULT = IndexClient.config.indexNames[0];
-    public static final String INDEX_PERCOLATOR = PercolatorService.INDEX_NAME;
+    public static final String PERCOLATOR_TYPE = ".percolator";
 
     /**
      * get indexRequest to index from a specific request
@@ -504,7 +503,7 @@ public abstract class IndexService {
     public static String getMapping(String indexName, String indexType) {
         ClusterState state = IndexClient.client.admin().cluster()
                 .prepareState()
-                .setFilterIndices(IndexService.INDEX_DEFAULT)
+                .setIndices(IndexService.INDEX_DEFAULT)
                 .execute().actionGet().getState();
         MappingMetaData mappingMetaData = state.getMetaData().index(indexName).mapping(indexType);
         if (mappingMetaData != null) {
@@ -592,24 +591,27 @@ public abstract class IndexService {
      * @param namePercolator
      * @param queryBuilder
      * @return
-     * @throws IOException
      */
     public static IndexResponse createPercolator(String namePercolator, QueryBuilder queryBuilder) {
+        return createPercolator(INDEX_DEFAULT, namePercolator, queryBuilder,false);
+    }
 
+    public static IndexResponse createPercolator(String indexName, String queryName, QueryBuilder queryBuilder, boolean immediatelyAvailable) {
         XContentBuilder source = null;
         try {
             source = jsonBuilder().startObject()
                     .field("query", queryBuilder)
                     .endObject();
         } catch (IOException e) {
-            Logger.error("Elasticsearch : Erreur when create percolator from a queryBuilder", e);
+            Logger.error("Elasticsearch : Error when creating percolator from a queryBuilder", e);
         }
 
         IndexRequestBuilder percolatorRequest =
-                IndexClient.client.prepareIndex(INDEX_PERCOLATOR,
-                        IndexService.INDEX_DEFAULT,
-                        namePercolator)
-                        .setSource(source);
+                IndexClient.client.prepareIndex(indexName,
+                        PERCOLATOR_TYPE,
+                        queryName)
+                        .setSource(source)
+                        .setRefresh(immediatelyAvailable);
 
         return percolatorRequest.execute().actionGet();
     }
@@ -623,24 +625,33 @@ public abstract class IndexService {
      * @throws IOException
      */
     public static IndexResponse createPercolator(String namePercolator, String query) {
+        return createPercolator(INDEX_DEFAULT,namePercolator,query,false);
+    }
 
+    public static IndexResponse createPercolator(String indexName, String queryName, String query, boolean immediatelyAvailable) {
         IndexRequestBuilder percolatorRequest =
-                IndexClient.client.prepareIndex(INDEX_PERCOLATOR,
-                        IndexService.INDEX_DEFAULT,
-                        namePercolator)
-                        .setSource("{\"query\": " + query + "}");
+                IndexClient.client.prepareIndex(indexName,
+                        PERCOLATOR_TYPE,
+                        queryName)
+                        .setSource("{\"query\": " + query + "}")
+                        .setRefresh(immediatelyAvailable);
 
         return percolatorRequest.execute().actionGet();
     }
+
 
     /**
      * Check if a percolator exists
      * @param namePercolator
      * @return
      */
-    public static boolean precolatorExists(String namePercolator) {
+    public static boolean percolatorExists(String namePercolator) {
+        return percolatorExistsInIndex(namePercolator, INDEX_DEFAULT);
+    }
+
+    public static boolean percolatorExistsInIndex(String namePercolator, String indexName){
         try {
-            GetResponse responseExist = IndexService.getPercolator(namePercolator);
+            GetResponse responseExist = IndexService.getPercolator(indexName, namePercolator);
             return (responseExist.isExists());
         } catch (IndexMissingException e) {
             return false;
@@ -654,12 +665,18 @@ public abstract class IndexService {
      * @return
      */
     public static DeleteResponse deletePercolator(String namePercolator) {
-        return delete(new IndexQueryPath(INDEX_PERCOLATOR, IndexService.INDEX_DEFAULT), namePercolator);
+        return deletePercolator(IndexService.INDEX_DEFAULT, namePercolator);
     }
 
-    /**
+    public static DeleteResponse deletePercolator(String indexName, String namePercolator) {
+        return delete(new IndexQueryPath(indexName, PERCOLATOR_TYPE), namePercolator);
+    }
+
+
+    // See important notes section on http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-percolate.html
+    /*/**
      * Delete all percolators
-     */
+     *//*
     public static void deletePercolators() {
         try {
             DeleteIndexResponse deleteIndexResponse = IndexClient.client.admin().indices().prepareDelete(INDEX_PERCOLATOR).execute().actionGet();
@@ -671,15 +688,25 @@ public abstract class IndexService {
         } catch (Exception e) {
             Logger.error("ElasticSearch : Index drop error : " + e.toString());
         }
-    }
+    }*/
 
     /**
      * Get the percolator details
-     * @param name
+     * @param queryName
      * @return
      */
-    public static GetResponse getPercolator(String name) {
-        return get(INDEX_PERCOLATOR, IndexService.INDEX_DEFAULT, name);
+    public static GetResponse getPercolator(String queryName) {
+        return getPercolator(INDEX_DEFAULT, queryName);
+    }
+
+    /**
+     * Get the percolator details on an index
+     * @param indexName
+     * @param queryName
+     * @return
+     */
+    public static GetResponse getPercolator(String indexName, String queryName){
+        return get(indexName, PERCOLATOR_TYPE, queryName);
     }
 
     /**
@@ -691,7 +718,8 @@ public abstract class IndexService {
      */
     public static List<String> getPercolatorsForDoc(Index indexable) {
 
-        PercolateRequestBuilder percolateRequestBuilder = new PercolateRequestBuilder(IndexClient.client, indexable.getIndexPath().index, indexable.getIndexPath().type);
+        PercolateRequestBuilder percolateRequestBuilder = new PercolateRequestBuilder(IndexClient.client);
+        percolateRequestBuilder.setDocumentType(indexable.getIndexPath().type);
 
         XContentBuilder doc = null;
         try {
@@ -713,6 +741,11 @@ public abstract class IndexService {
         if (percolateResponse == null) {
             return null;
         }
-        return percolateResponse.getMatches();
+        List<String> matchedQueryIds = new ArrayList<String>();
+        PercolateResponse.Match[] matches = percolateResponse.getMatches();
+        for(PercolateResponse.Match match : matches){
+            matchedQueryIds.add(match.getId().string());
+        }
+        return matchedQueryIds;
     }
 }

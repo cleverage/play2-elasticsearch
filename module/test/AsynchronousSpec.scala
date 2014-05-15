@@ -74,7 +74,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
         val future3 = SampleIndexableManager.deleteAsync("3")
         val future = Future.sequence(List(future1, future2, future3))
         val results = Await.result(future, Duration(10, SECONDS))
-        results.forall(_.isNotFound) must beFalse
+        results.forall(_.isFound) must beTrue
         results.map {_.getId()} must beEqualTo(List("1", "2", "3"))
       }
     }

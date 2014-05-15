@@ -64,11 +64,6 @@ public class IndexPlugin extends Plugin
                 }
             }
 
-            // Create "_percolator" index if not exists
-            if (!IndexService.existsIndex(IndexService.INDEX_PERCOLATOR)) {
-                IndexService.createIndex(IndexService.INDEX_PERCOLATOR);
-            }
-
             Logger.info("ElasticSearch : Plugin has started");
 
         } catch (NoNodeAvailableException e) {
