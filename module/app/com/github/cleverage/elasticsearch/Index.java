@@ -192,6 +192,15 @@ public abstract class Index implements Indexable {
         }
 
         /**
+         * Asynchronously retrieves an entity by ID.
+         * @param id
+         * @return
+         */
+        public F.Promise<T> byIdAsync(String id){
+            return IndexService.getAsync(queryPath, type, id);
+        };
+
+        /**
          * Retrieves all entities of the given type.
          */
         public IndexResults<T> all() {
