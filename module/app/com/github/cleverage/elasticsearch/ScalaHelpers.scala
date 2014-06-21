@@ -209,6 +209,7 @@ object ScalaHelpers {
    * @param size the number of element to retrieve
    * @param explain flag used to activate explain
    * @param noField flag used to activate the "noField"
+   * @param preference preference of which shard replicas to execute the search request on
    * @tparam T Type into which the results will be converted
    */
   case class IndexQuery[T <: Indexable](
@@ -218,7 +219,8 @@ object ScalaHelpers {
     val from: Option[Int] = None,
     val size: Option[Int] = None,
     val explain: Option[Boolean] = None,
-    val noField: Boolean = false
+    val noField: Boolean = false,
+    val preference: Option[String] = None
   ) {
     def withBuilder(builder: QueryBuilder): IndexQuery[T] = copy(builder = builder)
     def addFacet(facet: FacetBuilder): IndexQuery[T] = copy(facetBuilders = facet :: facetBuilders)
@@ -227,6 +229,7 @@ object ScalaHelpers {
     def withSize(size: Int): IndexQuery[T] = copy(size = Some(size))
     def withExplain(explain: Boolean): IndexQuery[T] = copy(explain = Some(explain))
     def withNoField(noField: Boolean): IndexQuery[T] = copy(noField = noField)
+    def withPreference(preference: String): IndexQuery[T] = copy(preference = Some(preference))
 
     /**
      * Executes the query
@@ -280,6 +283,9 @@ object ScalaHelpers {
       }
       if (noField) {
         request.setNoFields()
+      }
+      preference.foreach {
+        request.setPreference(_)
       }
       request
     }
