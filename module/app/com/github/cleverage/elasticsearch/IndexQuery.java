@@ -50,6 +50,7 @@ public class IndexQuery<T extends Index> {
     private int size = -1;
     private boolean explain = false;
     private boolean noField = false;
+    private String preference = null;
 
     public IndexQuery(Class<T> clazz) {
         Validate.notNull(clazz, "clazz cannot be null");
@@ -98,6 +99,18 @@ public class IndexQuery<T extends Index> {
 
     public IndexQuery<T> setExplain(boolean explain) {
         this.explain = explain;
+
+        return this;
+    }
+
+    /**
+     * Sets a preference of which shard replicas to execute the search request on.
+     * @param preference
+     *
+     * @return
+     */
+    public IndexQuery<T> setPreference(String preference) {
+        this.preference = preference;
 
         return this;
     }
@@ -257,6 +270,10 @@ public class IndexQuery<T extends Index> {
         // Explain
         if (explain) {
             request.setExplain(true);
+        }
+
+        if (preference != null) {
+            request.setPreference(preference);
         }
 
         if (IndexClient.config.showRequest) {
