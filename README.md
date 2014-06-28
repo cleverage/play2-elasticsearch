@@ -1,7 +1,7 @@
 # play2-elasticsearch
 ===================
 
-This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.90.12) integration in a [Playframework](http://www.playframework.com/) 2 application
+This module provides easy [Elasticsearch](http://www.elasticsearch.org/)(v1.1.0) integration in a [Playframework](http://www.playframework.com/) 2 application
 
 ![Playframework](http://fr.clever-age.com/local/cache-vignettes/L220xH78/play-logo-13d8c.png "Playframework")
 ![Elasticsearch](http://fr.clever-age.com/local/cache-vignettes/L250xH78/logoelasticsearchsmall-292be.png "Elasticsearch")
@@ -9,8 +9,6 @@ This module provides an easy [Elasticsearch](http://www.elasticsearch.org/)(v0.9
 [![Build Status](https://travis-ci.org/cleverage/play2-elasticsearch.png?branch=master)](https://travis-ci.org/cleverage/play2-elasticsearch)
 
 ## Versions
-
-For Playframework version **2.0.x**, see **README-2.0.x.md**
 
 Module | Playframework | Elasticsearch | Comments | Diff
 --- | --- | --- | --- | ---
@@ -26,13 +24,13 @@ Module | Playframework | Elasticsearch | Comments | Diff
  0.8-SNAPSHOT | 2.2.1 | 0.90.12 | Upgrade to ES 0.90.12 & play 2.2.1
  0.8.1 | 2.2.1 | 0.90.12 | Upgrade to ES 0.90.12 & play 2.2.1
  0.8.2 | 2.2.1 | 0.90.12 | Small fixes
- 1.1.0 | 2.2.1 | 1.1.0 | Upgrading the ES 1.1.0 (#47)
+ 1.1.0 | 2.2.1 | 1.1.0 | Upgrading to ES 1.1.0 (#47)
   
 ## Install
 
 The dependency declaration is :
 ```
-"com.clever-age" % "play2-elasticsearch" % "0.8.2"
+"com.clever-age" % "play2-elasticsearch" % "1.1.0"
 ```
 
 Since v0.8.1, releases are published on maven-central, so you don't have to define any specific resolvers.
@@ -52,7 +50,7 @@ version := "1.0-SNAPSHOT"
 libraryDependencies ++= Seq(
   jdbc,
   cache,
-  "com.clever-age"          % "play2-elasticsearch"       % "0.8.2"
+  "com.clever-age"          % "play2-elasticsearch"       % "1.1.0"
 )
 
 play.Project.playScalaSettings
