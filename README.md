@@ -40,23 +40,25 @@ If you want to use a snapshot version, you will have to register the Sonatype OS
 resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 ```
 
-Your `build.sbt` should look like :
+So the `Build.scala` should look like:
 ```
+import sbt._
 
-name := "test-play2-elasticsearch"
+object ApplicationBuild extends Build {
 
-version := "1.0-SNAPSHOT"
+  val appName         = "elasticsearch-sample"
+  val appVersion      = "0.1-SNAPSHOT"
 
-libraryDependencies ++= Seq(
-  jdbc,
-  cache,
-  "com.clever-age"          % "play2-elasticsearch"       % "1.1.0"
-)
+  val appDependencies = Seq(
+    "com.clever-age" % "play2-elasticsearch" % "1.1.0"
+  )
 
-play.Project.playScalaSettings
-
-// Uncomment this line if you use a snapshot version
-// resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+  val main = play.Project(appName, appVersion, appDependencies).settings(
+    // Add your own project settings here      
+    // Uncomment this line if you use a snapshot version
+    // resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+  )
+}
 ```
 
 ## Activate the plugin
