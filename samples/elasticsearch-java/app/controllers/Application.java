@@ -56,7 +56,7 @@ public class Application extends Controller {
       return ok(index.render("Your new application is ready."));
   }
 
-    public static Result async() {
+    public static F.Promise<Result> async() {
         // ElasticSearch HelloWorld
         IndexTest indexTest = new IndexTest();
         // "id" is mandatory if you want to update your document or to get by id else "id" is not mandatory
@@ -82,14 +82,12 @@ public class Application extends Controller {
         F.Promise<IndexResults<IndexTest>> indexResultsPromise2 = IndexTest.find.searchAsync(query2);
 
         F.Promise<List<IndexResults<IndexTest>>> combinedPromise = F.Promise.sequence(indexResultsPromise1, indexResultsPromise2);
-        return async(
-            combinedPromise.map(new F.Function<List<IndexResults<IndexTest>>, Result>() {
-                @Override
-                public Result apply(List<IndexResults<IndexTest>> indexResultsList) throws Throwable {
-                    return ok(indexResultsList.get(0).totalCount + " - " + indexResultsList.get(1).totalCount);
-                }
-            })
-        );
+        return combinedPromise.map(new F.Function<List<IndexResults<IndexTest>>, Result>() {
+            @Override
+            public Result apply(List<IndexResults<IndexTest>> indexResultsList) throws Throwable {
+                return ok(indexResultsList.get(0).totalCount + " - " + indexResultsList.get(1).totalCount);
+            }
+        });
 
     }
 

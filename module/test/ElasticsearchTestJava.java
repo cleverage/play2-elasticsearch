@@ -7,7 +7,6 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -205,7 +204,7 @@ public class ElasticsearchTestJava {
                 IndexService.refresh();
 
                 IndexQuery<Index1Type1> query = new IndexQuery<Index1Type1>(Index1Type1.class);
-                List<F.Promise<? extends IndexResults<Index1Type1>>> promises = new ArrayList<F.Promise<? extends IndexResults<Index1Type1>>>();
+                List<F.Promise<IndexResults<Index1Type1>>> promises = new ArrayList<F.Promise<IndexResults<Index1Type1>>>();
                 for (int i = 0; i < 10; i++) {
                     promises.add(query.fetchAsync(index1Type1.getIndexPath()));
                 }
