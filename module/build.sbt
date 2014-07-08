@@ -1,4 +1,4 @@
-import play.Project._
+import PlayKeys._
 import scala.Some
 import xerial.sbt.Sonatype.SonatypeKeys._
 import xerial.sbt.Sonatype._
@@ -7,22 +7,24 @@ name := "play2-elasticsearch"
 
 version := "0.8-SNAPSHOT"
 
+scalaVersion := "2.11.1"
+
+crossScalaVersions := Seq("2.10.4", "2.11.1")
+
 libraryDependencies ++= Seq(
   javaCore,
   // Add your project dependencies here
-  "org.elasticsearch" % "elasticsearch" % "0.90.12",
+  "org.elasticsearch" % "elasticsearch" % "0.90.13",
   "org.apache.commons" % "commons-lang3" % "3.1"
 )
 
-play.Project.playJavaSettings
+lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 sonatypeSettings
 
 organization := "com.clever-age"
 
 profileName := "com.clever-age"
-
-crossPaths := false
 
 publishMavenStyle := true
 
