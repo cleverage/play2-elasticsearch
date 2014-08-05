@@ -41,7 +41,7 @@ public class IndexConfig {
     public Boolean sniffing = true;
 
     /**
-     * elasticsearch.local.config = configuration file load on local mode.
+     * elasticsearch.config.resource = configuration file load on local mode.
      * eg : conf/elasticsearch.yml
      */
     public String localConfig = null;
