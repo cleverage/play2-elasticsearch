@@ -5,12 +5,12 @@ import xerial.sbt.Sonatype._
 
 name := "play2-elasticsearch"
 
-version := "1.1-SNAPSHOT"
+version := "1.3-SNAPSHOT"
 
 libraryDependencies ++= Seq(
   javaCore,
   // Add your project dependencies here
-  "org.elasticsearch" % "elasticsearch" % "1.1.0",
+  "org.elasticsearch" % "elasticsearch" % "1.3.1",
   "org.apache.commons" % "commons-lang3" % "3.1"
 )
 

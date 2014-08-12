@@ -28,6 +28,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
+import org.elasticsearch.script.ScriptService;
 import play.Logger;
 import play.libs.F;
 
@@ -241,7 +242,7 @@ public abstract class IndexService {
                                                                String updateScript) {
         return IndexClient.client.prepareUpdate(indexPath.index, indexPath.type, id)
                 .setScriptParams(updateFieldValues)
-                .setScript(updateScript);
+                .setScript(updateScript, ScriptService.ScriptType.INLINE);
     }
 
     /**
