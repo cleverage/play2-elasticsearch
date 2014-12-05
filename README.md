@@ -27,12 +27,14 @@ Module | Playframework | Elasticsearch | Comments | Diff
  0.8.1 | 2.2.1 | 0.90.12 | Upgrade to ES 0.90.12 & play 2.2.1
  0.8.2 | 2.2.1 | 0.90.12 | Small fixes
  1.1.0 | 2.2.1 | 1.1.0 | Upgrading the ES 1.1.0 (#47)
+ 1.4-SNAPSHOT | 2.2.1 | 1.4.1 | Upgrading the ES 1.4.1 (#59)
+
   
 ## Install
 
 The dependency declaration is :
 ```
-"com.clever-age" % "play2-elasticsearch" % "0.8.2"
+"com.clever-age" % "play2-elasticsearch" % "1.4-SNAPSHOT"
 ```
 
 Since v0.8.1, releases are published on maven-central, so you don't have to define any specific resolvers.
