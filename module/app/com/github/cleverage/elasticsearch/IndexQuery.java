@@ -51,6 +51,7 @@ public class IndexQuery<T extends Index> {
     private boolean explain = false;
     private boolean noField = false;
     private String preference = null;
+    private String route = null;
 
     public IndexQuery(Class<T> clazz) {
         Validate.notNull(clazz, "clazz cannot be null");
@@ -178,7 +179,6 @@ public class IndexQuery<T extends Index> {
     public IndexResults<T> fetch(IndexQueryPath indexQueryPath, FilterBuilder filter) {
 
         SearchRequestBuilder request = getSearchRequestBuilder(indexQueryPath, filter);
-
         return executeSearchRequest(request);
     }
 
@@ -274,6 +274,10 @@ public class IndexQuery<T extends Index> {
 
         if (preference != null) {
             request.setPreference(preference);
+        }
+
+        if(route != null){
+            request.setRouting(route);
         }
 
         if (IndexClient.config.showRequest) {

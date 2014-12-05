@@ -5,6 +5,7 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.search.SearchHit;
 
 import play.Logger;
@@ -94,20 +95,20 @@ public abstract class Index implements Indexable {
         return IndexService.indexAsync(getIndexPath(indexName), id, this);
     }
 
-    public UpdateResponse update(Map<String,Object> updateFieldValues , String updateScript){
-        return IndexService.update(getIndexPath(), id, updateFieldValues, updateScript);
+    public UpdateResponse update(Map<String,Object> updateFieldValues , String updateScript, ScriptService.ScriptType scriptType){
+        return IndexService.update(getIndexPath(), id, updateFieldValues, updateScript, scriptType);
     }
 
-    public UpdateResponse update(String indexName, Map<String,Object> updateFieldValues , String updateScript){
-        return IndexService.update(getIndexPath(indexName), id, updateFieldValues, updateScript);
+    public UpdateResponse update(String indexName, Map<String,Object> updateFieldValues , String updateScript, ScriptService.ScriptType scriptType){
+        return IndexService.update(getIndexPath(indexName), id, updateFieldValues, updateScript, scriptType);
     }
 
-    public F.Promise<UpdateResponse> updateAsync(Map<String,Object> updateFieldValues , String updateScript){
-        return IndexService.updateAsync(getIndexPath(), id, updateFieldValues, updateScript);
+    public F.Promise<UpdateResponse> updateAsync(Map<String,Object> updateFieldValues , String updateScript, ScriptService.ScriptType scriptType){
+        return IndexService.updateAsync(getIndexPath(), id, updateFieldValues, updateScript, scriptType);
     }
 
-    public F.Promise<UpdateResponse> updateAsync(String indexName, Map<String,Object> updateFieldValues , String updateScript){
-        return IndexService.updateAsync(getIndexPath(indexName), id, updateFieldValues, updateScript);
+    public F.Promise<UpdateResponse> updateAsync(String indexName, Map<String,Object> updateFieldValues , String updateScript, ScriptService.ScriptType scriptType){
+        return IndexService.updateAsync(getIndexPath(indexName), id, updateFieldValues, updateScript, scriptType);
     }
 
     /**

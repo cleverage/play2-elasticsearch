@@ -88,6 +88,12 @@ public class IndexConfig {
     public boolean dropOnShutdown = false;
 
     /**
+     * Drop the index on application shutdown
+     * Should probably be used only in tests
+     */
+    public boolean routingReqd = false;
+
+    /**
      * Play application
      */
     public Application application;
