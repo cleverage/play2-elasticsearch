@@ -28,6 +28,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.indices.IndexMissingException;
+import org.elasticsearch.script.ScriptService;
 import play.Logger;
 import play.libs.F;
 
@@ -238,10 +239,10 @@ public abstract class IndexService {
     public static UpdateRequestBuilder getUpdateRequestBuilder(IndexQueryPath indexPath,
                                                                String id,
                                                                Map<String, Object> updateFieldValues,
-                                                               String updateScript) {
+                                                               String updateScript, ScriptService.ScriptType scriptType) {
         return IndexClient.client.prepareUpdate(indexPath.index, indexPath.type, id)
                 .setScriptParams(updateFieldValues)
-                .setScript(updateScript);
+                .setScript(updateScript, scriptType);
     }
 
     /**
@@ -255,8 +256,8 @@ public abstract class IndexService {
     public static UpdateResponse update(IndexQueryPath indexPath,
                                         String id,
                                         Map<String, Object> updateFieldValues,
-                                        String updateScript) {
-        return getUpdateRequestBuilder(indexPath, id, updateFieldValues, updateScript)
+                                        String updateScript, ScriptService.ScriptType scriptType) {
+        return getUpdateRequestBuilder(indexPath, id, updateFieldValues, updateScript, scriptType)
                 .execute()
                 .actionGet();
     }
@@ -272,8 +273,8 @@ public abstract class IndexService {
     public static F.Promise<UpdateResponse> updateAsync(IndexQueryPath indexPath,
                                                         String id,
                                                         Map<String, Object> updateFieldValues,
-                                                        String updateScript) {
-        return updateAsync(getUpdateRequestBuilder(indexPath, id, updateFieldValues, updateScript));
+                                                        String updateScript, ScriptService.ScriptType scriptType) {
+        return updateAsync(getUpdateRequestBuilder(indexPath, id, updateFieldValues, updateScript, scriptType));
     }
 
     /**

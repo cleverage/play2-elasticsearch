@@ -1,5 +1,7 @@
 package com.github.cleverage.elasticsearch
 
+import org.elasticsearch.client.Client
+
 import concurrent.{Future, Promise}
 import org.elasticsearch.action.{ActionResponse, ActionRequest, ActionListener, ActionRequestBuilder}
 import play.libs.F
@@ -19,7 +21,7 @@ object AsyncUtils {
    * @param requestBuilder
    * @return
    */
-  def executeAsync[RQ <: ActionRequest[RQ],RS <: ActionResponse, RB <: ActionRequestBuilder[RQ,RS,RB]](requestBuilder: ActionRequestBuilder[RQ,RS,RB]): Future[RS] = {
+  def executeAsync[RQ <: ActionRequest[RQ],RS <: ActionResponse, RB <: ActionRequestBuilder[RQ,RS,RB,CL], CL <: Client](requestBuilder: ActionRequestBuilder[RQ,RS,RB,CL]): Future[RS] = {
     val promise = Promise[RS]()
 
     requestBuilder.execute(new ActionListener[RS] {
@@ -40,7 +42,7 @@ object AsyncUtils {
    * @param requestBuilder
    * @return
    */
-  def executeAsyncJava[RQ <: ActionRequest[RQ],RS <: ActionResponse, RB <: ActionRequestBuilder[RQ,RS,RB]](requestBuilder: ActionRequestBuilder[RQ,RS,RB]): F.Promise[RS] = {
+  def executeAsyncJava[RQ <: ActionRequest[RQ],RS <: ActionResponse, RB <: ActionRequestBuilder[RQ,RS,RB,CL], CL <: Client](requestBuilder: ActionRequestBuilder[RQ,RS,RB,CL]): F.Promise[RS] = {
     F.Promise.wrap(executeAsync(requestBuilder))
   }
 

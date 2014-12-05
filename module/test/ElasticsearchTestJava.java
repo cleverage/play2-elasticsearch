@@ -10,6 +10,7 @@ import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.script.ScriptService;
 import org.junit.Test;
 import play.libs.F;
 import play.test.FakeApplication;
@@ -244,17 +245,17 @@ public class ElasticsearchTestJava {
                 GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
                 Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date(),location);
                 index1Type1.index();
-                Map<String, Object> fieldNewValues = new HashMap<>();
+                Map<String, Object> fieldNewValues = new HashMap();
                 fieldNewValues.put("name", "new-name");
                 String updateScript = "ctx._source.name = name";
-                index1Type1.update(fieldNewValues, updateScript);
+                index1Type1.update(fieldNewValues, updateScript, ScriptService.ScriptType.INLINE);
 
                 Index1Type1 index1Type11 = Index1Type1.find.byId("1");
                 assertThat(index1Type11.name).isEqualTo("new-name");
 
                 // Async
                 fieldNewValues.put("name","new-name-async");
-                F.Promise<UpdateResponse> updateResponsePromise = index1Type1.updateAsync(fieldNewValues, updateScript);
+                F.Promise<UpdateResponse> updateResponsePromise = index1Type1.updateAsync(fieldNewValues, updateScript, ScriptService.ScriptType.INLINE);
                 updateResponsePromise.get(2L, TimeUnit.SECONDS);
 
                 index1Type11 = Index1Type1.find.byId("1");
