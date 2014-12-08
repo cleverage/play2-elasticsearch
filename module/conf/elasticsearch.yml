@@ -3,3 +3,5 @@
 cluster.name: play2-elasticsearch
 
 path.data: data
+
+script.disable_dynamic: true
