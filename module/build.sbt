@@ -1,21 +1,29 @@
-import play.Project._
-import scala.Some
 import xerial.sbt.Sonatype.SonatypeKeys._
 import xerial.sbt.Sonatype._
 
+import scala.Some
+
 name := "play2-elasticsearch"
 
-version := "1.4-SNAPSHOT"
+version := "2.1-SNAPSHOT"
+
+// DO NOT include a top-level directory in the outputting tgz file
+topLevelDirectory := None
+
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
   javaCore,
   // Add your project dependencies here
-  "org.elasticsearch" % "elasticsearch" % "1.4.1",
+  "org.elasticsearch" % "elasticsearch" % "2.1.1",
   "org.codehaus.groovy" % "groovy-all" % "2.3.8",
-  "org.apache.commons" % "commons-lang3" % "3.1"
-)
+  "org.apache.commons" % "commons-lang3" % "3.1",
+  "org.easytesting" % "fest-assert" % "1.4" % "test",
+  "org.specs2" %% "specs2-core" % "3.7.2" % "test"
 
-play.Project.playJavaSettings
+)
 
 sonatypeSettings
 
@@ -42,6 +50,12 @@ publishTo := {
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 
 homepage := Some(url("https://github.com/cleverage/play2-elasticsearch"))
+
+testOptions in Test +=
+  Tests.Argument(TestFrameworks.Specs2, "sequential", "true", "junitxml", "console")
+
+testOptions in Test +=
+  Tests.Argument(TestFrameworks.JUnit, "--ignore-runners=org.specs2.runner.JUnitRunner")
 
 pomExtra := (
   <scm>

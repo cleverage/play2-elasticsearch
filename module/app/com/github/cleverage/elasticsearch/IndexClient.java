@@ -1,12 +1,16 @@
 package com.github.cleverage.elasticsearch;
 
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsException;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.NodeBuilder;
-import play.Application;
 import play.Logger;
+import play.api.Configuration;
+import play.api.Environment;
+
+import java.net.InetAddress;
+import java.nio.file.Paths;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
@@ -18,15 +22,15 @@ public class IndexClient {
 
     public static IndexConfig config;
 
-    public IndexClient(Application application) {
+    public IndexClient(Environment environment, Configuration configuration) {
         // ElasticSearch config load from application.conf
-        this.config = new IndexConfig(application);
+        this.config = new IndexConfig(environment, configuration);
     }
 
     public void start() throws Exception {
 
         // Load Elasticsearch Settings
-        ImmutableSettings.Builder settings = loadSettings();
+        Settings.Builder settings = loadSettings();
 
         // Check Model
         if (this.isLocalMode()) {
@@ -38,7 +42,7 @@ public class IndexClient {
             Logger.info("ElasticSearch : Started in Local Mode");
         } else {
             Logger.info("ElasticSearch : Starting in Client Mode");
-            TransportClient c = new TransportClient(settings);
+            TransportClient c = TransportClient.builder().settings(settings).build();
             if (config.client == null) {
                 throw new Exception("Configuration required - elasticsearch.client when local model is disabled!");
             }
@@ -51,7 +55,7 @@ public class IndexClient {
                     throw new Exception("Invalid Host: " + host);
                 }
                 Logger.info("ElasticSearch : Client - Host: " + parts[0] + " Port: " + parts[1]);
-                c.addTransportAddress(new InetSocketTransportAddress(parts[0], Integer.valueOf(parts[1])));
+                c.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(parts[0]), Integer.valueOf(parts[1])));
                 done = true;
             }
             if (!done) {
@@ -94,21 +98,21 @@ public class IndexClient {
      * @return
      * @throws Exception
      */
-    private ImmutableSettings.Builder loadSettings() throws Exception {
-        ImmutableSettings.Builder settings = ImmutableSettings.settingsBuilder();
+    private Settings.Builder loadSettings() throws Exception {
+        Settings.Builder settings = Settings.settingsBuilder();
 
         // set default settings
         settings.put("client.transport.sniff", config.sniffing);
         
-        if (config.clusterName != null) {
+        if (config.clusterName != null && !config.clusterName.isEmpty()) {
             settings.put("cluster.name", config.clusterName);
         }
 
         // load settings
-        if (config.localConfig != null) {
+        if (config.localConfig != null && !config.localConfig.isEmpty()) {
             Logger.debug("Elasticsearch : Load settings from " + config.localConfig);
             try {
-                settings.loadFromClasspath(config.localConfig);
+                settings.loadFromPath(Paths.get(this.getClass().getClassLoader().getResource(config.localConfig).toURI()));
             } catch (SettingsException settingsException) {
                 Logger.error("Elasticsearch : Error when loading settings from " + config.localConfig);
                 throw new Exception(settingsException);

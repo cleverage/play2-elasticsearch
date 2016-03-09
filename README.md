@@ -28,6 +28,7 @@ Module | Playframework | Elasticsearch | Comments | Diff
  0.8.2 | 2.2.1 | 0.90.12 | Small fixes
  1.1.0 | 2.2.1 | 1.1.0 | Upgrading the ES 1.1.0 (#47)
  1.4-SNAPSHOT | 2.2.1 | 1.4.1 | Upgrading the ES 1.4.1 (#59)
+ 2.1-SNAPSHOT | 2.4.6 | 2.1.1 | Upgrading the ES 2.1.1
 
   
 ## Install
@@ -63,12 +64,21 @@ play.Project.playScalaSettings
 // resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 ```
 
-## Activate the plugin
+## Activate the Plugin/Module
+
+### Plugins were prior to 2.1-SNAPSHOT:
 
 The Play2-elasticsearch module requires its plugin class to be declared in the conf/play.plugins file. If this file doesn't exist (it's not created by default when you create a new project),
 just create it in the conf directory first, and then add
 ```
 9000:com.github.cleverage.elasticsearch.plugin.IndexPlugin
+```
+
+### Modules were introduced in the 2.1-SNAPSHOT:
+
+The Play2-elasticsearch module requires a Module class to be enabled inside of conf/application.conf
+```
+play.modules.enabled += "com.github.cleverage.elasticsearch.module.IndexModule"
 ```
 
 ## Configuration
