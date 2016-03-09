@@ -22,10 +22,8 @@ import java.util.Map;
                             "\"dateCreate\": { \"type\": \"date\"}," +
                             "\"category\"  : { \"type\": \"string\", \"analyzer\": \"keyword\"}," +
                             "\"location\" : {" +
-                                "\"type\" : \"geo_point\", " +
+                                "\"type\" : \"geo_point\" " +
                                 "\"lat_lon\" : \"true\", " +
-                                "\"normalize\" : \"false\"," +
-                                "\"validate\" : \"true\"" +
                             "}"+
                         "}" +
                     "}" +

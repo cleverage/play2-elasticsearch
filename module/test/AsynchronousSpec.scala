@@ -1,12 +1,9 @@
-import com.github.cleverage.elasticsearch.IndexQuery
-import concurrent.Await
-import concurrent.Future
-import concurrent.duration._
-import org.elasticsearch.index.query.{FilterBuilders, QueryBuilders}
+import org.elasticsearch.action.index.IndexResponse
 import org.specs2.mutable.Specification
 import play.api.test.Helpers._
-import play.api.libs.concurrent.Execution.Implicits._
-import play.libs.F
+
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
 /**
  * Specifications of the Asynchronous API
@@ -23,7 +20,7 @@ class AsynchronousSpec extends Specification with ElasticsearchTestHelper with S
         val future2 = SampleIndexableManager.indexAsync(second)
         val future3 = SampleIndexableManager.indexAsync(third)
 
-        val combinedFuture = Future.sequence(List(future1, future2, future3))
+        val combinedFuture: Future[List[IndexResponse]] = Future.sequence(List(future1, future2, future3))
         val results = Await.result(combinedFuture, Duration(10, SECONDS))
         results.map {_.getId()} must be equalTo(List("1","2","3"))
       }

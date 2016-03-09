@@ -1,11 +1,10 @@
-import collection.JavaConverters._
-import com.github.cleverage.elasticsearch.IndexClient
 import com.github.cleverage.elasticsearch.ScalaHelpers._
-import org.elasticsearch.client.Requests
 import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
 import org.specs2.mutable.Specification
-import play.api.libs.json.{Json, Writes, Reads}
+import play.api.libs.json.Json
 import play.api.test.Helpers._
+
+import scala.collection.JavaConverters._
 
 /**
  * Test of the indexing process
