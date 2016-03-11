@@ -176,7 +176,7 @@ public class IndexConfig {
                 // Loading class and annotation for set mapping if is present
                 Logger.debug("ElasticSearch : Registering class " + aClass);
 
-                klass = Class.forName(aClass, true, configuration.getClass().getClassLoader());
+                klass = Class.forName(aClass, true, environment.classLoader());
                 Object o = klass.newInstance();
 
                 String indexType = getIndexType(o);
