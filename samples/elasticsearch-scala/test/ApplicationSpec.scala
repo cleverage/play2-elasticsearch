@@ -1,9 +1,8 @@
 package test
 
 import org.specs2.mutable._
-
-import play.api.test._
 import play.api.test.Helpers._
+import play.api.test._
 
 /**
  * Add your spec here.
@@ -11,17 +10,30 @@ import play.api.test.Helpers._
  * For more information, consult the wiki.
  */
 class ApplicationSpec extends Specification {
+
+  val elasticsearchAdditionalConf = Map(
+    "elasticsearch.local" -> true,
+    "elasticsearch.config.resource" -> "elasticsearch.yml",
+    "elasticsearch.cluster.name" -> "test-cluster",
+    "elasticsearch.index.name" -> "test-index1,test-index2",
+    "elasticsearch.index.show_request" -> true,
+    "elasticsearch.index.dropOnShutdown" -> true,
+    "elasticsearch.index.clazzs" -> "indextype.*",
+    "elasticsearch.test-index1.settings" -> "",
+    "elasticsearch.test-index2.settings" -> ""
+  )
   
   "Application" should {
     
     "send 404 on a bad request" in {
-      running(FakeApplication()) {
-        route(FakeRequest(GET, "/boum")) must beNone        
+      running(FakeApplication(additionalConfiguration = elasticsearchAdditionalConf)) {
+        val a404 = route(FakeRequest(GET, "/boum")).get
+        status(a404) must  equalTo(NOT_FOUND)
       }
     }
     
     "render the index page" in {
-      running(FakeApplication()) {
+      running(FakeApplication(additionalConfiguration = elasticsearchAdditionalConf)) {
         val home = route(FakeRequest(GET, "/")).get
         
         status(home) must equalTo(OK)

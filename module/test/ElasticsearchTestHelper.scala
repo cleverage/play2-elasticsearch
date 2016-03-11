@@ -1,7 +1,11 @@
 import com.github.cleverage.elasticsearch.IndexClient
+import com.github.cleverage.elasticsearch.component.{IndexComponent, IndexComponentImpl}
 import org.elasticsearch.client.Requests
+import play.api.Application
+import play.api.inject._
+import play.api.inject.guice.GuiceApplicationBuilder
+
 import scala.collection.JavaConverters._
-import play.api.test.FakeApplication
 
 /**
  * Helper trait for Elasticsearch Tests
@@ -20,7 +24,9 @@ trait ElasticsearchTestHelper {
     "elasticsearch.config.resource" -> "elasticsearch.yml",
     "elasticsearch.cluster.name" -> "test-cluster",
     "elasticsearch.index.name" -> "test-index1,test-index2",
+    "elasticsearch.index.show_request" -> true,
     "elasticsearch.index.dropOnShutdown" -> true,
+    "elasticsearch.index.clazzs" -> "indextype.*",
     "elasticsearch.test-index1.settings" -> "",
     "elasticsearch.test-index2.settings" -> "",
     "elasticsearch.test-index1.mappings" -> testMapping,
@@ -30,13 +36,15 @@ trait ElasticsearchTestHelper {
   val additionalPlugins = Seq(
     "com.github.cleverage.elasticsearch.plugin.IndexPlugin"
   )
+  def esFakeApp(): Application = esFakeApp(Map[String, AnyRef]())
 
-  def esFakeApp(): FakeApplication = esFakeApp(Map[String, AnyRef]())
-
-  def esFakeApp(moreConfiguration: Map[String, AnyRef]): FakeApplication = FakeApplication(
-    additionalConfiguration = elasticsearchAdditionalConf ++ moreConfiguration,
-    additionalPlugins = additionalPlugins
-  )
+  def esFakeApp(moreConfiguration: Map[String, AnyRef]): Application = {
+    new GuiceApplicationBuilder()
+      .configure(elasticsearchAdditionalConf ++ moreConfiguration)
+      .overrides(
+        bind[IndexComponent].to[IndexComponentImpl].eagerly()
+      ).build()
+  }
 
   def waitForYellowStatus() = IndexClient.client.admin().cluster().health(Requests.clusterHealthRequest().waitForYellowStatus()).actionGet()
 

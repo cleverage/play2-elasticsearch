@@ -1,16 +1,18 @@
 package controllers
 
-import play.api._
-import play.api.mvc._
-import indexing.{IndexTestManager, IndexTest}
+import com.github.cleverage.elasticsearch.ScalaHelpers.{IndexQuery, _}
+import com.github.cleverage.elasticsearch.component.IndexComponent
+import javax.inject.{Singleton, Inject}
+import indexing.{IndexTest, IndexTestManager}
 import org.elasticsearch.index.query.QueryBuilders
-import com.github.cleverage.elasticsearch.ScalaHelpers._
+import play.api._
 import play.api.libs.concurrent.Execution.Implicits._
-import com.github.cleverage.elasticsearch.ScalaHelpers.IndexQuery
-import indexing.IndexTest
-import concurrent.Future
+import play.api.mvc._
 
-object Application extends Controller {
+import scala.concurrent.Future
+
+@Singleton
+class Application @Inject() (indexComponent: IndexComponent) extends Controller {
   
   def index = Action {
     val indexTest = IndexTest("1", "The name", "The category")

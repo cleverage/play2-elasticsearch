@@ -1,18 +1,17 @@
 package com.github.cleverage.elasticsearch
 
-import collection.JavaConverters._
-import play.api.libs.json.{Json, Writes, Reads}
-import org.elasticsearch.search.facet.{FacetBuilder, Facets}
+import org.elasticsearch.action.bulk.BulkResponse
 import org.elasticsearch.action.delete.DeleteResponse
 import org.elasticsearch.action.index.IndexResponse
-import org.elasticsearch.index.query.{QueryBuilders, QueryBuilder}
-import org.elasticsearch.search.sort.SortBuilder
-import org.elasticsearch.search.SearchHit
 import org.elasticsearch.action.search.{SearchRequestBuilder, SearchResponse, SearchType}
-import concurrent.Future
-import concurrent.promise
-import org.elasticsearch.action.ActionListener
-import org.elasticsearch.action.bulk.BulkResponse
+import org.elasticsearch.index.query.{QueryBuilder, QueryBuilders}
+import org.elasticsearch.search.SearchHit
+import org.elasticsearch.search.aggregations.{AbstractAggregationBuilder, Aggregations}
+import org.elasticsearch.search.sort.SortBuilder
+import play.api.libs.json.{Json, Reads, Writes}
+
+import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 /**
  * Scala helpers
@@ -69,10 +68,10 @@ object ScalaHelpers {
     val writes: Writes[T]
 
     /**
-     * Retrieve a T instance from the Elasticsearch index
-     * @param id Id of the object to retrieve
-     * @return the object
-     */
+      * Retrieve a T instance from the Elasticsearch index
+      * @param id Id of the object to retrieve
+      * @return the object
+      */
     def get(id: String): Option[T] = {
       val json = Option(IndexService.getAsString(indexPath, id))
       json.map {
@@ -81,16 +80,30 @@ object ScalaHelpers {
     }
 
     /**
-     * Retrieve asynchronously a T instance from the Elasticsearch index
-     * @param id
-     * @return
-     */
+      * Retrieve asynchronously a T instance from the Elasticsearch index
+      * @param id
+      * @return
+      */
     def getAsync(id: String)(implicit executor : scala.concurrent.ExecutionContext): Future[Option[T]] = {
       val getResponseFuture = AsyncUtils.executeAsync(IndexService.getGetRequestBuilder(indexPath, id))
       getResponseFuture.map { response =>
         Option(response.getSourceAsString).map {
           Json.parse(_).as[T](reads)
         }
+      }
+    }
+
+    /**
+      * Retrieve asynchronously a T instance from the Elasticsearch index
+      * @param ids
+      * @return
+      */
+    def getAsync(ids: Seq[String])(implicit executor : scala.concurrent.ExecutionContext): Future[Option[List[T]]] = {
+      val getResponseFuture = AsyncUtils.executeAsync(IndexService.getMultiGetRequestBuilder(indexPath, ids.asJava))
+      getResponseFuture.map { responses =>
+        Option(responses.getResponses.filter( _.getResponse.getSourceAsString != null).map { response =>
+          Json.parse(response.getResponse.getSourceAsString).as[T](reads)
+        }.toList)
       }
     }
 
@@ -203,18 +216,17 @@ object ScalaHelpers {
   /**
    * Query wrapper for scala
    * @param builder the Elasticsearch QueryBuilder to use
-   * @param facetBuilders the Elasticsearch FacetBuilders to use
    * @param sortBuilders the Elasticsearch SortBuilders to use
    * @param from the first element to retrieve
    * @param size the number of element to retrieve
    * @param explain flag used to activate explain
    * @param noField flag used to activate the "noField"
-   * @param preference preference of which shard replicas to execute the search request on
+   * @param preference preference of which shard replicas to execute the search request ond
    * @tparam T Type into which the results will be converted
    */
   case class IndexQuery[T <: Indexable](
     val builder: QueryBuilder = QueryBuilders.matchAllQuery(),
-    val facetBuilders: List[FacetBuilder] = Nil,
+    val aggregationBuilders: List[AbstractAggregationBuilder] = Nil,
     val sortBuilders: List[SortBuilder] = Nil,
     val from: Option[Int] = None,
     val size: Option[Int] = None,
@@ -223,7 +235,7 @@ object ScalaHelpers {
     val preference: Option[String] = None
   ) {
     def withBuilder(builder: QueryBuilder): IndexQuery[T] = copy(builder = builder)
-    def addFacet(facet: FacetBuilder): IndexQuery[T] = copy(facetBuilders = facet :: facetBuilders)
+    def addAggregation(aggregation: AbstractAggregationBuilder): IndexQuery[T] = copy(aggregationBuilders = aggregation :: aggregationBuilders)
     def addSort(sort: SortBuilder): IndexQuery[T] = copy(sortBuilders = sortBuilders :+ sort)
     def withFrom(from: Int): IndexQuery[T] = copy(from = Some(from))
     def withSize(size: Int): IndexQuery[T] = copy(size = Some(size))
@@ -266,8 +278,8 @@ object ScalaHelpers {
         .setTypes(indexPath.`type`)
         .setSearchType(SearchType.QUERY_THEN_FETCH)
       request.setQuery(builder)
-      facetBuilders.foreach {
-        request.addFacet(_)
+      aggregationBuilders.foreach {
+        request.addAggregation(_)
       }
       sortBuilders.foreach {
         request.addSort(_)
@@ -306,7 +318,6 @@ object ScalaHelpers {
    * @param pageCurrent the current page
    * @param pageNb the number of pages
    * @param results List of results converted back to Indexable instances
-   * @param facets List of facets
    * @tparam T Type into which the results are converted
    */
   case class IndexResults[T <: Indexable](
@@ -316,7 +327,8 @@ object ScalaHelpers {
     pageNb: Long,
     results: List[T],
     hits: List[SearchHit],
-    facets: Facets) {
+    aggregations: Aggregations
+    ) {
     /**
      * Use this if you need the SearchHit associated with your Result
      */
@@ -345,11 +357,11 @@ object ScalaHelpers {
         pageCurrent = pageCurrent,
         pageNb = if (pageSize == 0) 1 else math.round(math.ceil(totalCount / pageSize.toDouble)),
         // Converting Json hits to Indexable entities
-        hits = hits,
         results = hits.map {
           h => Json.parse(h.getSourceAsString).as[T](reads)
         },
-        facets = searchResponse.getFacets()
+        hits = hits,
+        aggregations = searchResponse.getAggregations()
       )
     }
   }

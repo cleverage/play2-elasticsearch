@@ -3,15 +3,26 @@ package com.github.cleverage.elasticsearch;
 import com.github.cleverage.elasticsearch.annotations.IndexMapping;
 import com.github.cleverage.elasticsearch.annotations.IndexName;
 import com.github.cleverage.elasticsearch.annotations.IndexType;
+import com.typesafe.config.ConfigValue;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
-import play.Application;
-import play.Configuration;
 import play.Logger;
+import play.api.Configuration;
+import play.api.Environment;
 import play.libs.Json;
-import play.libs.ReflectionsCache;
+import play.libs.MyReflectionsCache;
+import scala.Option;
+import scala.Tuple2;
+import scala.collection.Iterator;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
+;
 
 
 /**
@@ -94,24 +105,34 @@ public class IndexConfig {
     public boolean routingReqd = false;
 
     /**
-     * Play application
+     * Play configuration
      */
-    public Application application;
+    public Configuration configuration;
 
-    public IndexConfig(Application app) {
-        this.application = app;
-        this.client = app.configuration().getString("elasticsearch.client");
-        this.sniffing = app.configuration().getBoolean("elasticsearch.sniff", true);
-        this.local = app.configuration().getBoolean("elasticsearch.local");
-        this.localConfig = app.configuration().getString("elasticsearch.config.resource");
-        this.clusterName = app.configuration().getString("elasticsearch.cluster.name");
+    /**
+     * Play environment
+     */
+    public Environment environment;
 
+    private static final Option<scala.collection.immutable.Set<String>> empty = Option.apply(new scala.collection.immutable.HashSet<>());
 
-        this.showRequest = app.configuration().getBoolean("elasticsearch.index.show_request", false);
-        this.dropOnShutdown = app.configuration().getBoolean("elasticsearch.index.dropOnShutdown", false);
-        this.indexClazzs = app.configuration().getString("elasticsearch.index.clazzs");
+    public IndexConfig(Environment environment, Configuration configuration) {
 
-        String indexNameConf = app.configuration().getString("elasticsearch.index.name");
+        this.environment = environment;
+        this.configuration = configuration;
+
+        this.client = (configuration.getString("elasticsearch.client", empty) == Option.apply((String)null)) ? "" : configuration.getString("elasticsearch.client", empty).get();
+        this.clusterName = (configuration.getString("elasticsearch.cluster.name", empty) == Option.apply((String)null)) ? "" : configuration.getString("elasticsearch.cluster.name", empty).get();
+        this.indexClazzs = (configuration.getString("elasticsearch.index.clazzs", empty) == Option.apply((String)null)) ? "" : configuration.getString("elasticsearch.index.clazzs", empty).get();
+        String indexNameConf = (configuration.getString("elasticsearch.index.name", empty) == Option.apply((String)null)) ? "" : configuration.getString("elasticsearch.index.name", empty).get();
+
+        this.sniffing = (configuration.getBoolean("elasticsearch.sniff") == Option.apply(null)) ? false : (Boolean)configuration.getBoolean("elasticsearch.sniff").get();
+        this.local = (configuration.getBoolean("elasticsearch.local") == Option.apply(null)) ? false : (Boolean)configuration.getBoolean("elasticsearch.local").get();
+        this.localConfig = (configuration.getString("elasticsearch.config.resource", empty) == Option.apply((String)null)) ? "" : configuration.getString("elasticsearch.config.resource", empty).get();
+
+        this.showRequest = (configuration.getBoolean("elasticsearch.index.show_request") == Option.apply(null)) ? false : (Boolean)configuration.getBoolean("elasticsearch.index.show_request").get();
+        this.dropOnShutdown = (configuration.getBoolean("elasticsearch.index.dropOnShutdown") == Option.apply(null)) ? false : (Boolean)configuration.getBoolean("elasticsearch.index.dropOnShutdown").get();
+
         if(indexNameConf != null) {
             LinkedList<String> indexNamesL = new LinkedList<String>();
             String[] indexNamesTab = indexNameConf.split(",");
@@ -136,7 +157,7 @@ public class IndexConfig {
     }
 
     private void loadSettingsFromConfig(String indexName) {
-        String setting = application.configuration().getString("elasticsearch." + indexName + ".settings");
+        String setting = (configuration.getString("elasticsearch." + indexName + ".settings", empty) == Option.apply((String)null)) ? "" : configuration.getString("elasticsearch." + indexName + ".settings", empty).get();
         if(StringUtils.isNotEmpty(setting)) {
             indexSettings.put(indexName, setting);
         }
@@ -155,7 +176,7 @@ public class IndexConfig {
                 // Loading class and annotation for set mapping if is present
                 Logger.debug("ElasticSearch : Registering class " + aClass);
 
-                klass = Class.forName(aClass, true, application.classloader());
+                klass = Class.forName(aClass, true, environment.classLoader());
                 Object o = klass.newInstance();
 
                 String indexType = getIndexType(o);
@@ -167,6 +188,7 @@ public class IndexConfig {
                     indexMappings.put(path, indexMapping);
                 }
             } catch (Throwable e) {
+                e.printStackTrace();
                 Logger.error(e.getMessage());
             }
         }
@@ -177,16 +199,22 @@ public class IndexConfig {
      * @param indexName
      */
     private void loadMappingFromConfig(String indexName) {
-        Configuration mappingConfig = application.configuration().getConfig("elasticsearch." + indexName + ".mappings");
+        Configuration mappingConfig = (configuration.getConfig("elasticsearch." + indexName + ".mappings") == Option.apply((Configuration)null)) ? null : configuration.getConfig("elasticsearch." + indexName + ".mappings").get();
+
         if (mappingConfig != null) {
-            Map<String, Object> mappings = mappingConfig.asMap();
-            for (String indexType : mappings.keySet()) {
+
+            Iterator<Tuple2<String, ConfigValue>> iter = mappingConfig.entrySet().iterator();
+
+            while (iter.hasNext()) {
+                Tuple2<String, ConfigValue> mapping = iter.next();
+                String indexType = mapping._1();
                 IndexQueryPath indexQueryPath = new IndexQueryPath(indexName, indexType);
-                if (mappings.get(indexType) instanceof String) {
-                    indexMappings.put(indexQueryPath, (String) mappings.get(indexType));
+
+                if (mapping._2().unwrapped() instanceof String) {
+                    indexMappings.put(indexQueryPath, (String) mapping._2().unwrapped());
                 } else {
                     try {
-                        indexMappings.put(indexQueryPath, Json.toJson(mappings.get(indexType)).toString());
+                        indexMappings.put(indexQueryPath, Json.toJson(mapping._2().unwrapped()).toString());
                     } catch (Exception e) {
                         Logger.warn("Incorrect value in elasticsearch.index.mappings", e);
                     }
@@ -231,11 +259,14 @@ public class IndexConfig {
             for (String load : toLoad) {
                 load = load.trim();
                 if (load.endsWith(".*")) {
-                    Reflections reflections = ReflectionsCache.getReflections(application.classloader(), load.substring(0, load.length() - 2));
-                    for(Class c :reflections.getTypesAnnotatedWith(IndexName.class)){
+
+                    //TODO: remove the "play.libs.{MyClasspath,MyReflectionsCache}" local patch when we upgrade to play 2.5.0
+                    Reflections reflections = MyReflectionsCache.getReflections(environment.classLoader(), load.substring(0, load.length() - 2));
+
+                    for(Class c : reflections.getTypesAnnotatedWith(IndexName.class)){
                         classes.add(c.getName());
                     }
-                    for(Class c :reflections.getTypesAnnotatedWith(IndexType.class)){
+                    for(Class c : reflections.getTypesAnnotatedWith(IndexType.class)){
                         classes.add(c.getName());
                     }
                 } else {

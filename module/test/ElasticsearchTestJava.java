@@ -1,4 +1,9 @@
-import com.github.cleverage.elasticsearch.*;
+import com.github.cleverage.elasticsearch.IndexClient;
+import com.github.cleverage.elasticsearch.IndexQuery;
+import com.github.cleverage.elasticsearch.IndexResults;
+import com.github.cleverage.elasticsearch.IndexService;
+import com.github.cleverage.elasticsearch.component.IndexComponent;
+import com.github.cleverage.elasticsearch.component.IndexComponentImpl;
 import indextype.Index1Type1;
 import indextype.Index2Type1;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -7,42 +12,53 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.unit.DistanceUnit;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.GeoDistanceFilterBuilder;
+import org.elasticsearch.index.query.GeoDistanceQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TypeQueryBuilder;
 import org.elasticsearch.script.ScriptService;
+import org.junit.Before;
 import org.junit.Test;
+import play.Application;
+import play.inject.guice.GuiceApplicationBuilder;
 import play.libs.F;
-import play.test.FakeApplication;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static play.test.Helpers.fakeApplication;
+import static play.inject.Bindings.bind;
 import static play.test.Helpers.running;
 
 public class ElasticsearchTestJava {
 
-    public FakeApplication esFakeApplication() {
+    Application application = null;
 
+    @Before
+    public void setup() {
         Map<String, Object> additionalConfiguration = new HashMap<String, Object>();
         additionalConfiguration.put("elasticsearch.local", true);
+        additionalConfiguration.put("elasticsearch.config.resource", "elasticsearch.yml");
+        additionalConfiguration.put("elasticsearch.cluster.name", "test-cluster");
         additionalConfiguration.put("elasticsearch.index.name", "index1,index2");
         additionalConfiguration.put("elasticsearch.index.clazzs", "indextype.*");
         additionalConfiguration.put("elasticsearch.index.show_request", true);
         additionalConfiguration.put("elasticsearch.index.dropOnShutdown", true);
 
-        List<String> additionalPlugin = new ArrayList<String>();
-        additionalPlugin.add("com.github.cleverage.elasticsearch.plugin.IndexPlugin");
-
-        return fakeApplication(additionalConfiguration, additionalPlugin);
+        application = new GuiceApplicationBuilder()
+          .configure(additionalConfiguration)
+          .overrides(
+            bind(IndexComponent.class).to(IndexComponentImpl.class).eagerly()
+          ).build();
     }
-
 
     @Test
     public void checkIndexNames() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             public void run() {
                 assertThat(IndexClient.config.indexNames.length).isEqualTo(2);
                 assertThat(IndexClient.config.indexNames[0]).isEqualTo("index1");
@@ -53,7 +69,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void checkIndex1Create() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             public void run() {
                 String name1 = "name1";
                 String category = "category";
@@ -89,7 +105,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void checkIndex2Create() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             public void run() {
                 String name1 = "name1";
                 String category = "category";
@@ -119,7 +135,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void asynchronousIndex() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             @Override
             public void run() {
                 Index1Type1 index1Type1 = new Index1Type1("1", "name1", "category", new Date());
@@ -141,7 +157,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void asynchronousIndexBulk() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             @Override
             public void run() {
                 GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
@@ -162,7 +178,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void asynchronousDelete() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             @Override
             public void run() {
                 GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
@@ -185,7 +201,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void asynchronousGet() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             @Override
             public void run() {
                 GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
@@ -211,7 +227,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void asynchronousSearch() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             @Override
             public void run() {
                 GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
@@ -220,7 +236,7 @@ public class ElasticsearchTestJava {
                 IndexService.refresh();
 
                 IndexQuery<Index1Type1> query = new IndexQuery<Index1Type1>(Index1Type1.class);
-                List<F.Promise<? extends IndexResults<Index1Type1>>> promises = new ArrayList<F.Promise<? extends IndexResults<Index1Type1>>>();
+                List<F.Promise<IndexResults<Index1Type1>>> promises = new ArrayList<F.Promise<IndexResults<Index1Type1>>>();
                 for (int i = 0; i < 10; i++) {
                     promises.add(query.fetchAsync(index1Type1.getIndexPath()));
                 }
@@ -237,7 +253,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void update() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
 
             @Override
             public void run() {
@@ -248,14 +264,14 @@ public class ElasticsearchTestJava {
                 Map<String, Object> fieldNewValues = new HashMap();
                 fieldNewValues.put("name", "new-name");
                 String updateScript = "ctx._source.name = name";
-                index1Type1.update(fieldNewValues, updateScript, ScriptService.ScriptType.INLINE);
+                index1Type1.update(fieldNewValues, updateScript, ScriptService.ScriptType.INLINE, null);
 
                 Index1Type1 index1Type11 = Index1Type1.find.byId("1");
                 assertThat(index1Type11.name).isEqualTo("new-name");
 
                 // Async
                 fieldNewValues.put("name","new-name-async");
-                F.Promise<UpdateResponse> updateResponsePromise = index1Type1.updateAsync(fieldNewValues, updateScript, ScriptService.ScriptType.INLINE);
+                F.Promise<UpdateResponse> updateResponsePromise = index1Type1.updateAsync(fieldNewValues, updateScript, ScriptService.ScriptType.INLINE, null);
                 updateResponsePromise.get(2L, TimeUnit.SECONDS);
 
                 index1Type11 = Index1Type1.find.byId("1");
@@ -266,7 +282,7 @@ public class ElasticsearchTestJava {
 
     @Test
     public void searchWithGeoFilter() {
-        running(esFakeApplication(), new Runnable() {
+        running(application, new Runnable() {
             @Override
             public void run() {
                 GeoPoint location = new GeoPoint(30.6943566,-88.0430541);
@@ -284,12 +300,13 @@ public class ElasticsearchTestJava {
                 assertThat(Index1Type1.find.byId("2").name).isEqualTo("name1");
 
                 IndexQuery<Index1Type1> query = Index1Type1.find.query();
-                query.setBuilder(QueryBuilders.queryString("name1"));
-                GeoDistanceFilterBuilder filter = FilterBuilders.geoDistanceFilter("type1.location")
+                query.setBuilder(QueryBuilders.queryStringQuery("name1"));
+                TypeQueryBuilder type = QueryBuilders.typeQuery("type1");
+                GeoDistanceQueryBuilder filter = QueryBuilders.geoDistanceQuery("location")
                         .point(30, -88)
                         .distance(100, DistanceUnit.KILOMETERS);
 
-                F.Promise<IndexResults<Index1Type1>> indexResultsPromise = Index1Type1.find.searchAsync(query, filter);
+                F.Promise<IndexResults<Index1Type1>> indexResultsPromise = Index1Type1.find.searchAsync(query, QueryBuilders.boolQuery().must(type).must(filter));
                 IndexResults<Index1Type1> index1Type1IndexResults = indexResultsPromise.get(2L, TimeUnit.SECONDS);
                 assertThat(index1Type1IndexResults.totalCount).isEqualTo(1);
 

@@ -1,4 +1,6 @@
 import com.github.cleverage.elasticsearch.IndexService;
+import com.github.cleverage.elasticsearch.component.IndexComponent;
+import com.google.inject.Inject;
 import indexing.Country;
 import indexing.Player;
 import indexing.Team;
@@ -9,6 +11,11 @@ import play.Logger;
 import java.util.Date;
 
 public class Global extends GlobalSettings {
+
+    @Inject
+    public Global(IndexComponent indexComponent) {
+        indexComponent.getClient();
+    }
 
     @Override
     public void onStart(Application app) {
