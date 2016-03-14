@@ -1,6 +1,8 @@
 language: scala
+jdk:
+  - oraclejdk8
 scala:
-   - 2.10.2
+  - 2.11.7
 
 script:
   - cd module
@@ -12,3 +14,4 @@ notifications:
   # about configuring notification recipients and more.
   email: 
     - mguillermin@clever-age.com
+    - nboire@clever-age.com
