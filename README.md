@@ -35,7 +35,7 @@ Module | Playframework | Elasticsearch | Comments | Diff
 
 The dependency declaration is :
 ```
-"com.clever-age" % "play2-elasticsearch" % "1.4-SNAPSHOT"
+"com.clever-age" % "play2-elasticsearch" % "2.1-SNAPSHOT"
 ```
 
 Since v0.8.1, releases are published on maven-central, so you don't have to define any specific resolvers.
@@ -55,7 +55,7 @@ version := "1.0-SNAPSHOT"
 libraryDependencies ++= Seq(
   jdbc,
   cache,
-  "com.clever-age"          % "play2-elasticsearch"       % "0.8.2"
+  "com.clever-age"          % "play2-elasticsearch"       % "2.1-SNAPSHOT"
 )
 
 play.Project.playScalaSettings
